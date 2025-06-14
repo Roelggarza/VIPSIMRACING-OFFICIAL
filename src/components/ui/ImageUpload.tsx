@@ -1,6 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Camera, Upload, User, X, Crop } from 'lucide-react';
-import Button from './Button';
+import { Camera, User, X } from 'lucide-react';
 
 interface ImageUploadProps {
   currentImage?: string;
@@ -13,8 +12,6 @@ export default function ImageUpload({ currentImage, onImageChange, className = '
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [showCropModal, setShowCropModal] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -32,78 +29,28 @@ export default function ImageUpload({ currentImage, onImageChange, className = '
       return;
     }
 
-    setSelectedFile(file);
-    setShowCropModal(true);
-  };
-
-  const processImage = (file: File, crop?: { x: number; y: number; width: number; height: number }) => {
     setIsUploading(true);
 
     const reader = new FileReader();
     reader.onload = (e) => {
       const result = e.target?.result as string;
-      
-      if (crop && type === 'profile') {
-        // For profile pictures, create a cropped circular version
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          
-          if (ctx) {
-            const size = Math.min(crop.width, crop.height);
-            canvas.width = size;
-            canvas.height = size;
-            
-            // Create circular clip
-            ctx.beginPath();
-            ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
-            ctx.clip();
-            
-            // Draw cropped image
-            ctx.drawImage(
-              img,
-              crop.x, crop.y, crop.width, crop.height,
-              0, 0, size, size
-            );
-            
-            const croppedResult = canvas.toDataURL('image/jpeg', 0.8);
-            setPreviewImage(croppedResult);
-            onImageChange(croppedResult);
-          }
-        };
-        img.src = result;
-      } else {
-        // For banners or simple uploads, use as-is
-        setPreviewImage(result);
-        onImageChange(result);
-      }
-      
+      setPreviewImage(result);
+      onImageChange(result);
       setIsUploading(false);
-      setShowCropModal(false);
     };
-    
     reader.onerror = () => {
       alert('Error reading file');
       setIsUploading(false);
-      setShowCropModal(false);
     };
-    
     reader.readAsDataURL(file);
-  };
-
-  const handleCropConfirm = () => {
-    if (selectedFile) {
-      // For now, just process without crop - can be enhanced with a proper crop tool
-      processImage(selectedFile);
-    }
   };
 
   const triggerFileSelect = () => {
     fileInputRef.current?.click();
   };
 
-  const removeImage = () => {
+  const removeImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setPreviewImage(null);
     onImageChange('');
     if (fileInputRef.current) {
@@ -144,10 +91,7 @@ export default function ImageUpload({ currentImage, onImageChange, className = '
           
           {displayImage && (
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                removeImage();
-              }}
+              onClick={removeImage}
               className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
             >
               <X className="w-4 h-4" />
@@ -191,16 +135,16 @@ export default function ImageUpload({ currentImage, onImageChange, className = '
         
         {/* Overlay */}
         <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center cursor-pointer">
-          <Camera className="w-8 h-8 text-white" />
+          <div className="text-center">
+            <Camera className="w-8 h-8 text-white mx-auto mb-1" />
+            <p className="text-white text-xs">{displayImage ? 'Change' : 'Upload'}</p>
+          </div>
         </div>
 
         {/* Remove button */}
         {displayImage && (
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              removeImage();
-            }}
+            onClick={removeImage}
             className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
           >
             <X className="w-4 h-4" />
@@ -208,56 +152,9 @@ export default function ImageUpload({ currentImage, onImageChange, className = '
         )}
       </div>
 
-      <div className="flex space-x-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={triggerFileSelect}
-          disabled={isUploading}
-          icon={Upload}
-        >
-          {isUploading ? 'Uploading...' : displayImage ? 'Change Photo' : 'Add Photo'}
-        </Button>
-        
-        {displayImage && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={removeImage}
-            icon={X}
-          >
-            Remove
-          </Button>
-        )}
-      </div>
-
-      {/* Crop Modal */}
-      {showCropModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-slate-800 rounded-xl p-6 max-w-md w-full">
-            <h3 className="text-lg font-bold text-white mb-4">Adjust Image</h3>
-            <p className="text-slate-300 text-sm mb-4">
-              {type === 'profile' 
-                ? 'Your image will be cropped to a circle for your profile picture.'
-                : 'Adjust your banner image as needed.'
-              }
-            </p>
-            <div className="flex space-x-3">
-              <Button onClick={handleCropConfirm} disabled={isUploading}>
-                {isUploading ? 'Processing...' : 'Confirm'}
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setShowCropModal(false);
-                  setSelectedFile(null);
-                }}
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </div>
+      {/* Loading state */}
+      {isUploading && (
+        <p className="text-sm text-slate-400">Uploading...</p>
       )}
 
       <input
