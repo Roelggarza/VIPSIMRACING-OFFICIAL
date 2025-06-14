@@ -53,7 +53,38 @@ export default function Dashboard() {
     if (!sessionUser) {
       navigate('/login');
     } else {
-      setUser(sessionUser);
+      // Ensure the user object has all required properties
+      const completeUser: UserType = {
+        fullName: sessionUser.fullName || 'User',
+        dob: sessionUser.dob || '',
+        email: sessionUser.email || '',
+        password: sessionUser.password || '',
+        phone: sessionUser.phone || '',
+        emergencyName: sessionUser.emergencyName || '',
+        emergencyPhone: sessionUser.emergencyPhone || '',
+        registrationDate: sessionUser.registrationDate || new Date().toISOString(),
+        profilePicture: sessionUser.profilePicture || '',
+        bannerImage: sessionUser.bannerImage || '',
+        bio: sessionUser.bio || '',
+        racingCredits: sessionUser.racingCredits || 0,
+        accountBalance: sessionUser.accountBalance || 0,
+        isAdmin: sessionUser.isAdmin || false,
+        isOnline: sessionUser.isOnline || false,
+        lastActive: sessionUser.lastActive || new Date().toISOString(),
+        currentSimulator: sessionUser.currentSimulator || null,
+        isStreaming: sessionUser.isStreaming || false,
+        currentGame: sessionUser.currentGame || '',
+        socialAccounts: sessionUser.socialAccounts || {},
+        vipMembership: sessionUser.vipMembership || undefined,
+        stats: sessionUser.stats || {
+          totalRaces: 0,
+          bestLapTime: '--:--',
+          rank: 999,
+          wins: 0,
+          podiums: 0
+        }
+      };
+      setUser(completeUser);
     }
     setLoading(false);
   }, [navigate]);
@@ -169,6 +200,9 @@ export default function Dashboard() {
     : 'Recently';
 
   const isVipActive = user.vipMembership?.active && new Date(user.vipMembership.expiryDate) > new Date();
+
+  // Get the first name for the welcome message
+  const firstName = user.fullName ? user.fullName.split(' ')[0] : 'User';
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -477,7 +511,7 @@ export default function Dashboard() {
               <div>
                 <div className="flex items-center space-x-3">
                   <h1 className="text-2xl font-bold text-white">
-                    Welcome back, {user.fullName.split(' ')[0]}!
+                    Welcome back, {firstName}!
                   </h1>
                   {isVipActive && (
                     <div className="bg-red-500/20 px-2 py-1 rounded-full border border-red-500/30">
