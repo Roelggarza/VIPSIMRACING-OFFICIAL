@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Image, Heart, MessageCircle, Share2, User, Crown, Calendar, Trophy, Video, Play, Send, Upload, Tag, Plus, Type, Camera, X, Reply, ThumbsUp, MoreHorizontal, Facebook, Twitter, Instagram, ExternalLink } from 'lucide-react';
+import { Globe, Image, Heart, MessageCircle, Share2, User, Crown, Calendar, Trophy, Video, Play, Send, Upload, Tag, Plus, Type, Camera, X, Reply, ThumbsUp, MoreHorizontal, Facebook, Twitter, Instagram, ExternalLink, Clipboard } from 'lucide-react';
 import { getUsers, User as UserType, getCommunityPosts, CommunityPost, likeCommunityPost, addCommentToCommunityPost, addReplyToComment, likeComment, shareCommunityPost, addCommunityPost, Comment } from '../../utils/userStorage';
 import Card, { CardHeader, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
@@ -34,6 +34,7 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
   });
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [showPasteHint, setShowPasteHint] = useState(false);
 
   useEffect(() => {
     setPosts(getCommunityPosts());
@@ -254,6 +255,32 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
       setIsUploading(false);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handlePaste = async (e: React.ClipboardEvent) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      
+      // Check if the item is an image
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (file) {
+          handleImageUpload(file);
+          setShowPasteHint(false);
+          return;
+        }
+      }
+    }
+  };
+
+  const handleTextAreaFocus = () => {
+    setShowPasteHint(true);
+    // Hide hint after 3 seconds
+    setTimeout(() => setShowPasteHint(false), 3000);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -850,7 +877,7 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
         )}
       </Modal>
 
-      {/* Create Post Modal - Facebook Style */}
+      {/* Create Post Modal - Facebook Style with Paste Support */}
       <Modal
         isOpen={showCreatePost}
         onClose={() => setShowCreatePost(false)}
@@ -885,16 +912,28 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
             </div>
           </div>
 
-          {/* Main Text Area */}
-          <div>
+          {/* Main Text Area with Paste Support */}
+          <div className="relative">
             <textarea
               placeholder={`What's on your mind, ${currentUser.fullName.split(' ')[0]}?`}
               value={newPost.description}
               onChange={(e) => setNewPost(prev => ({ ...prev, description: e.target.value }))}
+              onPaste={handlePaste}
+              onFocus={handleTextAreaFocus}
               rows={4}
               className="w-full px-0 py-2 bg-transparent border-0 text-white text-lg placeholder-slate-400 focus:outline-none resize-none"
               style={{ fontSize: '18px' }}
             />
+            
+            {/* Paste Hint */}
+            {showPasteHint && (
+              <div className="absolute top-2 right-2 bg-blue-500/20 border border-blue-500/30 rounded-lg px-3 py-2 text-xs text-blue-300 animate-pulse">
+                <div className="flex items-center space-x-1">
+                  <Clipboard className="w-3 h-3" />
+                  <span>Paste images directly here!</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Image Upload Area */}
@@ -942,7 +981,7 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
                         {isDragOver ? 'Drop image here' : 'Add photos/videos'}
                       </p>
                       <p className="text-slate-400 text-sm mt-1">
-                        or drag and drop
+                        drag and drop, paste from clipboard, or click to select
                       </p>
                     </div>
                     <input
@@ -965,6 +1004,17 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
                 )}
               </div>
             )}
+          </div>
+
+          {/* Paste Instructions */}
+          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+            <div className="flex items-center space-x-2 text-blue-300 mb-2">
+              <Clipboard className="w-4 h-4" />
+              <span className="font-semibold text-sm">Pro Tip: Paste Images Directly!</span>
+            </div>
+            <p className="text-sm text-blue-300">
+              You can paste images directly into the text area above. Just copy an image (Ctrl+C) and paste it (Ctrl+V) while typing your post!
+            </p>
           </div>
 
           {/* Additional Options */}
