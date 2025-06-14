@@ -14,26 +14,27 @@ export default function Landing() {
       <div className="max-w-4xl w-full text-center space-y-8">
         {/* Hero Section */}
         <div className="space-y-4">
-          {/* VIP Sim Racing Logo */}
-          <div className="flex items-center justify-center mb-6">
+          {/* VIP Sim Racing Logo - Made Bigger */}
+          <div className="flex items-center justify-center mb-8">
             <img 
               src="/Adobe Express - file.png" 
               alt="VIP Sim Racing" 
-              className="h-56 w-auto object-contain"
+              className="h-72 w-auto object-contain logo-enhanced"
             />
           </div>
           
-          <h2 className="text-2xl md:text-3xl text-slate-300 font-light">
+          {/* Made text smaller */}
+          <h2 className="text-xl md:text-2xl text-slate-300 font-light text-shadow-medium">
             Professional Racing Simulation Experience
           </h2>
           
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base text-slate-400 max-w-2xl mx-auto leading-relaxed text-shadow-light">
             Experience the thrill of professional racing with our state-of-the-art simulators. 
             Train like a pro, compete with others, and push your limits in a safe environment.
           </p>
         </div>
 
-        {/* Action Buttons */}
+        {/* Action Buttons - Keeping same size */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Button 
             size="lg" 
@@ -86,24 +87,24 @@ export default function Landing() {
             <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto">
               <Car className="w-8 h-8 text-red-500" />
             </div>
-            <h3 className="text-xl font-semibold text-white">Professional Equipment</h3>
-            <p className="text-slate-400">State-of-the-art racing simulators with realistic physics</p>
+            <h3 className="text-xl font-semibold text-white text-shadow-medium">Professional Equipment</h3>
+            <p className="text-slate-400 text-shadow-light">State-of-the-art racing simulators with realistic physics</p>
           </div>
           
           <div className="text-center space-y-3">
             <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto">
               <Trophy className="w-8 h-8 text-red-500" />
             </div>
-            <h3 className="text-xl font-semibold text-white">Competitive Racing</h3>
-            <p className="text-slate-400">Join tournaments and compete with other racers</p>
+            <h3 className="text-xl font-semibold text-white text-shadow-medium">Competitive Racing</h3>
+            <p className="text-slate-400 text-shadow-light">Join tournaments and compete with other racers</p>
           </div>
           
           <div className="text-center space-y-3">
             <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto">
               <Flag className="w-8 h-8 text-red-500" />
             </div>
-            <h3 className="text-xl font-semibold text-white">Training Programs</h3>
-            <p className="text-slate-400">Improve your skills with professional coaching</p>
+            <h3 className="text-xl font-semibold text-white text-shadow-medium">Training Programs</h3>
+            <p className="text-slate-400 text-shadow-light">Improve your skills with professional coaching</p>
           </div>
         </div>
 
