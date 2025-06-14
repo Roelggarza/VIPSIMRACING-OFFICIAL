@@ -1,3 +1,171 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom background styles with the provided racing image */
+@layer base {
+  body {
+    background: 
+      linear-gradient(
+        rgba(15, 23, 42, 0.85), 
+        rgba(30, 41, 59, 0.90), 
+        rgba(127, 29, 29, 0.85)
+      ),
+      url('/image.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+  }
+  
+  /* Ensure text remains readable over the background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.3);
+    pointer-events: none;
+    z-index: -1;
+  }
+}
+
+/* Enhanced card backgrounds to work better with the new background */
+.bg-slate-800\/70 {
+  background-color: rgba(30, 41, 59, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+.bg-slate-700\/50 {
+  background-color: rgba(51, 65, 85, 0.75);
+  backdrop-filter: blur(4px);
+}
+
+/* Racing-themed background patterns for additional visual interest */
+.racing-bg-pattern {
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(239, 68, 68, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(239, 68, 68, 0.04) 0%, transparent 50%),
+    linear-gradient(45deg, transparent 40%, rgba(239, 68, 68, 0.02) 50%, transparent 60%);
+}
+
+/* Subtle racing track lines */
+.track-lines {
+  background-image: 
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 98px,
+      rgba(239, 68, 68, 0.02) 100px,
+      rgba(239, 68, 68, 0.02) 102px
+    );
+}
+
+/* Checkered flag pattern (very subtle) */
+.checkered-pattern {
+  background-image: 
+    linear-gradient(45deg, rgba(255, 255, 255, 0.008) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.008) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.008) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.008) 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+/* Speed lines effect for dynamic sections */
+.speed-lines {
+  background-image: 
+    linear-gradient(90deg, transparent 0%, rgba(239, 68, 68, 0.03) 50%, transparent 100%),
+    linear-gradient(90deg, transparent 20%, rgba(239, 68, 68, 0.02) 70%, transparent 100%);
+  background-size: 200px 2px, 150px 1px;
+  background-repeat: repeat-x;
+  animation: speedLines 3s linear infinite;
+}
+
+@keyframes speedLines {
+  0% { background-position: -200px 0, -150px 0; }
+  100% { background-position: 200px 0, 150px 0; }
+}
+
+/* Enhanced glassmorphism effects */
+.glass-effect {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-effect-light {
+  background: rgba(51, 65, 85, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Improved text contrast for readability */
+.text-enhanced {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Racing-themed gradient overlays */
+.racing-gradient {
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.1) 0%,
+    rgba(220, 38, 38, 0.05) 25%,
+    transparent 50%,
+    rgba(239, 68, 68, 0.05) 75%,
+    rgba(239, 68, 68, 0.1) 100%
+  );
+}
+
+/* Subtle animation for dynamic elements */
+.pulse-glow {
+  animation: pulseGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulseGlow {
+  from {
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.3);
+  }
+  to {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+  }
+}
+
+/* Enhanced modal and card backgrounds */
+.modal-backdrop {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+}
+
+/* Responsive background adjustments */
+@media (max-width: 768px) {
+  body {
+    background-size: cover;
+    background-position: center center;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  body::before {
+    background: rgba(15, 23, 42, 0.6);
+  }
+  
+  .glass-effect {
+    background: rgba(30, 41, 59, 0.9);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .speed-lines {
+    animation: none;
+  }
+  
+  .pulse-glow {
+    animation: none;
+  }
+}
