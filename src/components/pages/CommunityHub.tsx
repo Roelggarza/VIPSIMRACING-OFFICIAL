@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Image, Heart, MessageCircle, Share2, User, Crown, Calendar, Trophy, Video, Play, Send, Upload, Tag, Plus, Type, Camera } from 'lucide-react';
+import { Globe, Image, Heart, MessageCircle, Share2, User, Crown, Calendar, Trophy, Video, Play, Send, Upload, Tag, Plus, Type, Camera, X } from 'lucide-react';
 import { getUsers, User as UserType, getCommunityPosts, CommunityPost, likeCommunityPost, addCommentToCommunityPost, shareCommunityPost, addCommunityPost } from '../../utils/userStorage';
 import Card, { CardHeader, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Modal from '../ui/Modal';
-import ImageDropZone from '../ui/ImageDropZone';
 
 interface CommunityHubProps {
   currentUser: UserType;
@@ -29,6 +28,8 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
     tags: '',
     isPublic: true
   });
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     setPosts(getCommunityPosts());
@@ -74,13 +75,8 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
   };
 
   const handleCreatePost = () => {
-    if (!newPost.title.trim()) {
-      alert('Please add a title for your post');
-      return;
-    }
-
-    if (!newPost.mediaUrl.trim()) {
-      alert('Please add an image to your post');
+    if (!newPost.title.trim() && !newPost.description.trim()) {
+      alert('Please add some content to your post');
       return;
     }
 
@@ -89,7 +85,7 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
     addCommunityPost({
       userId: currentUser.email,
       type: newPost.type,
-      title: newPost.title,
+      title: newPost.title || 'Racing Update',
       description: newPost.description,
       mediaUrl: newPost.mediaUrl,
       thumbnailUrl: newPost.type === 'video' ? newPost.mediaUrl : undefined,
@@ -117,8 +113,50 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
     });
   };
 
-  const handleImageSelect = (imageData: string) => {
-    setNewPost(prev => ({ ...prev, mediaUrl: imageData }));
+  const handleImageUpload = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size must be less than 5MB');
+      return;
+    }
+
+    setIsUploading(true);
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      setNewPost(prev => ({ ...prev, mediaUrl: result }));
+      setIsUploading(false);
+    };
+    reader.onerror = () => {
+      alert('Error reading file');
+      setIsUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      handleImageUpload(files[0]);
+    }
   };
 
   const getPostTypeIcon = (type: string) => {
@@ -183,14 +221,11 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
         </CardContent>
       </Card>
 
-      {/* Create Post Section */}
-      <Card className="border-dashed border-2 border-slate-600 hover:border-red-500 transition-colors">
-        <CardContent 
-          className="p-6 cursor-pointer"
-          onClick={() => setShowCreatePost(true)}
-        >
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-600/50">
+      {/* Create Post Section - Facebook Style */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-600/50">
               {currentUser.profilePicture ? (
                 <img 
                   src={currentUser.profilePicture} 
@@ -199,35 +234,40 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <User className="w-6 h-6 text-slate-400" />
+                  <User className="w-5 h-5 text-slate-400" />
                 </div>
               )}
             </div>
-            <div className="flex-1">
-              <div className="bg-slate-700/50 rounded-lg p-4 text-slate-400 hover:bg-slate-700/70 transition-colors">
-                What's your latest racing achievement, {currentUser.fullName.split(' ')[0]}?
-              </div>
-            </div>
+            <button
+              onClick={() => setShowCreatePost(true)}
+              className="flex-1 bg-slate-700/50 hover:bg-slate-700/70 rounded-full px-4 py-3 text-left text-slate-400 transition-colors"
+            >
+              What's your latest racing achievement, {currentUser.fullName.split(' ')[0]}?
+            </button>
           </div>
           
-          <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-700">
-            <div className="flex space-x-4">
-              <div className="flex items-center space-x-2 text-slate-400 hover:text-red-400 transition-colors">
-                <Camera className="w-5 h-5" />
-                <span className="text-sm font-medium">Photo/Video</span>
-              </div>
-              <div className="flex items-center space-x-2 text-slate-400 hover:text-yellow-400 transition-colors">
-                <Trophy className="w-5 h-5" />
-                <span className="text-sm font-medium">Achievement</span>
-              </div>
-              <div className="flex items-center space-x-2 text-slate-400 hover:text-blue-400 transition-colors">
-                <Tag className="w-5 h-5" />
-                <span className="text-sm font-medium">Lap Record</span>
-              </div>
-            </div>
-            <Button size="sm" icon={Plus}>
-              Create Post
-            </Button>
+          <div className="flex items-center justify-between pt-3 border-t border-slate-700">
+            <button
+              onClick={() => setShowCreatePost(true)}
+              className="flex items-center space-x-2 text-slate-400 hover:text-red-400 transition-colors px-4 py-2 rounded-lg hover:bg-slate-700/30"
+            >
+              <Camera className="w-5 h-5" />
+              <span className="text-sm font-medium">Photo/Video</span>
+            </button>
+            <button
+              onClick={() => setShowCreatePost(true)}
+              className="flex items-center space-x-2 text-slate-400 hover:text-yellow-400 transition-colors px-4 py-2 rounded-lg hover:bg-slate-700/30"
+            >
+              <Trophy className="w-5 h-5" />
+              <span className="text-sm font-medium">Achievement</span>
+            </button>
+            <button
+              onClick={() => setShowCreatePost(true)}
+              className="flex items-center space-x-2 text-slate-400 hover:text-blue-400 transition-colors px-4 py-2 rounded-lg hover:bg-slate-700/30"
+            >
+              <Tag className="w-5 h-5" />
+              <span className="text-sm font-medium">Lap Record</span>
+            </button>
           </div>
         </CardContent>
       </Card>
@@ -316,37 +356,39 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
                   </div>
 
                   {/* Media */}
-                  <div className="relative">
-                    {post.type === 'video' ? (
-                      <div className="relative">
-                        <img 
-                          src={post.thumbnailUrl || post.mediaUrl} 
-                          alt="Video thumbnail" 
-                          className="w-full h-auto max-h-96 object-cover"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                          <div className="w-16 h-16 bg-red-500/80 rounded-full flex items-center justify-center">
-                            <Play className="w-8 h-8 text-white ml-1" />
+                  {post.mediaUrl && (
+                    <div className="relative">
+                      {post.type === 'video' ? (
+                        <div className="relative">
+                          <img 
+                            src={post.thumbnailUrl || post.mediaUrl} 
+                            alt="Video thumbnail" 
+                            className="w-full h-auto max-h-96 object-cover"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                            <div className="w-16 h-16 bg-red-500/80 rounded-full flex items-center justify-center">
+                              <Play className="w-8 h-8 text-white ml-1" />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ) : (
-                      <img 
-                        src={post.mediaUrl} 
-                        alt="Racing content" 
-                        className="w-full h-auto max-h-96 object-cover"
-                      />
-                    )}
-                    
-                    {post.achievement && (
-                      <div className="absolute top-4 left-4 bg-yellow-500/20 backdrop-blur-sm px-3 py-1 rounded-full border border-yellow-500/30">
-                        <span className="text-yellow-300 text-sm font-bold flex items-center">
-                          <Trophy className="w-3 h-3 mr-1" />
-                          {post.achievement}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+                      ) : (
+                        <img 
+                          src={post.mediaUrl} 
+                          alt="Racing content" 
+                          className="w-full h-auto max-h-96 object-cover"
+                        />
+                      )}
+                      
+                      {post.achievement && (
+                        <div className="absolute top-4 left-4 bg-yellow-500/20 backdrop-blur-sm px-3 py-1 rounded-full border border-yellow-500/30">
+                          <span className="text-yellow-300 text-sm font-bold flex items-center">
+                            <Trophy className="w-3 h-3 mr-1" />
+                            {post.achievement}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Post Details */}
                   {(post.track || post.lapTime || post.tags?.length) && (
@@ -469,120 +511,161 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
         )}
       </div>
 
-      {/* Create Post Modal */}
+      {/* Create Post Modal - Facebook Style */}
       <Modal
         isOpen={showCreatePost}
         onClose={() => setShowCreatePost(false)}
-        title="Share Your Racing Content"
+        title="Create Post"
       >
-        <div className="space-y-6">
-          {/* Post Type Selection */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Content Type</label>
-              <select
-                value={newPost.type}
-                onChange={(e) => setNewPost(prev => ({ ...prev, type: e.target.value as any }))}
-                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-red-500"
-              >
-                <option value="screenshot">Screenshot</option>
-                <option value="video">Video/Clip</option>
-                <option value="lap_record">Lap Record</option>
-                <option value="highlight">Race Highlight</option>
-              </select>
+        <div className="space-y-4">
+          {/* User Info */}
+          <div className="flex items-center space-x-3 pb-3 border-b border-slate-700">
+            <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-600/50">
+              {currentUser.profilePicture ? (
+                <img 
+                  src={currentUser.profilePicture} 
+                  alt="Your profile" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <User className="w-5 h-5 text-slate-400" />
+                </div>
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Visibility</label>
+              <p className="font-semibold text-white">{currentUser.fullName}</p>
               <select
                 value={newPost.isPublic ? 'public' : 'private'}
                 onChange={(e) => setNewPost(prev => ({ ...prev, isPublic: e.target.value === 'public' }))}
-                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="text-sm bg-slate-700/50 border border-slate-600 rounded px-2 py-1 text-slate-300"
               >
-                <option value="public">Public</option>
-                <option value="private">Private</option>
+                <option value="public">🌍 Public</option>
+                <option value="private">🔒 Private</option>
               </select>
             </div>
           </div>
 
-          {/* Image Upload */}
+          {/* Main Text Area */}
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Upload Image/Video *
-            </label>
-            <ImageDropZone
-              onImageSelect={handleImageSelect}
-              className="w-full"
-            />
-          </div>
-
-          {/* Title and Description */}
-          <Input
-            label="Title *"
-            placeholder="Give your content a catchy title..."
-            value={newPost.title}
-            onChange={(e) => setNewPost(prev => ({ ...prev, title: e.target.value }))}
-          />
-
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">Description</label>
             <textarea
-              placeholder="Tell us about this moment..."
+              placeholder={`What's on your mind, ${currentUser.fullName.split(' ')[0]}?`}
               value={newPost.description}
               onChange={(e) => setNewPost(prev => ({ ...prev, description: e.target.value }))}
-              rows={3}
-              className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+              rows={4}
+              className="w-full px-0 py-2 bg-transparent border-0 text-white text-lg placeholder-slate-400 focus:outline-none resize-none"
+              style={{ fontSize: '18px' }}
             />
           </div>
 
-          {/* Game and Track Details */}
+          {/* Image Upload Area */}
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`
+              relative border-2 border-dashed rounded-lg p-6 transition-all duration-200
+              ${isDragOver 
+                ? 'border-red-500 bg-red-500/10' 
+                : 'border-slate-600 hover:border-red-500 hover:bg-red-500/5'
+              }
+              ${newPost.mediaUrl ? 'border-solid border-green-500' : ''}
+            `}
+          >
+            {newPost.mediaUrl ? (
+              <div className="relative">
+                <img 
+                  src={newPost.mediaUrl} 
+                  alt="Upload preview" 
+                  className="w-full h-48 object-cover rounded-lg"
+                />
+                <button
+                  onClick={() => setNewPost(prev => ({ ...prev, mediaUrl: '' }))}
+                  className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="text-center">
+                {isUploading ? (
+                  <div className="space-y-3">
+                    <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                    <p className="text-slate-400">Uploading image...</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="w-16 h-16 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto">
+                      <Camera className="w-8 h-8 text-slate-400" />
+                    </div>
+                    <div>
+                      <p className="text-white font-medium">
+                        {isDragOver ? 'Drop image here' : 'Add photos/videos'}
+                      </p>
+                      <p className="text-slate-400 text-sm mt-1">
+                        or drag and drop
+                      </p>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleImageUpload(file);
+                      }}
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    <label
+                      htmlFor="image-upload"
+                      className="inline-block bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg cursor-pointer transition-colors"
+                    >
+                      Select Photos
+                    </label>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Additional Options */}
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label="Game"
-              placeholder="e.g., Assetto Corsa"
+              placeholder="Game (optional)"
               value={newPost.game}
               onChange={(e) => setNewPost(prev => ({ ...prev, game: e.target.value }))}
             />
             <Input
-              label="Track"
-              placeholder="e.g., Silverstone GP"
+              placeholder="Track (optional)"
               value={newPost.track}
               onChange={(e) => setNewPost(prev => ({ ...prev, track: e.target.value }))}
             />
-          </div>
-
-          {/* Performance Details */}
-          <div className="grid grid-cols-2 gap-4">
             <Input
-              label="Lap Time"
-              placeholder="e.g., 1:27.543"
+              placeholder="Lap time (optional)"
               value={newPost.lapTime}
               onChange={(e) => setNewPost(prev => ({ ...prev, lapTime: e.target.value }))}
             />
             <Input
-              label="Achievement"
-              placeholder="e.g., Personal Best"
+              placeholder="Achievement (optional)"
               value={newPost.achievement}
               onChange={(e) => setNewPost(prev => ({ ...prev, achievement: e.target.value }))}
             />
           </div>
 
-          {/* Tags */}
           <Input
-            label="Tags"
-            placeholder="racing, silverstone, personal-best (comma separated)"
+            placeholder="Tags (comma separated)"
             value={newPost.tags}
             onChange={(e) => setNewPost(prev => ({ ...prev, tags: e.target.value }))}
           />
 
-          {/* Action Buttons */}
-          <div className="flex space-x-3 pt-4">
-            <Button onClick={handleCreatePost} className="flex-1" icon={Upload}>
-              Share Post
-            </Button>
-            <Button variant="outline" onClick={() => setShowCreatePost(false)} className="flex-1">
-              Cancel
-            </Button>
-          </div>
+          {/* Post Button */}
+          <Button 
+            onClick={handleCreatePost} 
+            className="w-full" 
+            disabled={!newPost.description.trim() && !newPost.mediaUrl}
+          >
+            Post
+          </Button>
         </div>
       </Modal>
     </div>
