@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Flag, QrCode } from 'lucide-react';
+import { Car, Flag, Trophy, QrCode } from 'lucide-react';
 import QRCode from 'qrcode.react';
 import Button from '../ui/Button';
 import Card, { CardContent } from '../ui/Card';
@@ -84,7 +84,7 @@ export default function Landing() {
         <div className="grid md:grid-cols-3 gap-6 mt-16">
           <div className="text-center space-y-3">
             <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto">
-              <div className="text-red-500 text-2xl font-bold">🏎️</div>
+              <Car className="w-8 h-8 text-red-500" />
             </div>
             <h3 className="text-xl font-semibold text-white">Professional Equipment</h3>
             <p className="text-slate-400">State-of-the-art racing simulators with realistic physics</p>
@@ -92,7 +92,7 @@ export default function Landing() {
           
           <div className="text-center space-y-3">
             <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto">
-              <div className="text-red-500 text-2xl font-bold">🏆</div>
+              <Trophy className="w-8 h-8 text-red-500" />
             </div>
             <h3 className="text-xl font-semibold text-white">Competitive Racing</h3>
             <p className="text-slate-400">Join tournaments and compete with other racers</p>
@@ -100,7 +100,7 @@ export default function Landing() {
           
           <div className="text-center space-y-3">
             <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto">
-              <div className="text-red-500 text-2xl font-bold">🎯</div>
+              <Flag className="w-8 h-8 text-red-500" />
             </div>
             <h3 className="text-xl font-semibold text-white">Training Programs</h3>
             <p className="text-slate-400">Improve your skills with professional coaching</p>
