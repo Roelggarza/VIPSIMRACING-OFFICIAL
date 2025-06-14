@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Flag, Trophy, QrCode, Info } from 'lucide-react';
+import { Car, Flag, Trophy, QrCode } from 'lucide-react';
 import QRCode from 'qrcode.react';
 import Button from '../ui/Button';
 import Card, { CardContent } from '../ui/Card';
@@ -33,7 +33,7 @@ export default function Landing() {
           </p>
         </div>
 
-        {/* Navigation */}
+        {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Button 
             size="lg" 
@@ -51,16 +51,6 @@ export default function Landing() {
             className="w-full sm:w-auto"
           >
             MEMBER LOGIN
-          </Button>
-          
-          <Button 
-            variant="ghost" 
-            size="lg"
-            onClick={() => navigate("/about")}
-            icon={Info}
-            className="w-full sm:w-auto"
-          >
-            ABOUT US
           </Button>
         </div>
 
