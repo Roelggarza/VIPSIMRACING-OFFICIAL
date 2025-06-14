@@ -19,7 +19,7 @@ export default function Landing() {
             <img 
               src="/Adobe Express - file.png" 
               alt="VIP Sim Racing" 
-              className="h-32 w-auto object-contain"
+              className="h-48 w-auto object-contain"
             />
           </div>
           
