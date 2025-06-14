@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogIn, AlertCircle } from 'lucide-react';
-import { findUser, saveSession } from '../../utils/userStorage';
+import { LogIn, AlertCircle, Mail, ArrowLeft } from 'lucide-react';
+import { findUser, saveSession, emailExists } from '../../utils/userStorage';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Card, { CardHeader, CardContent } from '../ui/Card';
@@ -15,6 +15,9 @@ export default function Login() {
   const [form, setForm] = useState<FormData>({ email: '', password: '' });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetSent, setResetSent] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,6 +49,136 @@ export default function Login() {
       navigate('/dashboard');
     }, 800);
   };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!resetEmail.trim()) {
+      setError('Please enter your email address.');
+      return;
+    }
+
+    if (!emailExists(resetEmail)) {
+      setError('No account found with this email address.');
+      return;
+    }
+
+    setIsLoading(true);
+    
+    // Simulate sending reset email
+    setTimeout(() => {
+      setResetSent(true);
+      setIsLoading(false);
+      setError('');
+    }, 1000);
+  };
+
+  if (showResetPassword) {
+    if (resetSent) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-red-900/20 flex items-center justify-center p-6">
+          <Card className="max-w-md w-full">
+            <CardHeader>
+              <div className="text-center space-y-2">
+                <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
+                  <Mail className="w-6 h-6 text-green-500" />
+                </div>
+                <h1 className="text-2xl font-bold text-white">Check Your Email</h1>
+                <p className="text-slate-400">Password reset instructions sent to {resetEmail}</p>
+              </div>
+            </CardHeader>
+
+            <CardContent>
+              <div className="space-y-4">
+                <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+                  <p className="text-sm text-green-300">
+                    We've sent password reset instructions to your email address. 
+                    Please check your inbox and follow the link to reset your password.
+                  </p>
+                </div>
+                
+                <Button 
+                  onClick={() => {
+                    setShowResetPassword(false);
+                    setResetSent(false);
+                    setResetEmail('');
+                  }}
+                  variant="outline"
+                  size="lg" 
+                  className="w-full"
+                  icon={ArrowLeft}
+                >
+                  Back to Login
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-red-900/20 flex items-center justify-center p-6">
+        <Card className="max-w-md w-full">
+          <CardHeader>
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto">
+                <Mail className="w-6 h-6 text-blue-500" />
+              </div>
+              <h1 className="text-2xl font-bold text-white">Reset Password</h1>
+              <p className="text-slate-400">Enter your email to receive reset instructions</p>
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <Input
+                name="resetEmail"
+                type="email"
+                label="Email Address"
+                placeholder="Enter your email"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                autoComplete="email"
+              />
+
+              {error && (
+                <div className="flex items-center space-x-2 text-red-400 bg-red-500/10 p-3 rounded-lg">
+                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                  <span className="text-sm font-medium">{error}</span>
+                </div>
+              )}
+
+              <Button 
+                type="submit" 
+                size="lg" 
+                className="w-full"
+                disabled={isLoading}
+                icon={Mail}
+              >
+                {isLoading ? 'Sending...' : 'Send Reset Instructions'}
+              </Button>
+
+              <Button 
+                type="button"
+                variant="ghost" 
+                size="lg" 
+                className="w-full"
+                onClick={() => {
+                  setShowResetPassword(false);
+                  setError('');
+                  setResetEmail('');
+                }}
+                icon={ArrowLeft}
+              >
+                Back to Login
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-red-900/20 flex items-center justify-center p-6">
@@ -98,6 +231,15 @@ export default function Login() {
               {isLoading ? 'Signing In...' : 'Sign In'}
             </Button>
           </form>
+
+          <div className="text-center pt-4">
+            <button
+              onClick={() => setShowResetPassword(true)}
+              className="text-red-500 hover:text-red-400 font-semibold underline text-sm"
+            >
+              Forgot your password?
+            </button>
+          </div>
 
           <div className="text-center pt-6 border-t border-slate-700 mt-6">
             <p className="text-slate-400">

@@ -43,6 +43,28 @@ export interface Transaction {
   description: string;
 }
 
+export interface Screenshot {
+  id: string;
+  userId: string;
+  imageUrl: string;
+  caption?: string;
+  game?: string;
+  track?: string;
+  lapTime?: string;
+  achievement?: string;
+  likes: number;
+  likedBy?: string[];
+  comments?: Comment[];
+  createdAt: string;
+}
+
+export interface Comment {
+  id: string;
+  userId: string;
+  text: string;
+  createdAt: string;
+}
+
 export interface Simulator {
   id: number;
   name: string;
@@ -56,6 +78,7 @@ const STORAGE_KEY_USERS = "vipSimUsers";
 const STORAGE_KEY_SESSION = "vipSimSession";
 const STORAGE_KEY_TRANSACTIONS = "vipSimTransactions";
 const STORAGE_KEY_SIMULATORS = "vipSimSimulators";
+const STORAGE_KEY_SCREENSHOTS = "vipSimScreenshots";
 
 export function getUsers(): User[] {
   const usersStr = localStorage.getItem(STORAGE_KEY_USERS);
@@ -267,6 +290,66 @@ export function formatCreditsDisplay(minutes: number): string {
   if (hours === 0) return `${remainingMinutes} min`;
   if (remainingMinutes === 0) return `${hours}h`;
   return `${hours}h ${remainingMinutes}m`;
+}
+
+// Screenshot Management
+export function getScreenshots(): Screenshot[] {
+  const screenshotsStr = localStorage.getItem(STORAGE_KEY_SCREENSHOTS);
+  const screenshots = screenshotsStr ? JSON.parse(screenshotsStr) : [];
+  
+  // Initialize with some sample screenshots if empty
+  if (screenshots.length === 0) {
+    const sampleScreenshots: Screenshot[] = [
+      {
+        id: '1',
+        userId: 'admin@example.com',
+        imageUrl: 'https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg?auto=compress&cs=tinysrgb&w=800',
+        caption: 'Perfect lap at Silverstone! New personal best 🏁',
+        game: 'Assetto Corsa',
+        track: 'Silverstone GP',
+        lapTime: '1:27.543',
+        achievement: 'Personal Best',
+        likes: 12,
+        likedBy: [],
+        comments: [],
+        createdAt: new Date(Date.now() - 86400000).toISOString()
+      },
+      {
+        id: '2',
+        userId: 'admin@example.com',
+        imageUrl: 'https://images.pexels.com/photos/1335077/pexels-photo-1335077.jpeg?auto=compress&cs=tinysrgb&w=800',
+        caption: 'Monaco night racing is absolutely stunning! The city lights make it magical ✨',
+        game: 'Gran Turismo 7',
+        track: 'Monaco Street Circuit',
+        likes: 8,
+        likedBy: [],
+        comments: [],
+        createdAt: new Date(Date.now() - 172800000).toISOString()
+      }
+    ];
+    
+    localStorage.setItem(STORAGE_KEY_SCREENSHOTS, JSON.stringify(sampleScreenshots));
+    return sampleScreenshots;
+  }
+  
+  return screenshots;
+}
+
+export function addScreenshot(screenshot: Omit<Screenshot, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments'>): Screenshot {
+  const screenshots = getScreenshots();
+  const newScreenshot: Screenshot = {
+    ...screenshot,
+    id: Date.now().toString(),
+    likes: 0,
+    likedBy: [],
+    comments: [],
+    createdAt: new Date().toISOString()
+  };
+  
+  screenshots.push(newScreenshot);
+  localStorage.setItem(STORAGE_KEY_SCREENSHOTS, JSON.stringify(screenshots));
+  
+  return newScreenshot;
 }
 
 // Simulator Management

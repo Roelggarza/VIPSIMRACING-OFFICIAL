@@ -21,7 +21,8 @@ import {
   History,
   Gamepad2,
   Shield,
-  Monitor
+  Monitor,
+  Globe
 } from 'lucide-react';
 import { getSession, clearSession, User as UserType, formatCreditsDisplay, getUserTransactions } from '../../utils/userStorage';
 import Button from '../ui/Button';
@@ -34,6 +35,7 @@ import Leaderboard from './Leaderboard';
 import UserProfile from './UserProfile';
 import GamesLibrary from './GamesLibrary';
 import AdminDashboard from './AdminDashboard';
+import CommunityHub from './CommunityHub';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -176,6 +178,8 @@ export default function Dashboard() {
         return <Leaderboard onUserSelect={handleUserSelect} />;
       case 'games':
         return <GamesLibrary user={user} />;
+      case 'community':
+        return <CommunityHub currentUser={user} />;
       case 'admin':
         return user.isAdmin ? <AdminDashboard /> : null;
       default:
@@ -558,6 +562,20 @@ export default function Dashboard() {
               <div className="flex items-center space-x-2">
                 <Gamepad2 className="w-4 h-4" />
                 <span>Games</span>
+              </div>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('community')}
+              className={`py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
+                activeTab === 'community'
+                  ? 'border-red-500 text-red-500'
+                  : 'border-transparent text-slate-400 hover:text-white'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <Globe className="w-4 h-4" />
+                <span>Community Hub</span>
               </div>
             </button>
             
