@@ -2,14 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom background styles with the provided racing image */
+/* Custom background styles with directional visibility */
 @layer base {
   body {
     background: 
       linear-gradient(
-        rgba(15, 23, 42, 0.45), 
-        rgba(30, 41, 59, 0.55), 
-        rgba(127, 29, 29, 0.45)
+        135deg,
+        rgba(15, 23, 42, 0.25) 0%,
+        rgba(30, 41, 59, 0.35) 25%,
+        rgba(127, 29, 29, 0.45) 50%,
+        rgba(30, 41, 59, 0.65) 75%,
+        rgba(15, 23, 42, 0.75) 100%
       ),
       url('/image.png');
     background-size: cover;
@@ -19,7 +22,7 @@
     min-height: 100vh;
   }
   
-  /* Lighter overlay to show more of the background image */
+  /* Directional overlay - lighter on top/left, darker on right */
   body::before {
     content: '';
     position: fixed;
@@ -27,7 +30,14 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(15, 23, 42, 0.15);
+    background: linear-gradient(
+      135deg,
+      rgba(15, 23, 42, 0.05) 0%,
+      rgba(15, 23, 42, 0.10) 25%,
+      rgba(15, 23, 42, 0.20) 50%,
+      rgba(15, 23, 42, 0.35) 75%,
+      rgba(15, 23, 42, 0.45) 100%
+    );
     pointer-events: none;
     z-index: -1;
   }
@@ -175,16 +185,26 @@ h1, h2, h3, h4, h5, h6 {
     background-position: center center;
   }
   
-  /* Slightly more overlay on mobile for better readability */
+  /* Adjust directional overlay for mobile */
   body::before {
-    background: rgba(15, 23, 42, 0.25);
+    background: linear-gradient(
+      135deg,
+      rgba(15, 23, 42, 0.15) 0%,
+      rgba(15, 23, 42, 0.25) 50%,
+      rgba(15, 23, 42, 0.35) 100%
+    );
   }
 }
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   body::before {
-    background: rgba(15, 23, 42, 0.4);
+    background: linear-gradient(
+      135deg,
+      rgba(15, 23, 42, 0.25) 0%,
+      rgba(15, 23, 42, 0.40) 50%,
+      rgba(15, 23, 42, 0.55) 100%
+    );
   }
   
   .glass-effect {
@@ -214,4 +234,23 @@ h1, h2, h3, h4, h5, h6 {
 
 .text-shadow-light {
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Directional visibility enhancement for specific areas */
+.bg-visible-left {
+  background: linear-gradient(
+    90deg,
+    rgba(30, 41, 59, 0.70) 0%,
+    rgba(30, 41, 59, 0.85) 50%,
+    rgba(30, 41, 59, 0.95) 100%
+  );
+}
+
+.bg-visible-top {
+  background: linear-gradient(
+    180deg,
+    rgba(30, 41, 59, 0.70) 0%,
+    rgba(30, 41, 59, 0.85) 50%,
+    rgba(30, 41, 59, 0.95) 100%
+  );
 }
