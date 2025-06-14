@@ -7,9 +7,9 @@
   body {
     background: 
       linear-gradient(
-        rgba(15, 23, 42, 0.85), 
-        rgba(30, 41, 59, 0.90), 
-        rgba(127, 29, 29, 0.85)
+        rgba(15, 23, 42, 0.45), 
+        rgba(30, 41, 59, 0.55), 
+        rgba(127, 29, 29, 0.45)
       ),
       url('/image.png');
     background-size: cover;
@@ -19,7 +19,7 @@
     min-height: 100vh;
   }
   
-  /* Ensure text remains readable over the background */
+  /* Lighter overlay to show more of the background image */
   body::before {
     content: '';
     position: fixed;
@@ -27,21 +27,43 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(15, 23, 42, 0.3);
+    background: rgba(15, 23, 42, 0.15);
     pointer-events: none;
     z-index: -1;
   }
 }
 
-/* Enhanced card backgrounds to work better with the new background */
+/* Enhanced card backgrounds with better transparency */
 .bg-slate-800\/70 {
-  background-color: rgba(30, 41, 59, 0.85);
-  backdrop-filter: blur(8px);
+  background-color: rgba(30, 41, 59, 0.90);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .bg-slate-700\/50 {
-  background-color: rgba(51, 65, 85, 0.75);
+  background-color: rgba(51, 65, 85, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Enhanced text contrast for better readability over the visible background */
+.text-enhanced {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* Stronger text shadows for headers and important text */
+h1, h2, h3, h4, h5, h6 {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+/* Enhanced button contrast */
+.bg-red-500 {
+  background-color: rgba(239, 68, 68, 0.95);
   backdrop-filter: blur(4px);
+}
+
+.bg-red-500:hover {
+  background-color: rgba(220, 38, 38, 0.95);
 }
 
 /* Racing-themed background patterns for additional visual interest */
@@ -90,22 +112,17 @@
   100% { background-position: 200px 0, 150px 0; }
 }
 
-/* Enhanced glassmorphism effects */
+/* Enhanced glassmorphism effects with better visibility */
 .glass-effect {
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 41, 59, 0.85);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .glass-effect-light {
-  background: rgba(51, 65, 85, 0.6);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-/* Improved text contrast for readability */
-.text-enhanced {
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  background: rgba(51, 65, 85, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 /* Racing-themed gradient overlays */
@@ -136,8 +153,19 @@
 
 /* Enhanced modal and card backgrounds */
 .modal-backdrop {
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+/* Logo and important text visibility enhancement */
+.logo-enhanced {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.8));
+}
+
+/* Card content with better contrast */
+.card-content-enhanced {
+  background: rgba(30, 41, 59, 0.92);
+  backdrop-filter: blur(16px);
 }
 
 /* Responsive background adjustments */
@@ -146,16 +174,21 @@
     background-size: cover;
     background-position: center center;
   }
+  
+  /* Slightly more overlay on mobile for better readability */
+  body::before {
+    background: rgba(15, 23, 42, 0.25);
+  }
 }
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   body::before {
-    background: rgba(15, 23, 42, 0.6);
+    background: rgba(15, 23, 42, 0.4);
   }
   
   .glass-effect {
-    background: rgba(30, 41, 59, 0.9);
+    background: rgba(30, 41, 59, 0.95);
   }
 }
 
@@ -168,4 +201,17 @@
   .pulse-glow {
     animation: none;
   }
+}
+
+/* Enhanced text readability classes */
+.text-shadow-strong {
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+}
+
+.text-shadow-medium {
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+}
+
+.text-shadow-light {
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
