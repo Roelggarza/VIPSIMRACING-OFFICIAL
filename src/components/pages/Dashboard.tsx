@@ -524,16 +524,16 @@ export default function Dashboard() {
             </button>
             
             <button
-              onClick={() => setActiveTab('transactions')}
+              onClick={() => setActiveTab('community')}
               className={`py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                activeTab === 'transactions'
+                activeTab === 'community'
                   ? 'border-red-500 text-red-500'
                   : 'border-transparent text-slate-400 hover:text-white'
               }`}
             >
               <div className="flex items-center space-x-2">
-                <History className="w-4 h-4" />
-                <span>Transaction History</span>
+                <Globe className="w-4 h-4" />
+                <span>Community Hub</span>
               </div>
             </button>
             
@@ -552,6 +552,20 @@ export default function Dashboard() {
             </button>
             
             <button
+              onClick={() => setActiveTab('transactions')}
+              className={`py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
+                activeTab === 'transactions'
+                  ? 'border-red-500 text-red-500'
+                  : 'border-transparent text-slate-400 hover:text-white'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <History className="w-4 h-4" />
+                <span>Transaction History</span>
+              </div>
+            </button>
+            
+            <button
               onClick={() => setActiveTab('games')}
               className={`py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
                 activeTab === 'games'
@@ -562,20 +576,6 @@ export default function Dashboard() {
               <div className="flex items-center space-x-2">
                 <Gamepad2 className="w-4 h-4" />
                 <span>Games</span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('community')}
-              className={`py-4 px-2 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                activeTab === 'community'
-                  ? 'border-red-500 text-red-500'
-                  : 'border-transparent text-slate-400 hover:text-white'
-              }`}
-            >
-              <div className="flex items-center space-x-2">
-                <Globe className="w-4 h-4" />
-                <span>Community Hub</span>
               </div>
             </button>
             

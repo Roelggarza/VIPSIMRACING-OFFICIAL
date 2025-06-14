@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Flag, Trophy, QrCode } from 'lucide-react';
+import { Flag, QrCode } from 'lucide-react';
 import QRCode from 'qrcode.react';
 import Button from '../ui/Button';
 import Card, { CardContent } from '../ui/Card';
@@ -14,12 +14,13 @@ export default function Landing() {
       <div className="max-w-4xl w-full text-center space-y-8">
         {/* Hero Section */}
         <div className="space-y-6">
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <Car className="w-12 h-12 text-red-500" />
-            <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-white to-red-300 bg-clip-text text-transparent">
-              VIP Edge
-            </h1>
-            <Trophy className="w-12 h-12 text-red-500" />
+          {/* VIP Sim Racing Logo */}
+          <div className="flex items-center justify-center mb-8">
+            <img 
+              src="/Adobe Express - file.png" 
+              alt="VIP Sim Racing" 
+              className="h-32 w-auto object-contain"
+            />
           </div>
           
           <h2 className="text-2xl md:text-3xl text-slate-300 font-light">
@@ -83,7 +84,7 @@ export default function Landing() {
         <div className="grid md:grid-cols-3 gap-6 mt-16">
           <div className="text-center space-y-3">
             <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto">
-              <Car className="w-8 h-8 text-red-500" />
+              <div className="text-red-500 text-2xl font-bold">🏎️</div>
             </div>
             <h3 className="text-xl font-semibold text-white">Professional Equipment</h3>
             <p className="text-slate-400">State-of-the-art racing simulators with realistic physics</p>
@@ -91,7 +92,7 @@ export default function Landing() {
           
           <div className="text-center space-y-3">
             <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto">
-              <Trophy className="w-8 h-8 text-red-500" />
+              <div className="text-red-500 text-2xl font-bold">🏆</div>
             </div>
             <h3 className="text-xl font-semibold text-white">Competitive Racing</h3>
             <p className="text-slate-400">Join tournaments and compete with other racers</p>
@@ -99,7 +100,7 @@ export default function Landing() {
           
           <div className="text-center space-y-3">
             <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto">
-              <Flag className="w-8 h-8 text-red-500" />
+              <div className="text-red-500 text-2xl font-bold">🎯</div>
             </div>
             <h3 className="text-xl font-semibold text-white">Training Programs</h3>
             <p className="text-slate-400">Improve your skills with professional coaching</p>
