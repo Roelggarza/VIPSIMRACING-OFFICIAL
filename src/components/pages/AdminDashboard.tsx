@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, Monitor, Activity, Eye, Settings, AlertTriangle, Key, UserCheck, UserX, Bell, BellOff, Clock, MapPin, Smartphone, Globe } from 'lucide-react';
-import { getUsers, getSimulators, User as UserType, Simulator, formatCreditsDisplay, resetUserPassword, updateUser, getAdminNotifications, markNotificationAsRead, getUnreadNotificationCount } from '../../utils/userStorage';
+import { Shield, Users, Monitor, Activity, Eye, Settings, AlertTriangle, Key, UserCheck, UserX, Bell, BellOff, Clock, MapPin, Smartphone, Globe, Flag, MessageCircle, Trash2, EyeOff, CheckCircle, XCircle } from 'lucide-react';
+import { getUsers, getSimulators, User as UserType, Simulator, formatCreditsDisplay, resetUserPassword, updateUser, getAdminNotifications, markNotificationAsRead, getUnreadNotificationCount, getPostReports, PostReport, updatePostReport, getCommunityPosts, hidePost, deleteCommunityPost, getChatMessages } from '../../utils/userStorage';
 import Card, { CardHeader, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -9,25 +9,33 @@ import Modal from '../ui/Modal';
 export default function AdminDashboard() {
   const [users, setUsers] = useState<UserType[]>([]);
   const [simulators, setSimulators] = useState<Simulator[]>([]);
-  const [activeTab, setActiveTab] = useState<'users' | 'simulators' | 'notifications'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'simulators' | 'notifications' | 'reports' | 'chat'>('users');
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [showUserDetails, setShowUserDetails] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [reports, setReports] = useState<PostReport[]>([]);
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+  const [selectedReport, setSelectedReport] = useState<PostReport | null>(null);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   useEffect(() => {
     setUsers(getUsers());
     setSimulators(getSimulators());
     setNotifications(getAdminNotifications());
     setUnreadCount(getUnreadNotificationCount());
+    setReports(getPostReports());
+    setChatMessages(getChatMessages());
   }, []);
 
   const refreshData = () => {
     setUsers(getUsers());
     setNotifications(getAdminNotifications());
     setUnreadCount(getUnreadNotificationCount());
+    setReports(getPostReports());
+    setChatMessages(getChatMessages());
   };
 
   const getStatusColor = (isOnline: boolean) => {
@@ -83,6 +91,45 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleReportAction = (reportId: string, action: 'dismiss' | 'resolve', adminNotes?: string) => {
+    const report = reports.find(r => r.id === reportId);
+    if (!report) return;
+
+    if (action === 'resolve') {
+      // Hide the post
+      if (report.postId) {
+        hidePost(report.postId, true);
+      }
+    }
+
+    updatePostReport(reportId, {
+      status: action === 'dismiss' ? 'dismissed' : 'resolved',
+      adminNotes: adminNotes || `${action === 'dismiss' ? '✅ Dismissed' : '🔒 Resolved'} by admin`
+    });
+
+    refreshData();
+    setShowReportModal(false);
+    setSelectedReport(null);
+  };
+
+  const handleDeleteReportedPost = (reportId: string) => {
+    const report = reports.find(r => r.id === reportId);
+    if (!report || !report.postId) return;
+
+    if (confirm('Are you sure you want to permanently delete this post?')) {
+      const success = deleteCommunityPost(report.postId, 'admin@vipedge.com'); // Admin override
+      if (success) {
+        updatePostReport(reportId, {
+          status: 'resolved',
+          adminNotes: '🗑️ Post deleted by admin'
+        });
+        refreshData();
+        setShowReportModal(false);
+        setSelectedReport(null);
+      }
+    }
+  };
+
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'new_registration':
@@ -91,6 +138,10 @@ export default function AdminDashboard() {
         return <Key className="w-5 h-5 text-yellow-500" />;
       case 'purchase':
         return <Activity className="w-5 h-5 text-green-500" />;
+      case 'post_report':
+        return <Flag className="w-5 h-5 text-red-500" />;
+      case 'chat_message':
+        return <MessageCircle className="w-5 h-5 text-purple-500" />;
       default:
         return <Bell className="w-5 h-5 text-slate-500" />;
     }
@@ -106,6 +157,25 @@ export default function AdminDashboard() {
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
     return time.toLocaleDateString();
   };
+
+  const getReportStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'text-yellow-400 bg-yellow-500/20';
+      case 'reviewed':
+        return 'text-blue-400 bg-blue-500/20';
+      case 'resolved':
+        return 'text-green-400 bg-green-500/20';
+      case 'dismissed':
+        return 'text-gray-400 bg-gray-500/20';
+      default:
+        return 'text-slate-400 bg-slate-500/20';
+    }
+  };
+
+  const pendingReports = reports.filter(r => r.status === 'pending');
+  const supportChats = chatMessages.filter(m => m.type === 'support' && !m.isAI);
+  const reportChats = chatMessages.filter(m => m.type === 'report' && !m.isAI);
 
   return (
     <div className="space-y-6">
@@ -125,6 +195,34 @@ export default function AdminDashboard() {
                 icon={Users}
               >
                 User Management
+              </Button>
+              <Button
+                variant={activeTab === 'reports' ? 'primary' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveTab('reports')}
+                icon={Flag}
+                className="relative"
+              >
+                Reports
+                {pendingReports.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {pendingReports.length > 9 ? '9+' : pendingReports.length}
+                  </span>
+                )}
+              </Button>
+              <Button
+                variant={activeTab === 'chat' ? 'primary' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveTab('chat')}
+                icon={MessageCircle}
+                className="relative"
+              >
+                Chat Support
+                {(supportChats.length + reportChats.length) > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-purple-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {(supportChats.length + reportChats.length) > 9 ? '9+' : (supportChats.length + reportChats.length)}
+                  </span>
+                )}
               </Button>
               <Button
                 variant={activeTab === 'notifications' ? 'primary' : 'ghost'}
@@ -154,7 +252,7 @@ export default function AdminDashboard() {
       </Card>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         <Card className="bg-gradient-to-br from-blue-500/20 to-blue-600/10">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -195,19 +293,187 @@ export default function AdminDashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-red-300 text-sm font-medium">VIP Members</p>
+                <p className="text-red-300 text-sm font-medium">Pending Reports</p>
+                <p className="text-2xl font-bold text-white">{pendingReports.length}</p>
+              </div>
+              <Flag className="w-8 h-8 text-red-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/10">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-yellow-300 text-sm font-medium">VIP Members</p>
                 <p className="text-2xl font-bold text-white">
                   {users.filter(u => u.vipMembership?.active).length}
                 </p>
               </div>
-              <Shield className="w-8 h-8 text-red-500" />
+              <Shield className="w-8 h-8 text-yellow-500" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'notifications' ? (
+      {activeTab === 'reports' ? (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white">Content Reports</h3>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-slate-400">{pendingReports.length} pending</span>
+                <Button variant="ghost" size="sm" onClick={refreshData}>
+                  Refresh
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {reports.length === 0 ? (
+                <div className="text-center py-8 text-slate-400">
+                  <Flag className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No reports yet.</p>
+                </div>
+              ) : (
+                reports.map((report) => (
+                  <div 
+                    key={report.id}
+                    className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                      report.status === 'pending' 
+                        ? 'bg-red-500/10 border-red-500/30 hover:bg-red-500/20' 
+                        : 'bg-slate-700/20 border-slate-700/50'
+                    }`}
+                    onClick={() => {
+                      setSelectedReport(report);
+                      setShowReportModal(true);
+                    }}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <Flag className="w-5 h-5 text-red-500" />
+                          <h4 className="font-semibold text-white">
+                            Report: {report.reason.replace('_', ' ')}
+                          </h4>
+                          <span className={`px-2 py-1 rounded text-xs font-bold ${getReportStatusColor(report.status)}`}>
+                            {report.status.toUpperCase()}
+                          </span>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <p className="text-slate-400">Reported by:</p>
+                            <p className="text-white">{report.reporterName}</p>
+                          </div>
+                          <div>
+                            <p className="text-slate-400">Post title:</p>
+                            <p className="text-white">{report.post?.title || 'Unknown'}</p>
+                          </div>
+                          <div>
+                            <p className="text-slate-400">Reason:</p>
+                            <p className="text-white capitalize">{report.reason.replace('_', ' ')}</p>
+                          </div>
+                          <div>
+                            <p className="text-slate-400">Reported:</p>
+                            <p className="text-white">{formatNotificationTime(report.timestamp)}</p>
+                          </div>
+                        </div>
+                        
+                        {report.description && (
+                          <div className="mt-3">
+                            <p className="text-slate-400 text-sm">Description:</p>
+                            <p className="text-slate-300 text-sm">{report.description}</p>
+                          </div>
+                        )}
+                        
+                        {report.adminNotes && (
+                          <div className="mt-3 bg-slate-800/50 rounded p-2">
+                            <p className="text-slate-400 text-xs">Admin Notes:</p>
+                            <p className="text-slate-300 text-sm">{report.adminNotes}</p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {report.status === 'pending' && (
+                        <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      ) : activeTab === 'chat' ? (
+        <div className="space-y-6">
+          {/* Support Chats */}
+          <Card>
+            <CardHeader>
+              <h3 className="text-lg font-bold text-white">Support Chats</h3>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {supportChats.length === 0 ? (
+                  <div className="text-center py-8 text-slate-400">
+                    <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No support chats yet.</p>
+                  </div>
+                ) : (
+                  supportChats.slice(0, 10).map((message) => (
+                    <div key={message.id} className="p-4 bg-slate-700/30 rounded-lg">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <MessageCircle className="w-4 h-4 text-blue-500" />
+                            <span className="font-semibold text-white">{message.userName}</span>
+                            <span className="text-xs text-slate-500">{formatNotificationTime(message.timestamp)}</span>
+                          </div>
+                          <p className="text-slate-300 text-sm">{message.message}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Report Chats */}
+          <Card>
+            <CardHeader>
+              <h3 className="text-lg font-bold text-white">Report Chats</h3>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {reportChats.length === 0 ? (
+                  <div className="text-center py-8 text-slate-400">
+                    <Flag className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No report chats yet.</p>
+                  </div>
+                ) : (
+                  reportChats.slice(0, 10).map((message) => (
+                    <div key={message.id} className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <Flag className="w-4 h-4 text-red-500" />
+                            <span className="font-semibold text-white">{message.userName}</span>
+                            <span className="text-xs text-slate-500">{formatNotificationTime(message.timestamp)}</span>
+                          </div>
+                          <p className="text-slate-300 text-sm">{message.message}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      ) : activeTab === 'notifications' ? (
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -475,6 +741,121 @@ export default function AdminDashboard() {
           </Card>
         </div>
       )}
+
+      {/* Report Details Modal */}
+      <Modal
+        isOpen={showReportModal}
+        onClose={() => {
+          setShowReportModal(false);
+          setSelectedReport(null);
+        }}
+        title="Report Details"
+      >
+        {selectedReport && (
+          <div className="space-y-6">
+            {/* Report Info */}
+            <div className="bg-slate-700/30 rounded-lg p-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-slate-400">Reported by:</p>
+                  <p className="text-white font-semibold">{selectedReport.reporterName}</p>
+                </div>
+                <div>
+                  <p className="text-slate-400">Report time:</p>
+                  <p className="text-white">{new Date(selectedReport.timestamp).toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-slate-400">Reason:</p>
+                  <p className="text-white capitalize">{selectedReport.reason.replace('_', ' ')}</p>
+                </div>
+                <div>
+                  <p className="text-slate-400">Status:</p>
+                  <span className={`px-2 py-1 rounded text-xs font-bold ${getReportStatusColor(selectedReport.status)}`}>
+                    {selectedReport.status.toUpperCase()}
+                  </span>
+                </div>
+              </div>
+              
+              {selectedReport.description && (
+                <div className="mt-4">
+                  <p className="text-slate-400 text-sm">Description:</p>
+                  <p className="text-white">{selectedReport.description}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Post Content */}
+            {selectedReport.post && (
+              <div className="bg-slate-700/30 rounded-lg p-4">
+                <h4 className="font-semibold text-white mb-3">Reported Post</h4>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-slate-400 text-sm">Title:</p>
+                    <p className="text-white">{selectedReport.post.title}</p>
+                  </div>
+                  {selectedReport.post.description && (
+                    <div>
+                      <p className="text-slate-400 text-sm">Description:</p>
+                      <p className="text-white">{selectedReport.post.description}</p>
+                    </div>
+                  )}
+                  {selectedReport.post.mediaUrl && (
+                    <div>
+                      <p className="text-slate-400 text-sm">Media:</p>
+                      <img 
+                        src={selectedReport.post.mediaUrl} 
+                        alt="Reported content" 
+                        className="w-full max-w-sm h-auto rounded-lg"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Admin Actions */}
+            {selectedReport.status === 'pending' && (
+              <div className="space-y-4">
+                <h4 className="font-semibold text-white">Admin Actions</h4>
+                <div className="grid grid-cols-1 gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => handleReportAction(selectedReport.id, 'dismiss', 'Report reviewed - no violation found')}
+                    icon={XCircle}
+                    className="w-full justify-start"
+                  >
+                    Dismiss Report (No Violation)
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleReportAction(selectedReport.id, 'resolve', 'Post hidden due to policy violation')}
+                    icon={EyeOff}
+                    className="w-full justify-start bg-yellow-500/10 hover:bg-yellow-500/20 border-yellow-500/30"
+                  >
+                    Hide Post (Policy Violation)
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleDeleteReportedPost(selectedReport.id)}
+                    icon={Trash2}
+                    className="w-full justify-start bg-red-500/10 hover:bg-red-500/20 border-red-500/30"
+                  >
+                    Delete Post (Severe Violation)
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Admin Notes */}
+            {selectedReport.adminNotes && (
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+                <p className="text-blue-300 text-sm font-semibold">Admin Notes:</p>
+                <p className="text-blue-200 text-sm mt-1">{selectedReport.adminNotes}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
 
       {/* Password Reset Modal */}
       <Modal

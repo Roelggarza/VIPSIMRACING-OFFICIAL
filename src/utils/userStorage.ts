@@ -135,6 +135,33 @@ export interface CommunityPost {
   sharedBy: string[];
   createdAt: string;
   isPublic: boolean;
+  reportedBy?: string[]; // Users who reported this post
+  reportCount?: number;
+  isHidden?: boolean; // Admin can hide posts
+}
+
+export interface PostReport {
+  id: string;
+  postId: string;
+  reporterId: string;
+  reporterName: string;
+  reason: 'spam' | 'inappropriate' | 'harassment' | 'copyright' | 'other';
+  description: string;
+  timestamp: string;
+  status: 'pending' | 'reviewed' | 'resolved' | 'dismissed';
+  adminNotes?: string;
+  post?: CommunityPost; // Include post data for context
+}
+
+export interface ChatMessage {
+  id: string;
+  userId: string;
+  userName: string;
+  message: string;
+  timestamp: string;
+  isAI: boolean;
+  type: 'support' | 'report' | 'general';
+  relatedPostId?: string; // If chat is about a specific post
 }
 
 export interface Transaction {
@@ -180,6 +207,8 @@ const STORAGE_KEY_SIMULATORS = "vipSimSimulators_CENTRAL";
 const STORAGE_KEY_SCREENSHOTS = "vipSimScreenshots_CENTRAL";
 const STORAGE_KEY_COMMUNITY_POSTS = "vipSimCommunityPosts_CENTRAL";
 const STORAGE_KEY_ADMIN_NOTIFICATIONS = "vipSimAdminNotifications";
+const STORAGE_KEY_POST_REPORTS = "vipSimPostReports_CENTRAL";
+const STORAGE_KEY_CHAT_MESSAGES = "vipSimChatMessages_CENTRAL";
 
 // Initialize central database with sample data if empty
 function initializeCentralDatabase() {
@@ -470,7 +499,7 @@ export function resetUserPassword(email: string, newPassword: string): boolean {
 // Admin Notifications System
 interface AdminNotification {
   id: string;
-  type: 'new_registration' | 'password_reset' | 'purchase' | 'system';
+  type: 'new_registration' | 'password_reset' | 'purchase' | 'system' | 'post_report' | 'chat_message';
   title: string;
   message: string;
   timestamp: string;
@@ -753,7 +782,10 @@ export function getCommunityPosts(): CommunityPost[] {
         shares: 3,
         sharedBy: [],
         createdAt: new Date(Date.now() - 86400000).toISOString(),
-        isPublic: true
+        isPublic: true,
+        reportedBy: [],
+        reportCount: 0,
+        isHidden: false
       },
       {
         id: '2',
@@ -772,7 +804,10 @@ export function getCommunityPosts(): CommunityPost[] {
         shares: 1,
         sharedBy: [],
         createdAt: new Date(Date.now() - 172800000).toISOString(),
-        isPublic: true
+        isPublic: true,
+        reportedBy: [],
+        reportCount: 0,
+        isHidden: false
       }
     ];
     
@@ -783,7 +818,7 @@ export function getCommunityPosts(): CommunityPost[] {
   return posts;
 }
 
-export function addCommunityPost(post: Omit<CommunityPost, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments' | 'shares' | 'sharedBy'>): CommunityPost {
+export function addCommunityPost(post: Omit<CommunityPost, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments' | 'shares' | 'sharedBy' | 'reportedBy' | 'reportCount' | 'isHidden'>): CommunityPost {
   const posts = getCommunityPosts();
   const newPost: CommunityPost = {
     ...post,
@@ -793,7 +828,10 @@ export function addCommunityPost(post: Omit<CommunityPost, 'id' | 'createdAt' | 
     comments: [],
     shares: 0,
     sharedBy: [],
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    reportedBy: [],
+    reportCount: 0,
+    isHidden: false
   };
   
   posts.unshift(newPost); // Add to beginning for newest first
@@ -808,6 +846,48 @@ export function updateCommunityPost(postId: string, updates: Partial<CommunityPo
   
   if (postIndex !== -1) {
     posts[postIndex] = { ...posts[postIndex], ...updates };
+    localStorage.setItem(STORAGE_KEY_COMMUNITY_POSTS, JSON.stringify(posts));
+  }
+}
+
+export function deleteCommunityPost(postId: string, userId: string): boolean {
+  const posts = getCommunityPosts();
+  const postIndex = posts.findIndex(p => p.id === postId);
+  
+  if (postIndex !== -1) {
+    const post = posts[postIndex];
+    const user = getUsers().find(u => u.email === userId);
+    
+    // Check if user owns the post or is admin
+    if (post.userId === userId || user?.isAdmin) {
+      posts.splice(postIndex, 1);
+      localStorage.setItem(STORAGE_KEY_COMMUNITY_POSTS, JSON.stringify(posts));
+      
+      // Add admin notification if admin deleted someone else's post
+      if (user?.isAdmin && post.userId !== userId) {
+        addAdminNotification({
+          type: 'system',
+          title: 'Post Deleted by Admin',
+          message: `Admin deleted post "${post.title}" by ${post.userId}`,
+          timestamp: new Date().toISOString(),
+          userId: userId,
+          data: { deletedPost: post }
+        });
+      }
+      
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+export function hidePost(postId: string, isHidden: boolean): void {
+  const posts = getCommunityPosts();
+  const post = posts.find(p => p.id === postId);
+  
+  if (post) {
+    post.isHidden = isHidden;
     localStorage.setItem(STORAGE_KEY_COMMUNITY_POSTS, JSON.stringify(posts));
   }
 }
@@ -917,6 +997,189 @@ export function shareCommunityPost(postId: string, userId: string): void {
     post.shares += 1;
     localStorage.setItem(STORAGE_KEY_COMMUNITY_POSTS, JSON.stringify(posts));
   }
+}
+
+// Post Reporting System
+export function reportPost(postId: string, reporterId: string, reason: string, description: string): PostReport {
+  const posts = getCommunityPosts();
+  const post = posts.find(p => p.id === postId);
+  
+  if (!post) {
+    throw new Error('Post not found');
+  }
+  
+  const user = getUsers().find(u => u.email === reporterId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+  
+  // Check if user already reported this post
+  if (post.reportedBy && post.reportedBy.includes(reporterId)) {
+    throw new Error('You have already reported this post');
+  }
+  
+  // Add to post's reported list
+  if (!post.reportedBy) post.reportedBy = [];
+  if (!post.reportCount) post.reportCount = 0;
+  
+  post.reportedBy.push(reporterId);
+  post.reportCount += 1;
+  
+  // Create report record
+  const report: PostReport = {
+    id: Date.now().toString(),
+    postId: postId,
+    reporterId: reporterId,
+    reporterName: user.fullName,
+    reason: reason as any,
+    description: description,
+    timestamp: new Date().toISOString(),
+    status: 'pending',
+    post: post
+  };
+  
+  // Save report
+  const reports = getPostReports();
+  reports.unshift(report);
+  localStorage.setItem(STORAGE_KEY_POST_REPORTS, JSON.stringify(reports));
+  
+  // Update post
+  localStorage.setItem(STORAGE_KEY_COMMUNITY_POSTS, JSON.stringify(posts));
+  
+  // Add admin notification
+  addAdminNotification({
+    type: 'post_report',
+    title: 'New Post Report',
+    message: `${user.fullName} reported a post for ${reason}`,
+    timestamp: new Date().toISOString(),
+    userId: reporterId,
+    data: { report, post }
+  });
+  
+  return report;
+}
+
+export function getPostReports(): PostReport[] {
+  const reportsStr = localStorage.getItem(STORAGE_KEY_POST_REPORTS);
+  return reportsStr ? JSON.parse(reportsStr) : [];
+}
+
+export function updatePostReport(reportId: string, updates: Partial<PostReport>): void {
+  const reports = getPostReports();
+  const reportIndex = reports.findIndex(r => r.id === reportId);
+  
+  if (reportIndex !== -1) {
+    reports[reportIndex] = { ...reports[reportIndex], ...updates };
+    localStorage.setItem(STORAGE_KEY_POST_REPORTS, JSON.stringify(reports));
+  }
+}
+
+// AI Chat Assistant System
+export function getChatMessages(): ChatMessage[] {
+  const messagesStr = localStorage.getItem(STORAGE_KEY_CHAT_MESSAGES);
+  return messagesStr ? JSON.parse(messagesStr) : [];
+}
+
+export function addChatMessage(message: Omit<ChatMessage, 'id' | 'timestamp'>): ChatMessage {
+  const messages = getChatMessages();
+  const newMessage: ChatMessage = {
+    ...message,
+    id: Date.now().toString(),
+    timestamp: new Date().toISOString()
+  };
+  
+  messages.push(newMessage);
+  
+  // Keep only last 1000 messages
+  if (messages.length > 1000) {
+    messages.splice(0, messages.length - 1000);
+  }
+  
+  localStorage.setItem(STORAGE_KEY_CHAT_MESSAGES, JSON.stringify(messages));
+  
+  // Add admin notification for non-AI messages
+  if (!message.isAI && message.type !== 'general') {
+    addAdminNotification({
+      type: 'chat_message',
+      title: `New ${message.type} chat`,
+      message: `${message.userName}: ${message.message.substring(0, 50)}${message.message.length > 50 ? '...' : ''}`,
+      timestamp: new Date().toISOString(),
+      userId: message.userId,
+      data: { chatMessage: newMessage }
+    });
+  }
+  
+  return newMessage;
+}
+
+export function generateAIResponse(userMessage: string, messageType: 'support' | 'report' | 'general', relatedPostId?: string): string {
+  const message = userMessage.toLowerCase();
+  
+  // FAQ responses
+  if (message.includes('hours') || message.includes('open')) {
+    return "VIP Edge Racing is open Monday-Friday 10 AM - 10 PM, Saturday-Sunday 9 AM - 11 PM. We're here to provide the ultimate racing experience!";
+  }
+  
+  if (message.includes('price') || message.includes('cost') || message.includes('package')) {
+    return "Our racing packages start at $30 for TrackPass Basic (30 minutes, 1 driver). We also offer TrackPass Plus ($45), Pro ($60), and Elite ($99.99). VIP membership is $49.99/month with 25% discount on all sessions plus 30 minutes included!";
+  }
+  
+  if (message.includes('book') || message.includes('reserve') || message.includes('schedule')) {
+    return "You can book sessions directly through your dashboard! Purchase racing credits and either book immediately or schedule for later. VIP members get priority booking access.";
+  }
+  
+  if (message.includes('credit') || message.includes('minute')) {
+    return "Racing credits are measured in minutes. Each package includes racing time: Basic/Plus/Pro/Elite all include 30 minutes. You can view your current credits in your dashboard.";
+  }
+  
+  if (message.includes('vip') || message.includes('membership')) {
+    return "VIP membership ($49.99/month) includes 25% discount on all sessions, 30 minutes of racing credits monthly, 4 guest passes, priority booking, and exclusive events. It's our best value!";
+  }
+  
+  if (message.includes('simulator') || message.includes('equipment')) {
+    return "We have 8 professional racing simulators with realistic physics, force feedback steering, and triple monitor setups. Games include Assetto Corsa, F1 23, Gran Turismo 7, iRacing, and more!";
+  }
+  
+  if (message.includes('age') || message.includes('old') || message.includes('young')) {
+    return "Drivers must be at least 13 years old. Minors (under 18) need parental consent and must have an emergency contact on file. We welcome racers of all skill levels!";
+  }
+  
+  if (message.includes('cancel') || message.includes('refund')) {
+    return "Sessions can be cancelled up to 2 hours before your scheduled time for a full credit refund. For package refunds, please contact our admin team through this chat.";
+  }
+  
+  if (message.includes('help') || message.includes('support')) {
+    return "I'm here to help! I can answer questions about pricing, booking, VIP membership, simulator equipment, hours, and policies. What would you like to know?";
+  }
+  
+  // Report-specific responses
+  if (messageType === 'report') {
+    if (message.includes('inappropriate') || message.includes('offensive')) {
+      return "Thank you for reporting inappropriate content. I've forwarded this to our moderation team. They'll review the post within 24 hours and take appropriate action. Is there anything specific about the content that concerns you?";
+    }
+    
+    if (message.includes('spam')) {
+      return "Thanks for reporting spam content. Our team will review this immediately. Spam posts are typically removed within a few hours. We appreciate you helping keep our community clean!";
+    }
+    
+    if (message.includes('harassment') || message.includes('bullying')) {
+      return "We take harassment very seriously. This report has been escalated to our admin team for immediate review. If you feel unsafe, please don't hesitate to contact us directly. We're committed to maintaining a respectful racing community.";
+    }
+    
+    return "Thank you for your report. Our moderation team has been notified and will review the content within 24 hours. We appreciate you helping maintain our community standards. Is there anything else I can help you with?";
+  }
+  
+  // General responses
+  if (message.includes('thank')) {
+    return "You're welcome! Happy to help. Feel free to ask if you have any other questions about VIP Edge Racing!";
+  }
+  
+  if (message.includes('hello') || message.includes('hi')) {
+    return "Hello! Welcome to VIP Edge Racing support. I'm here to help with any questions about our racing simulators, packages, booking, or policies. What can I assist you with today?";
+  }
+  
+  // Default response
+  return "I understand you're asking about that. Let me connect you with our admin team who can provide more detailed assistance. In the meantime, feel free to ask about our racing packages, VIP membership, booking process, or facility hours!";
 }
 
 // Screenshot Management (Legacy - keeping for backward compatibility)
