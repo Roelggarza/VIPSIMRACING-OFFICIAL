@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Car, Flag, Trophy, QrCode } from 'lucide-react';
+import { Car, Flag, Trophy, QrCode, Info } from 'lucide-react';
 import QRCode from 'qrcode.react';
 import Button from '../ui/Button';
 import Card, { CardContent } from '../ui/Card';
@@ -33,7 +33,7 @@ export default function Landing() {
           </p>
         </div>
 
-        {/* Action Buttons */}
+        {/* Navigation */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Button 
             size="lg" 
@@ -51,6 +51,16 @@ export default function Landing() {
             className="w-full sm:w-auto"
           >
             MEMBER LOGIN
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            size="lg"
+            onClick={() => navigate("/about")}
+            icon={Info}
+            className="w-full sm:w-auto"
+          >
+            ABOUT US
           </Button>
         </div>
 
@@ -105,6 +115,14 @@ export default function Landing() {
             <h3 className="text-xl font-semibold text-white">Training Programs</h3>
             <p className="text-slate-400">Improve your skills with professional coaching</p>
           </div>
+        </div>
+
+        {/* Contact Info Footer */}
+        <div className="pt-8 border-t border-slate-700/50">
+          <p className="text-slate-400 text-sm">
+            Contact us: <a href="tel:8324904304" className="text-red-400 hover:text-red-300 transition-colors">(832) 490-4304</a> | 
+            <a href="mailto:roel@vipsimracing.com" className="text-red-400 hover:text-red-300 transition-colors ml-1">roel@vipsimracing.com</a>
+          </p>
         </div>
       </div>
     </div>
