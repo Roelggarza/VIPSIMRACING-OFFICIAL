@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Image, Heart, MessageCircle, Share2, User, Crown, Calendar, Trophy, Video, Play, Send, Upload, Tag, Plus, Type, Camera, X, Reply, ThumbsUp, MoreHorizontal } from 'lucide-react';
+import { Globe, Image, Heart, MessageCircle, Share2, User, Crown, Calendar, Trophy, Video, Play, Send, Upload, Tag, Plus, Type, Camera, X, Reply, ThumbsUp, MoreHorizontal, Facebook, Twitter, Instagram, ExternalLink } from 'lucide-react';
 import { getUsers, User as UserType, getCommunityPosts, CommunityPost, likeCommunityPost, addCommentToCommunityPost, addReplyToComment, likeComment, shareCommunityPost, addCommunityPost, Comment } from '../../utils/userStorage';
 import Card, { CardHeader, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
@@ -18,6 +18,8 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
   const [replyTexts, setReplyTexts] = useState<{[key: string]: string}>({});
   const [showReplies, setShowReplies] = useState<{[key: string]: boolean}>({});
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [selectedPostForShare, setSelectedPostForShare] = useState<CommunityPost | null>(null);
   const [newPost, setNewPost] = useState({
     type: 'screenshot' as 'screenshot' | 'video' | 'lap_record' | 'highlight',
     title: '',
@@ -95,10 +97,94 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
     refreshPosts();
   };
 
-  const handleShare = (postId: string) => {
+  const handleShare = (post: CommunityPost) => {
+    setSelectedPostForShare(post);
+    setShowShareModal(true);
+  };
+
+  const handleInternalShare = (postId: string) => {
     shareCommunityPost(postId, currentUser.email);
     refreshPosts();
-    alert('Post shared!');
+    setShowShareModal(false);
+    alert('Post shared to your timeline!');
+  };
+
+  const generateShareUrl = (post: CommunityPost) => {
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/community/post/${post.id}`;
+  };
+
+  const generateShareText = (post: CommunityPost) => {
+    const user = getUserByEmail(post.userId);
+    let text = `Check out this amazing racing post by ${user?.fullName || 'a racer'}!\n\n`;
+    text += `"${post.title}"\n`;
+    if (post.description) {
+      text += `${post.description.substring(0, 100)}${post.description.length > 100 ? '...' : ''}\n`;
+    }
+    if (post.track) text += `🏁 Track: ${post.track}\n`;
+    if (post.lapTime) text += `⏱️ Lap Time: ${post.lapTime}\n`;
+    if (post.achievement) text += `🏆 Achievement: ${post.achievement}\n`;
+    text += `\n#VIPEdgeRacing #SimRacing`;
+    return text;
+  };
+
+  const shareToFacebook = (post: CommunityPost) => {
+    const url = generateShareUrl(post);
+    const text = generateShareText(post);
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`;
+    window.open(facebookUrl, '_blank', 'width=600,height=400');
+    handleInternalShare(post.id);
+  };
+
+  const shareToTwitter = (post: CommunityPost) => {
+    const url = generateShareUrl(post);
+    const text = generateShareText(post);
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+    window.open(twitterUrl, '_blank', 'width=600,height=400');
+    handleInternalShare(post.id);
+  };
+
+  const shareToInstagram = (post: CommunityPost) => {
+    // Instagram doesn't support direct URL sharing, so we'll copy the content to clipboard
+    const text = generateShareText(post);
+    const url = generateShareUrl(post);
+    const fullText = `${text}\n\nView full post: ${url}`;
+    
+    navigator.clipboard.writeText(fullText).then(() => {
+      alert('Post content copied to clipboard! You can now paste it in Instagram.');
+      // Open Instagram in a new tab
+      window.open('https://www.instagram.com/', '_blank');
+      handleInternalShare(post.id);
+    }).catch(() => {
+      alert('Unable to copy to clipboard. Please manually copy the post content.');
+    });
+  };
+
+  const shareViaWebAPI = async (post: CommunityPost) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: post.title,
+          text: generateShareText(post),
+          url: generateShareUrl(post)
+        });
+        handleInternalShare(post.id);
+      } catch (error) {
+        console.log('Share cancelled or failed');
+      }
+    } else {
+      // Fallback: copy to clipboard
+      const text = generateShareText(post);
+      const url = generateShareUrl(post);
+      const fullText = `${text}\n\nView full post: ${url}`;
+      
+      navigator.clipboard.writeText(fullText).then(() => {
+        alert('Post content copied to clipboard!');
+        handleInternalShare(post.id);
+      }).catch(() => {
+        alert('Unable to copy to clipboard.');
+      });
+    }
   };
 
   const toggleReplies = (commentId: string) => {
@@ -609,7 +695,7 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
                           size="sm" 
                           icon={Share2}
                           className={isShared ? 'text-blue-500' : ''}
-                          onClick={() => handleShare(post.id)}
+                          onClick={() => handleShare(post)}
                         >
                           {post.shares || 0}
                         </Button>
@@ -667,6 +753,102 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
           })
         )}
       </div>
+
+      {/* Share Modal */}
+      <Modal
+        isOpen={showShareModal}
+        onClose={() => {
+          setShowShareModal(false);
+          setSelectedPostForShare(null);
+        }}
+        title="Share Post"
+      >
+        {selectedPostForShare && (
+          <div className="space-y-4">
+            {/* Post Preview */}
+            <div className="bg-slate-700/30 rounded-lg p-4">
+              <h4 className="font-semibold text-white mb-2">{selectedPostForShare.title}</h4>
+              {selectedPostForShare.description && (
+                <p className="text-slate-300 text-sm mb-2">{selectedPostForShare.description.substring(0, 100)}...</p>
+              )}
+              <div className="flex items-center space-x-2 text-xs text-slate-400">
+                {selectedPostForShare.track && <span>🏁 {selectedPostForShare.track}</span>}
+                {selectedPostForShare.lapTime && <span>⏱️ {selectedPostForShare.lapTime}</span>}
+              </div>
+            </div>
+
+            {/* Share Options */}
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold text-white">Share to Social Media</h3>
+              
+              <div className="grid grid-cols-1 gap-3">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-blue-600/10 hover:bg-blue-600/20 border-blue-600/30"
+                  onClick={() => shareToFacebook(selectedPostForShare)}
+                >
+                  <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center mr-3">
+                    <span className="text-white text-xs font-bold">f</span>
+                  </div>
+                  Share to Facebook
+                  <ExternalLink className="w-4 h-4 ml-auto" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-sky-500/10 hover:bg-sky-500/20 border-sky-500/30"
+                  onClick={() => shareToTwitter(selectedPostForShare)}
+                >
+                  <div className="w-6 h-6 bg-sky-500 rounded flex items-center justify-center mr-3">
+                    <span className="text-white text-xs font-bold">𝕏</span>
+                  </div>
+                  Share to X (Twitter)
+                  <ExternalLink className="w-4 h-4 ml-auto" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="w-full justify-start bg-gradient-to-r from-purple-500/10 to-pink-500/10 hover:from-purple-500/20 hover:to-pink-500/20 border-purple-500/30"
+                  onClick={() => shareToInstagram(selectedPostForShare)}
+                >
+                  <div className="w-6 h-6 bg-gradient-to-r from-purple-500 to-pink-500 rounded flex items-center justify-center mr-3">
+                    <span className="text-white text-xs font-bold">📷</span>
+                  </div>
+                  Copy for Instagram
+                  <ExternalLink className="w-4 h-4 ml-auto" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => shareViaWebAPI(selectedPostForShare)}
+                >
+                  <Share2 className="w-5 h-5 mr-3" />
+                  {navigator.share ? 'Share via Device' : 'Copy Link'}
+                </Button>
+              </div>
+
+              <div className="border-t border-slate-700 pt-3">
+                <h4 className="text-sm font-semibold text-white mb-2">Share within VIP Edge</h4>
+                <Button
+                  variant="primary"
+                  className="w-full"
+                  onClick={() => handleInternalShare(selectedPostForShare.id)}
+                >
+                  Share to Your Timeline
+                </Button>
+              </div>
+            </div>
+
+            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+              <p className="text-sm text-blue-300">
+                <strong>Note:</strong> External sharing opens the respective social media platform. 
+                Instagram requires manual posting as they don't support direct URL sharing.
+              </p>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {/* Create Post Modal - Facebook Style */}
       <Modal
