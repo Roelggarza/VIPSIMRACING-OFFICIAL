@@ -45,13 +45,15 @@ export default function ImageUpload({ currentImage, onImageChange, className = '
     reader.readAsDataURL(file);
   };
 
-  const triggerFileSelect = () => {
+  const triggerFileSelect = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent form submission
+    e.stopPropagation(); // Stop event bubbling
     fileInputRef.current?.click();
   };
 
   const removeImage = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    e.preventDefault(); // Prevent form submission
+    e.stopPropagation(); // Stop event bubbling
     setPreviewImage(null);
     onImageChange('');
     if (fileInputRef.current) {
@@ -84,16 +86,22 @@ export default function ImageUpload({ currentImage, onImageChange, className = '
           
           {/* Upload Button */}
           <button
+            type="button" // Explicitly set button type
             onClick={triggerFileSelect}
             className="absolute bottom-2 right-2 w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors shadow-lg"
             disabled={isUploading}
           >
-            <Upload className="w-5 h-5" />
+            {isUploading ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              <Upload className="w-5 h-5" />
+            )}
           </button>
           
           {/* Remove Button */}
           {displayImage && (
             <button
+              type="button" // Explicitly set button type
               onClick={removeImage}
               className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors z-10"
             >
@@ -136,6 +144,7 @@ export default function ImageUpload({ currentImage, onImageChange, className = '
         
         {/* Upload Button - Bottom Right Corner */}
         <button
+          type="button" // Explicitly set button type to prevent form submission
           onClick={triggerFileSelect}
           disabled={isUploading}
           className="absolute bottom-0 right-0 w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors shadow-lg border-2 border-slate-800"
@@ -150,6 +159,7 @@ export default function ImageUpload({ currentImage, onImageChange, className = '
         {/* Remove Button - Top Right Corner */}
         {displayImage && (
           <button
+            type="button" // Explicitly set button type to prevent form submission
             onClick={removeImage}
             className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors z-10 border-2 border-slate-800"
           >
