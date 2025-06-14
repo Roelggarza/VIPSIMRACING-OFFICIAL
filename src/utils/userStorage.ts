@@ -4,6 +4,9 @@ export interface User {
   email: string;
   password: string;
   phone: string;
+  address: string;
+  state: string;
+  zipCode: string;
   emergencyName: string;
   emergencyPhone: string;
   registrationDate: string;
@@ -64,17 +67,6 @@ export interface User {
   };
 }
 
-export interface Transaction {
-  id: string;
-  userId: string;
-  type: 'purchase' | 'usage' | 'refund';
-  packageName: string;
-  amount: number; // dollars spent
-  credits: number; // minutes added/used
-  date: string;
-  description: string;
-}
-
 export interface Comment {
   id: string;
   userId: string;
@@ -107,6 +99,17 @@ export interface CommunityPost {
   sharedBy: string[];
   createdAt: string;
   isPublic: boolean;
+}
+
+export interface Transaction {
+  id: string;
+  userId: string;
+  type: 'purchase' | 'usage' | 'refund';
+  packageName: string;
+  amount: number; // dollars spent
+  credits: number; // minutes added/used
+  date: string;
+  description: string;
 }
 
 export interface Screenshot {
@@ -147,6 +150,10 @@ export function getUsers(): User[] {
   // Initialize default stats and admin user if needed
   return users.map((user: User, index: number) => ({
     ...user,
+    // Ensure address fields exist for existing users
+    address: user.address || '',
+    state: user.state || '',
+    zipCode: user.zipCode || '',
     stats: user.stats || {
       totalRaces: Math.floor(Math.random() * 50),
       bestLapTime: `1:${30 + Math.floor(Math.random() * 30)}.${Math.floor(Math.random() * 99).toString().padStart(2, '0')}`,
@@ -216,6 +223,9 @@ export function findUser(email: string, password: string): User | undefined {
     user.racingCredits = user.racingCredits || 0;
     user.accountBalance = user.accountBalance || 0;
     user.socialAccounts = user.socialAccounts || {};
+    user.address = user.address || '';
+    user.state = user.state || '';
+    user.zipCode = user.zipCode || '';
     updateUser(user);
   }
   
@@ -239,6 +249,9 @@ export function getSession(): User | null {
     user.racingCredits = user.racingCredits || 0;
     user.accountBalance = user.accountBalance || 0;
     user.socialAccounts = user.socialAccounts || {};
+    user.address = user.address || '';
+    user.state = user.state || '';
+    user.zipCode = user.zipCode || '';
   }
   
   return user;

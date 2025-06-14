@@ -61,6 +61,9 @@ export default function Dashboard() {
         email: sessionUser.email || '',
         password: sessionUser.password || '',
         phone: sessionUser.phone || '',
+        address: sessionUser.address || '',
+        state: sessionUser.state || '',
+        zipCode: sessionUser.zipCode || '',
         emergencyName: sessionUser.emergencyName || '',
         emergencyPhone: sessionUser.emergencyPhone || '',
         registrationDate: sessionUser.registrationDate || new Date().toISOString(),
@@ -458,6 +461,12 @@ export default function Dashboard() {
                     <div className="flex justify-between">
                       <span className="text-slate-400">Phone:</span>
                       <span className="text-white">{user.phone}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Address:</span>
+                      <span className="text-white text-right text-sm">
+                        {user.address ? `${user.address}, ${user.state} ${user.zipCode}` : 'Not provided'}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">Emergency Contact:</span>

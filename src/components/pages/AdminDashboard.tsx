@@ -200,6 +200,12 @@ export default function AdminDashboard() {
                         <p className="text-blue-400 font-semibold">${(user.accountBalance || 0).toFixed(2)}</p>
                       </div>
                       <div>
+                        <p className="text-slate-400">Address</p>
+                        <p className="text-slate-300 text-xs">
+                          {user.address ? `${user.address}, ${user.state} ${user.zipCode}` : 'Not provided'}
+                        </p>
+                      </div>
+                      <div>
                         <p className="text-slate-400">Password</p>
                         <p className="text-yellow-400 font-mono text-xs bg-slate-800/50 px-2 py-1 rounded">
                           {user.password}
@@ -407,6 +413,12 @@ export default function AdminDashboard() {
               <div>
                 <label className="block text-sm font-medium text-slate-300">Date of Birth</label>
                 <p className="text-white">{new Date(selectedUser.dob).toLocaleDateString()}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300">Address</label>
+                <p className="text-white">
+                  {selectedUser.address ? `${selectedUser.address}, ${selectedUser.state} ${selectedUser.zipCode}` : 'Not provided'}
+                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300">Emergency Contact</label>

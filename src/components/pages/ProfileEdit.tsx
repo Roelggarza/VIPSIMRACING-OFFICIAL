@@ -14,6 +14,9 @@ interface ProfileEditProps {
 interface FormData {
   fullName: string;
   phone: string;
+  address: string;
+  state: string;
+  zipCode: string;
   emergencyName: string;
   emergencyPhone: string;
   profilePicture: string;
@@ -61,6 +64,9 @@ export default function ProfileEdit({ user, onSave, onCancel }: ProfileEditProps
   const [form, setForm] = useState<FormData>({
     fullName: user.fullName,
     phone: user.phone,
+    address: user.address || '',
+    state: user.state || '',
+    zipCode: user.zipCode || '',
     emergencyName: user.emergencyName,
     emergencyPhone: user.emergencyPhone,
     profilePicture: user.profilePicture || '',
@@ -160,6 +166,9 @@ export default function ProfileEdit({ user, onSave, onCancel }: ProfileEditProps
 
     if (!form.fullName.trim()) newErrors.fullName = 'Full name is required';
     if (!form.phone.trim()) newErrors.phone = 'Phone number is required';
+    if (!form.address.trim()) newErrors.address = 'Address is required';
+    if (!form.state.trim()) newErrors.state = 'State is required';
+    if (!form.zipCode.trim()) newErrors.zipCode = 'ZIP code is required';
     if (!form.emergencyName.trim()) newErrors.emergencyName = 'Emergency contact name is required';
     if (!form.emergencyPhone.trim()) newErrors.emergencyPhone = 'Emergency contact phone is required';
     if (form.bio.length > 200) newErrors.bio = 'Bio must be 200 characters or less';
@@ -189,6 +198,9 @@ export default function ProfileEdit({ user, onSave, onCancel }: ProfileEditProps
         ...user,
         fullName: form.fullName,
         phone: form.phone,
+        address: form.address,
+        state: form.state,
+        zipCode: form.zipCode,
         emergencyName: form.emergencyName,
         emergencyPhone: form.emergencyPhone,
         profilePicture: form.profilePicture,
@@ -333,6 +345,48 @@ export default function ProfileEdit({ user, onSave, onCancel }: ProfileEditProps
                   onChange={handleChange}
                   error={errors.phone}
                   autoComplete="tel"
+                />
+              </div>
+            </div>
+
+            {/* Address Information */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white border-b border-slate-700 pb-2">
+                Address Information
+              </h3>
+              
+              <Input
+                name="address"
+                type="text"
+                label="Street Address"
+                placeholder="Enter your street address"
+                value={form.address}
+                onChange={handleChange}
+                error={errors.address}
+                autoComplete="street-address"
+              />
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                <Input
+                  name="state"
+                  type="text"
+                  label="State"
+                  placeholder="Enter your state"
+                  value={form.state}
+                  onChange={handleChange}
+                  error={errors.state}
+                  autoComplete="address-level1"
+                />
+
+                <Input
+                  name="zipCode"
+                  type="text"
+                  label="ZIP Code"
+                  placeholder="Enter your ZIP code"
+                  value={form.zipCode}
+                  onChange={handleChange}
+                  error={errors.zipCode}
+                  autoComplete="postal-code"
                 />
               </div>
             </div>

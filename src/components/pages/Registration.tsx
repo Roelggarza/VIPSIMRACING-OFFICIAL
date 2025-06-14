@@ -13,6 +13,9 @@ interface FormData {
   email: string;
   password: string;
   phone: string;
+  address: string;
+  state: string;
+  zipCode: string;
   emergencyName: string;
   emergencyPhone: string;
 }
@@ -28,6 +31,9 @@ export default function Registration() {
     email: '',
     password: '',
     phone: '',
+    address: '',
+    state: '',
+    zipCode: '',
     emergencyName: '',
     emergencyPhone: '',
   });
@@ -68,6 +74,9 @@ export default function Registration() {
     }
     
     if (!form.phone.trim()) newErrors.phone = 'Phone number is required';
+    if (!form.address.trim()) newErrors.address = 'Address is required';
+    if (!form.state.trim()) newErrors.state = 'State is required';
+    if (!form.zipCode.trim()) newErrors.zipCode = 'ZIP code is required';
     if (!form.emergencyName.trim()) newErrors.emergencyName = 'Emergency contact name is required';
     if (!form.emergencyPhone.trim()) newErrors.emergencyPhone = 'Emergency contact phone is required';
 
@@ -288,6 +297,45 @@ export default function Registration() {
                 error={errors.phone}
                 autoComplete="tel"
               />
+
+              {/* Address Section */}
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold text-white">Address Information</h3>
+                <Input
+                  name="address"
+                  type="text"
+                  label="Street Address"
+                  placeholder="Enter your street address"
+                  value={form.address}
+                  onChange={handleChange}
+                  error={errors.address}
+                  autoComplete="street-address"
+                />
+                
+                <div className="grid md:grid-cols-2 gap-4">
+                  <Input
+                    name="state"
+                    type="text"
+                    label="State"
+                    placeholder="Enter your state"
+                    value={form.state}
+                    onChange={handleChange}
+                    error={errors.state}
+                    autoComplete="address-level1"
+                  />
+
+                  <Input
+                    name="zipCode"
+                    type="text"
+                    label="ZIP Code"
+                    placeholder="Enter your ZIP code"
+                    value={form.zipCode}
+                    onChange={handleChange}
+                    error={errors.zipCode}
+                    autoComplete="postal-code"
+                  />
+                </div>
+              </div>
 
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold text-white">Emergency Contact</h3>
