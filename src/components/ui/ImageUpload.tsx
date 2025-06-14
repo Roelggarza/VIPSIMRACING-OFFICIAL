@@ -45,11 +45,14 @@ export default function ImageUpload({ currentImage, onImageChange, className = '
     reader.readAsDataURL(file);
   };
 
-  const triggerFileSelect = () => {
+  const triggerFileSelect = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     fileInputRef.current?.click();
   };
 
   const removeImage = (e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     setPreviewImage(null);
     onImageChange('');
@@ -64,7 +67,10 @@ export default function ImageUpload({ currentImage, onImageChange, className = '
     return (
       <div className={`space-y-4 ${className}`}>
         <div className="relative">
-          <div className="h-32 bg-gradient-to-r from-slate-700 via-slate-600 to-red-900/50 rounded-lg overflow-hidden group cursor-pointer" onClick={triggerFileSelect}>
+          <div 
+            className="h-32 bg-gradient-to-r from-slate-700 via-slate-600 to-red-900/50 rounded-lg overflow-hidden group cursor-pointer" 
+            onClick={triggerFileSelect}
+          >
             {displayImage ? (
               <img 
                 src={displayImage} 
@@ -92,7 +98,7 @@ export default function ImageUpload({ currentImage, onImageChange, className = '
           {displayImage && (
             <button
               onClick={removeImage}
-              className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
+              className="absolute top-2 right-2 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors z-10"
             >
               <X className="w-4 h-4" />
             </button>
@@ -145,7 +151,7 @@ export default function ImageUpload({ currentImage, onImageChange, className = '
         {displayImage && (
           <button
             onClick={removeImage}
-            className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
+            className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors z-10"
           >
             <X className="w-4 h-4" />
           </button>
