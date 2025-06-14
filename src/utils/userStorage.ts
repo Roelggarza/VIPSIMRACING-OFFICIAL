@@ -21,6 +21,34 @@ export interface User {
   currentSimulator?: number | null; // 1-8 for simulator number
   isStreaming?: boolean;
   currentGame?: string;
+  status?: 'online' | 'away' | 'busy' | 'offline';
+  statusMessage?: string;
+  spotifyData?: {
+    connected: boolean;
+    currentTrack?: {
+      name: string;
+      artist: string;
+      album: string;
+      imageUrl: string;
+      isPlaying: boolean;
+      duration: number;
+      progress: number;
+    };
+    recentTracks?: Array<{
+      name: string;
+      artist: string;
+      album: string;
+      imageUrl: string;
+      playedAt: string;
+    }>;
+    topTracks?: Array<{
+      name: string;
+      artist: string;
+      album: string;
+      imageUrl: string;
+      popularity: number;
+    }>;
+  };
   socialAccounts?: {
     steam?: {
       username: string;
@@ -50,6 +78,11 @@ export interface User {
     personalWebsite?: {
       url: string;
       title: string;
+      connected: boolean;
+    };
+    spotify?: {
+      username: string;
+      profileUrl: string;
       connected: boolean;
     };
   };
@@ -154,6 +187,9 @@ export function getUsers(): User[] {
     address: user.address || '',
     state: user.state || '',
     zipCode: user.zipCode || '',
+    status: user.status || (Math.random() > 0.7 ? 'online' : Math.random() > 0.5 ? 'away' : 'offline'),
+    statusMessage: user.statusMessage || getRandomStatusMessage(),
+    spotifyData: user.spotifyData || generateRandomSpotifyData(),
     stats: user.stats || {
       totalRaces: Math.floor(Math.random() * 50),
       bestLapTime: `1:${30 + Math.floor(Math.random() * 30)}.${Math.floor(Math.random() * 99).toString().padStart(2, '0')}`,
@@ -170,6 +206,59 @@ export function getUsers(): User[] {
   }));
 }
 
+function getRandomStatusMessage(): string {
+  const messages = [
+    'Racing at Silverstone 🏁',
+    'Setting new lap records',
+    'In the zone',
+    'Practicing for the championship',
+    'Tuning my setup',
+    'Ready to race!',
+    'Chasing the perfect lap',
+    'Living life in the fast lane',
+    'Born to race',
+    'Speed is life'
+  ];
+  return messages[Math.floor(Math.random() * messages.length)];
+}
+
+function generateRandomSpotifyData() {
+  const tracks = [
+    { name: 'Thunder', artist: 'Imagine Dragons', album: 'Evolve', imageUrl: 'https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg?auto=compress&cs=tinysrgb&w=300' },
+    { name: 'Believer', artist: 'Imagine Dragons', album: 'Evolve', imageUrl: 'https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg?auto=compress&cs=tinysrgb&w=300' },
+    { name: 'Radioactive', artist: 'Imagine Dragons', album: 'Night Visions', imageUrl: 'https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg?auto=compress&cs=tinysrgb&w=300' },
+    { name: 'Warriors', artist: 'Imagine Dragons', album: 'Smoke + Mirrors', imageUrl: 'https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg?auto=compress&cs=tinysrgb&w=300' },
+    { name: 'Enemy', artist: 'Imagine Dragons', album: 'Mercury - Act 1', imageUrl: 'https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg?auto=compress&cs=tinysrgb&w=300' },
+    { name: 'Bones', artist: 'Imagine Dragons', album: 'Mercury - Acts 1 & 2', imageUrl: 'https://images.pexels.com/photos/167636/pexels-photo-167636.jpeg?auto=compress&cs=tinysrgb&w=300' }
+  ];
+
+  const isConnected = Math.random() > 0.6;
+  if (!isConnected) {
+    return { connected: false };
+  }
+
+  const currentTrack = tracks[Math.floor(Math.random() * tracks.length)];
+  const isPlaying = Math.random() > 0.3;
+  
+  return {
+    connected: true,
+    currentTrack: {
+      ...currentTrack,
+      isPlaying,
+      duration: 180000 + Math.floor(Math.random() * 120000), // 3-5 minutes
+      progress: Math.floor(Math.random() * 120000) // Random progress
+    },
+    recentTracks: tracks.slice(0, 3).map(track => ({
+      ...track,
+      playedAt: new Date(Date.now() - Math.random() * 86400000).toISOString()
+    })),
+    topTracks: tracks.slice(0, 5).map(track => ({
+      ...track,
+      popularity: 60 + Math.floor(Math.random() * 40)
+    }))
+  };
+}
+
 function getRandomGame(): string {
   const games = ['Assetto Corsa', 'Forza Horizon 5', 'Gran Turismo 7', 'F1 23', 'iRacing', 'rFactor 2'];
   return games[Math.floor(Math.random() * games.length)];
@@ -183,6 +272,9 @@ export function saveUser(user: Omit<User, 'registrationDate' | 'racingCredits' |
     racingCredits: 0,
     accountBalance: 0,
     isAdmin: users.length === 0, // First user is admin
+    status: 'online',
+    statusMessage: 'New to VIP Edge Racing!',
+    spotifyData: { connected: false },
     socialAccounts: {},
     stats: {
       totalRaces: 0,
@@ -226,6 +318,8 @@ export function findUser(email: string, password: string): User | undefined {
     user.address = user.address || '';
     user.state = user.state || '';
     user.zipCode = user.zipCode || '';
+    user.status = user.status || 'online';
+    user.spotifyData = user.spotifyData || { connected: false };
     updateUser(user);
   }
   
@@ -252,6 +346,8 @@ export function getSession(): User | null {
     user.address = user.address || '';
     user.state = user.state || '';
     user.zipCode = user.zipCode || '';
+    user.status = user.status || 'online';
+    user.spotifyData = user.spotifyData || { connected: false };
   }
   
   return user;
@@ -272,6 +368,70 @@ export function resetUserPassword(email: string, newPassword: string): boolean {
     return true;
   }
   return false;
+}
+
+// Spotify Integration Functions
+export function connectSpotify(userId: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    // Simulate Spotify OAuth flow
+    setTimeout(() => {
+      const users = getUsers();
+      const userIndex = users.findIndex(u => u.email.toLowerCase() === userId.toLowerCase());
+      
+      if (userIndex !== -1) {
+        users[userIndex].spotifyData = generateRandomSpotifyData();
+        users[userIndex].socialAccounts = {
+          ...users[userIndex].socialAccounts,
+          spotify: {
+            username: 'user_' + Math.random().toString(36).substr(2, 9),
+            profileUrl: 'https://open.spotify.com/user/example',
+            connected: true
+          }
+        };
+        localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    }, 1500);
+  });
+}
+
+export function disconnectSpotify(userId: string): void {
+  const users = getUsers();
+  const userIndex = users.findIndex(u => u.email.toLowerCase() === userId.toLowerCase());
+  
+  if (userIndex !== -1) {
+    users[userIndex].spotifyData = { connected: false };
+    if (users[userIndex].socialAccounts?.spotify) {
+      users[userIndex].socialAccounts!.spotify!.connected = false;
+    }
+    localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
+  }
+}
+
+export function updateUserStatus(userId: string, status: 'online' | 'away' | 'busy' | 'offline', message?: string): void {
+  const users = getUsers();
+  const userIndex = users.findIndex(u => u.email.toLowerCase() === userId.toLowerCase());
+  
+  if (userIndex !== -1) {
+    users[userIndex].status = status;
+    if (message !== undefined) {
+      users[userIndex].statusMessage = message;
+    }
+    users[userIndex].lastActive = new Date().toISOString();
+    localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
+    
+    // Update session if this is the current user
+    const currentSession = getSession();
+    if (currentSession && currentSession.email.toLowerCase() === userId.toLowerCase()) {
+      currentSession.status = status;
+      if (message !== undefined) {
+        currentSession.statusMessage = message;
+      }
+      saveSession(currentSession);
+    }
+  }
 }
 
 // Credit and Balance Management Functions

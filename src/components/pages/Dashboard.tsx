@@ -36,6 +36,8 @@ import UserProfile from './UserProfile';
 import GamesLibrary from './GamesLibrary';
 import AdminDashboard from './AdminDashboard';
 import CommunityHub from './CommunityHub';
+import StatusBubble from '../ui/StatusBubble';
+import SpotifyWidget from '../ui/SpotifyWidget';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -48,6 +50,7 @@ export default function Dashboard() {
   const [isPackagesExpanded, setIsPackagesExpanded] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [showUserProfile, setShowUserProfile] = useState(false);
+  const [showSpotifyWidget, setShowSpotifyWidget] = useState(false);
 
   useEffect(() => {
     const sessionUser = getSession();
@@ -78,6 +81,9 @@ export default function Dashboard() {
         currentSimulator: sessionUser.currentSimulator || null,
         isStreaming: sessionUser.isStreaming || false,
         currentGame: sessionUser.currentGame || '',
+        status: sessionUser.status || 'online',
+        statusMessage: sessionUser.statusMessage || '',
+        spotifyData: sessionUser.spotifyData || { connected: false },
         socialAccounts: sessionUser.socialAccounts || {},
         vipMembership: sessionUser.vipMembership || undefined,
         stats: sessionUser.stats || {
@@ -89,6 +95,11 @@ export default function Dashboard() {
         }
       };
       setUser(completeUser);
+      
+      // Show Spotify widget if connected and has current track
+      if (completeUser.spotifyData?.connected && completeUser.spotifyData.currentTrack) {
+        setShowSpotifyWidget(true);
+      }
     }
     setLoading(false);
   }, [navigate]);
@@ -440,7 +451,7 @@ export default function Dashboard() {
                     className="text-center pb-4 border-b border-slate-700 cursor-pointer hover:bg-slate-700/20 rounded-lg p-2 transition-colors"
                     onClick={handleViewOwnProfile}
                   >
-                    <div className="w-20 h-20 rounded-full overflow-hidden bg-red-500/20 border-2 border-red-500/30 mx-auto mb-3">
+                    <div className="relative w-20 h-20 rounded-full overflow-hidden bg-red-500/20 border-2 border-red-500/30 mx-auto mb-3">
                       {user.profilePicture ? (
                         <img 
                           src={user.profilePicture} 
@@ -452,9 +463,21 @@ export default function Dashboard() {
                           <User className="w-10 h-10 text-red-500" />
                         </div>
                       )}
+                      {/* Status Bubble */}
+                      <div className="absolute -bottom-1 -right-1">
+                        <StatusBubble 
+                          status={user.status || 'offline'} 
+                          size="md"
+                          showSpotify={true}
+                          spotifyData={user.spotifyData}
+                        />
+                      </div>
                     </div>
                     <h3 className="font-bold text-white">{user.fullName}</h3>
                     <p className="text-sm text-slate-400">{user.email}</p>
+                    {user.statusMessage && (
+                      <p className="text-xs text-slate-500 mt-1">{user.statusMessage}</p>
+                    )}
                     <p className="text-xs text-blue-400 mt-1">Click to view full profile</p>
                   </div>
                   
@@ -517,7 +540,7 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 rounded-full overflow-hidden bg-red-500/20 border-2 border-red-500/30">
+              <div className="relative w-12 h-12 rounded-full overflow-hidden bg-red-500/20 border-2 border-red-500/30">
                 {user.profilePicture ? (
                   <img 
                     src={user.profilePicture} 
@@ -529,6 +552,15 @@ export default function Dashboard() {
                     <User className="w-6 h-6 text-red-500" />
                   </div>
                 )}
+                {/* Status Bubble */}
+                <div className="absolute -bottom-1 -right-1">
+                  <StatusBubble 
+                    status={user.status || 'offline'} 
+                    size="sm"
+                    showSpotify={true}
+                    spotifyData={user.spotifyData}
+                  />
+                </div>
               </div>
               <div>
                 <div className="flex items-center space-x-3">
@@ -550,6 +582,9 @@ export default function Dashboard() {
                     <Timer className="w-4 h-4" />
                     <span className="font-semibold">{formatCreditsDisplay(user.racingCredits || 0)}</span>
                   </div>
+                  {user.statusMessage && (
+                    <p className="text-slate-500 text-xs">• {user.statusMessage}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -657,6 +692,15 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto px-6 py-8">
         {renderTabContent()}
       </main>
+
+      {/* Spotify Widget */}
+      {showSpotifyWidget && user.spotifyData && (
+        <SpotifyWidget 
+          spotifyData={user.spotifyData}
+          onClose={() => setShowSpotifyWidget(false)}
+          compact={true}
+        />
+      )}
 
       {/* Profile Edit Modal */}
       <Modal

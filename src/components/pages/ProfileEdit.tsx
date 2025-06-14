@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Save, AlertCircle, CheckCircle, Upload, Image, Link, ExternalLink, Unlink } from 'lucide-react';
-import { User, updateUser } from '../../utils/userStorage';
+import { Save, AlertCircle, CheckCircle, Upload, Image, Link, ExternalLink, Unlink, Music, Play, Pause, Volume2 } from 'lucide-react';
+import { User, updateUser, connectSpotify, disconnectSpotify, updateUserStatus } from '../../utils/userStorage';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import ImageUpload from '../ui/ImageUpload';
@@ -22,6 +22,8 @@ interface FormData {
   profilePicture: string;
   bannerImage: string;
   bio: string;
+  status: 'online' | 'away' | 'busy' | 'offline';
+  statusMessage: string;
   socialAccounts: {
     steam?: {
       username: string;
@@ -53,6 +55,11 @@ interface FormData {
       title: string;
       connected: boolean;
     };
+    spotify?: {
+      username: string;
+      profileUrl: string;
+      connected: boolean;
+    };
   };
 }
 
@@ -72,21 +79,25 @@ export default function ProfileEdit({ user, onSave, onCancel }: ProfileEditProps
     profilePicture: user.profilePicture || '',
     bannerImage: user.bannerImage || '',
     bio: user.bio || '',
+    status: user.status || 'online',
+    statusMessage: user.statusMessage || '',
     socialAccounts: {
       steam: user.socialAccounts?.steam || { username: '', profileUrl: '', connected: false },
       discord: user.socialAccounts?.discord || { username: '', discriminator: '', connected: false },
       twitch: user.socialAccounts?.twitch || { username: '', profileUrl: '', connected: false },
       youtube: user.socialAccounts?.youtube || { channelName: '', channelUrl: '', connected: false },
       twitter: user.socialAccounts?.twitter || { username: '', profileUrl: '', connected: false },
-      personalWebsite: user.socialAccounts?.personalWebsite || { url: '', title: '', connected: false }
+      personalWebsite: user.socialAccounts?.personalWebsite || { url: '', title: '', connected: false },
+      spotify: user.socialAccounts?.spotify || { username: '', profileUrl: '', connected: false }
     }
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [activeTab, setActiveTab] = useState<'profile' | 'social'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'social' | 'status'>('profile');
+  const [isConnectingSpotify, setIsConnectingSpotify] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
     // Clear error when user starts typing
@@ -142,6 +153,12 @@ export default function ProfileEdit({ user, onSave, onCancel }: ProfileEditProps
       case 'personalWebsite':
         isValid = !!(account as any).url && !!(account as any).title;
         break;
+      case 'spotify':
+        isValid = !!(account as any).username;
+        if (isValid && !(account as any).profileUrl) {
+          handleSocialAccountChange(platform, 'profileUrl', `https://open.spotify.com/user/${(account as any).username}`);
+        }
+        break;
     }
 
     if (isValid) {
@@ -151,6 +168,31 @@ export default function ProfileEdit({ user, onSave, onCancel }: ProfileEditProps
 
   const disconnectSocialAccount = (platform: string) => {
     handleSocialAccountChange(platform, 'connected', false);
+  };
+
+  const handleSpotifyConnect = async () => {
+    setIsConnectingSpotify(true);
+    try {
+      const success = await connectSpotify(user.email);
+      if (success) {
+        handleSocialAccountChange('spotify', 'connected', true);
+        handleSocialAccountChange('spotify', 'username', 'user_' + Math.random().toString(36).substr(2, 9));
+        alert('Spotify connected successfully!');
+      } else {
+        alert('Failed to connect Spotify. Please try again.');
+      }
+    } catch (error) {
+      alert('Error connecting to Spotify.');
+    } finally {
+      setIsConnectingSpotify(false);
+    }
+  };
+
+  const handleSpotifyDisconnect = () => {
+    disconnectSpotify(user.email);
+    handleSocialAccountChange('spotify', 'connected', false);
+    handleSocialAccountChange('spotify', 'username', '');
+    alert('Spotify disconnected successfully!');
   };
 
   const handleImageChange = (imageData: string, type: 'profile' | 'banner') => {
@@ -206,10 +248,13 @@ export default function ProfileEdit({ user, onSave, onCancel }: ProfileEditProps
         profilePicture: form.profilePicture,
         bannerImage: form.bannerImage,
         bio: form.bio,
+        status: form.status,
+        statusMessage: form.statusMessage,
         socialAccounts: form.socialAccounts,
       };
 
       updateUser(updatedUser);
+      updateUserStatus(user.email, form.status, form.statusMessage);
       setShowSuccess(true);
       setIsLoading(false);
 
@@ -248,6 +293,16 @@ export default function ProfileEdit({ user, onSave, onCancel }: ProfileEditProps
           }`}
         >
           Profile Settings
+        </button>
+        <button
+          onClick={() => setActiveTab('status')}
+          className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+            activeTab === 'status'
+              ? 'bg-red-500 text-white'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          Status & Presence
         </button>
         <button
           onClick={() => setActiveTab('social')}
@@ -445,6 +500,133 @@ export default function ProfileEdit({ user, onSave, onCancel }: ProfileEditProps
               </div>
             </div>
           </>
+        ) : activeTab === 'status' ? (
+          /* Status & Presence Tab */
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-white border-b border-slate-700 pb-2">
+              Status & Presence Settings
+            </h3>
+            <p className="text-slate-400 text-sm">
+              Control how you appear to other users and what information is shared.
+            </p>
+
+            {/* Status Selection */}
+            <div className="space-y-4">
+              <label className="block text-sm font-medium text-slate-300">Online Status</label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { value: 'online', label: 'Online', color: 'bg-green-500', description: 'Available to race' },
+                  { value: 'away', label: 'Away', color: 'bg-yellow-500', description: 'Temporarily away' },
+                  { value: 'busy', label: 'Busy', color: 'bg-red-500', description: 'Do not disturb' },
+                  { value: 'offline', label: 'Offline', color: 'bg-gray-500', description: 'Appear offline' }
+                ].map((status) => (
+                  <button
+                    key={status.value}
+                    type="button"
+                    onClick={() => setForm(prev => ({ ...prev, status: status.value as any }))}
+                    className={`p-3 rounded-lg border-2 transition-all ${
+                      form.status === status.value
+                        ? 'border-red-500 bg-red-500/10'
+                        : 'border-slate-600 hover:border-slate-500'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-2 mb-2">
+                      <div className={`w-3 h-3 rounded-full ${status.color}`} />
+                      <span className="text-white font-medium text-sm">{status.label}</span>
+                    </div>
+                    <p className="text-slate-400 text-xs">{status.description}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Status Message */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-300">
+                Status Message (Optional)
+              </label>
+              <Input
+                name="statusMessage"
+                type="text"
+                placeholder="What are you up to? (e.g., Racing at Silverstone 🏁)"
+                value={form.statusMessage}
+                onChange={handleChange}
+                maxLength={50}
+              />
+              <p className="text-xs text-slate-500">
+                This message will appear next to your status indicator ({form.statusMessage.length}/50)
+              </p>
+            </div>
+
+            {/* Spotify Integration */}
+            <div className="bg-slate-700/30 rounded-lg p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-green-600/20 rounded-lg flex items-center justify-center">
+                    <Music className="w-5 h-5 text-green-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-white">Spotify Integration</h4>
+                    <p className="text-sm text-slate-400">Share what you're listening to while racing</p>
+                  </div>
+                </div>
+                {user.spotifyData?.connected ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSpotifyDisconnect}
+                    icon={Unlink}
+                  >
+                    Disconnect
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleSpotifyConnect}
+                    disabled={isConnectingSpotify}
+                    icon={Music}
+                  >
+                    {isConnectingSpotify ? 'Connecting...' : 'Connect Spotify'}
+                  </Button>
+                )}
+              </div>
+
+              {user.spotifyData?.connected && user.spotifyData.currentTrack && (
+                <div className="bg-slate-800/50 rounded-lg p-3">
+                  <div className="flex items-center space-x-3">
+                    <img 
+                      src={user.spotifyData.currentTrack.imageUrl} 
+                      alt="Album cover"
+                      className="w-12 h-12 rounded-lg"
+                    />
+                    <div className="flex-1">
+                      <p className="text-white font-medium text-sm">{user.spotifyData.currentTrack.name}</p>
+                      <p className="text-slate-400 text-xs">{user.spotifyData.currentTrack.artist}</p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      {user.spotifyData.currentTrack.isPlaying ? (
+                        <Play className="w-4 h-4 text-green-400" />
+                      ) : (
+                        <Pause className="w-4 h-4 text-slate-400" />
+                      )}
+                      <span className="text-xs text-slate-400">
+                        {user.spotifyData.currentTrack.isPlaying ? 'Playing' : 'Paused'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="text-xs text-slate-500">
+                <p>• Your currently playing track will be visible to other users</p>
+                <p>• You can control playback from the Spotify widget</p>
+                <p>• This helps create a more social racing experience</p>
+              </div>
+            </div>
+          </div>
         ) : (
           /* Social Accounts Tab */
           <div className="space-y-6">
