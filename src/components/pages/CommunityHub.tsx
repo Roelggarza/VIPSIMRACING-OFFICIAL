@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Image, Heart, MessageCircle, Share2, User, Crown, Calendar, Trophy, Video, Play, Send, Upload, Tag, Plus, Type, Camera, X } from 'lucide-react';
-import { getUsers, User as UserType, getCommunityPosts, CommunityPost, likeCommunityPost, addCommentToCommunityPost, shareCommunityPost, addCommunityPost } from '../../utils/userStorage';
+import { Globe, Image, Heart, MessageCircle, Share2, User, Crown, Calendar, Trophy, Video, Play, Send, Upload, Tag, Plus, Type, Camera, X, Reply, ThumbsUp, MoreHorizontal } from 'lucide-react';
+import { getUsers, User as UserType, getCommunityPosts, CommunityPost, likeCommunityPost, addCommentToCommunityPost, addReplyToComment, likeComment, shareCommunityPost, addCommunityPost, Comment } from '../../utils/userStorage';
 import Card, { CardHeader, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -15,6 +15,8 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
   const [users, setUsers] = useState<UserType[]>([]);
   const [filter, setFilter] = useState<'all' | 'following' | 'vip'>('all');
   const [commentTexts, setCommentTexts] = useState<{[key: string]: string}>({});
+  const [replyTexts, setReplyTexts] = useState<{[key: string]: string}>({});
+  const [showReplies, setShowReplies] = useState<{[key: string]: boolean}>({});
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [newPost, setNewPost] = useState({
     type: 'screenshot' as 'screenshot' | 'video' | 'lap_record' | 'highlight',
@@ -48,9 +50,13 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
     return users.find(u => u.email === email);
   };
 
+  const refreshPosts = () => {
+    setPosts(getCommunityPosts());
+  };
+
   const handleLike = (postId: string) => {
     likeCommunityPost(postId, currentUser.email);
-    setPosts(getCommunityPosts()); // Refresh posts
+    refreshPosts();
   };
 
   const handleComment = (postId: string) => {
@@ -65,13 +71,38 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
     });
 
     setCommentTexts(prev => ({ ...prev, [postId]: '' }));
-    setPosts(getCommunityPosts()); // Refresh posts
+    refreshPosts();
+  };
+
+  const handleReply = (postId: string, commentId: string) => {
+    const replyKey = `${postId}-${commentId}`;
+    const replyText = replyTexts[replyKey]?.trim();
+    if (!replyText) return;
+
+    addReplyToComment(postId, commentId, {
+      userId: currentUser.email,
+      userName: currentUser.fullName,
+      userAvatar: currentUser.profilePicture,
+      text: replyText
+    });
+
+    setReplyTexts(prev => ({ ...prev, [replyKey]: '' }));
+    refreshPosts();
+  };
+
+  const handleLikeComment = (postId: string, commentId: string) => {
+    likeComment(postId, commentId, currentUser.email);
+    refreshPosts();
   };
 
   const handleShare = (postId: string) => {
     shareCommunityPost(postId, currentUser.email);
-    setPosts(getCommunityPosts()); // Refresh posts
+    refreshPosts();
     alert('Post shared!');
+  };
+
+  const toggleReplies = (commentId: string) => {
+    setShowReplies(prev => ({ ...prev, [commentId]: !prev[commentId] }));
   };
 
   const handleCreatePost = () => {
@@ -97,7 +128,7 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
       isPublic: newPost.isPublic
     });
 
-    setPosts(getCommunityPosts()); // Refresh posts
+    refreshPosts();
     setShowCreatePost(false);
     setNewPost({
       type: 'screenshot',
@@ -183,6 +214,141 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
       default:
         return 'text-blue-400 bg-blue-500/20';
     }
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return 'just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    return date.toLocaleDateString();
+  };
+
+  const renderComment = (comment: Comment, postId: string, isReply: boolean = false) => {
+    const replyKey = `${postId}-${comment.id}`;
+    const isLiked = comment.likedBy.includes(currentUser.email);
+    const hasReplies = comment.replies && comment.replies.length > 0;
+    const showingReplies = showReplies[comment.id];
+
+    return (
+      <div key={comment.id} className={`${isReply ? 'ml-8 border-l-2 border-slate-700 pl-4' : ''}`}>
+        <div className="flex items-start space-x-3">
+          <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-600/50 flex-shrink-0">
+            {comment.userAvatar ? (
+              <img 
+                src={comment.userAvatar} 
+                alt="Commenter" 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <User className="w-4 h-4 text-slate-400" />
+              </div>
+            )}
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <div className="bg-slate-700/30 rounded-lg p-3">
+              <div className="flex items-center space-x-2 mb-1">
+                <p className="font-semibold text-white text-sm">{comment.userName}</p>
+                <p className="text-xs text-slate-500">{formatTimeAgo(comment.createdAt)}</p>
+              </div>
+              <p className="text-slate-300 text-sm">{comment.text}</p>
+            </div>
+            
+            {/* Comment Actions */}
+            <div className="flex items-center space-x-4 mt-2 text-xs">
+              <button
+                onClick={() => handleLikeComment(postId, comment.id)}
+                className={`flex items-center space-x-1 hover:text-red-400 transition-colors ${
+                  isLiked ? 'text-red-400' : 'text-slate-500'
+                }`}
+              >
+                <ThumbsUp className="w-3 h-3" />
+                <span>{comment.likes > 0 ? comment.likes : 'Like'}</span>
+              </button>
+              
+              {!isReply && (
+                <button
+                  onClick={() => {
+                    const replyInput = document.getElementById(`reply-${comment.id}`);
+                    if (replyInput) replyInput.focus();
+                  }}
+                  className="flex items-center space-x-1 text-slate-500 hover:text-blue-400 transition-colors"
+                >
+                  <Reply className="w-3 h-3" />
+                  <span>Reply</span>
+                </button>
+              )}
+              
+              {hasReplies && (
+                <button
+                  onClick={() => toggleReplies(comment.id)}
+                  className="flex items-center space-x-1 text-slate-500 hover:text-blue-400 transition-colors"
+                >
+                  <MessageCircle className="w-3 h-3" />
+                  <span>
+                    {showingReplies ? 'Hide' : 'Show'} {comment.replies!.length} {comment.replies!.length === 1 ? 'reply' : 'replies'}
+                  </span>
+                </button>
+              )}
+            </div>
+
+            {/* Reply Input */}
+            {!isReply && (
+              <div className="mt-3 flex space-x-2">
+                <div className="w-6 h-6 rounded-full overflow-hidden bg-slate-600/50 flex-shrink-0">
+                  {currentUser.profilePicture ? (
+                    <img 
+                      src={currentUser.profilePicture} 
+                      alt="Your avatar" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <User className="w-3 h-3 text-slate-400" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 flex space-x-2">
+                  <Input
+                    id={`reply-${comment.id}`}
+                    placeholder="Write a reply..."
+                    value={replyTexts[replyKey] || ''}
+                    onChange={(e) => setReplyTexts(prev => ({ ...prev, [replyKey]: e.target.value }))}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleReply(postId, comment.id);
+                      }
+                    }}
+                    className="text-sm"
+                  />
+                  <Button 
+                    size="sm" 
+                    onClick={() => handleReply(postId, comment.id)}
+                    disabled={!replyTexts[replyKey]?.trim()}
+                    className="px-3"
+                  >
+                    <Send className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Replies */}
+            {hasReplies && showingReplies && (
+              <div className="mt-4 space-y-3">
+                {comment.replies!.map((reply) => renderComment(reply, postId, true))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -331,7 +497,7 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
                           </div>
                           <div className="flex items-center space-x-2 text-sm text-slate-400">
                             <Calendar className="w-3 h-3" />
-                            <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                            <span>{formatTimeAgo(post.createdAt)}</span>
                             {post.game && (
                               <>
                                 <span>•</span>
@@ -341,8 +507,8 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
                           </div>
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm" icon={Share2} onClick={() => handleShare(post.id)}>
-                        Share
+                      <Button variant="ghost" size="sm" icon={MoreHorizontal}>
+                        <span className="sr-only">More options</span>
                       </Button>
                     </div>
                   </div>
@@ -443,6 +609,7 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
                           size="sm" 
                           icon={Share2}
                           className={isShared ? 'text-blue-500' : ''}
+                          onClick={() => handleShare(post.id)}
                         >
                           {post.shares || 0}
                         </Button>
@@ -451,57 +618,47 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
 
                     {/* Comments */}
                     {post.comments && post.comments.length > 0 && (
-                      <div className="space-y-3 mb-4">
-                        {post.comments.slice(-3).map((comment) => (
-                          <div key={comment.id} className="flex items-start space-x-3">
-                            <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-600/50">
-                              {comment.userAvatar ? (
-                                <img 
-                                  src={comment.userAvatar} 
-                                  alt="Commenter" 
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <User className="w-4 h-4 text-slate-400" />
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex-1">
-                              <div className="bg-slate-700/30 rounded-lg p-3">
-                                <p className="font-semibold text-white text-sm">{comment.userName}</p>
-                                <p className="text-slate-300 text-sm">{comment.text}</p>
-                              </div>
-                              <p className="text-xs text-slate-500 mt-1">
-                                {new Date(comment.createdAt).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
+                      <div className="space-y-4 mb-4">
+                        {post.comments.map((comment) => renderComment(comment, post.id))}
                       </div>
                     )}
 
                     {/* Add Comment */}
                     <div className="flex space-x-2">
-                      <Input
-                        placeholder="Add a comment..."
-                        value={commentTexts[post.id] || ''}
-                        onChange={(e) => setCommentTexts(prev => ({ ...prev, [post.id]: e.target.value }))}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            handleComment(post.id);
-                          }
-                        }}
-                        className="flex-1"
-                      />
-                      <Button 
-                        size="sm" 
-                        onClick={() => handleComment(post.id)}
-                        disabled={!commentTexts[post.id]?.trim()}
-                        icon={Send}
-                      >
-                        Post
-                      </Button>
+                      <div className="w-8 h-8 rounded-full overflow-hidden bg-slate-600/50 flex-shrink-0">
+                        {currentUser.profilePicture ? (
+                          <img 
+                            src={currentUser.profilePicture} 
+                            alt="Your avatar" 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <User className="w-4 h-4 text-slate-400" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 flex space-x-2">
+                        <Input
+                          placeholder="Add a comment..."
+                          value={commentTexts[post.id] || ''}
+                          onChange={(e) => setCommentTexts(prev => ({ ...prev, [post.id]: e.target.value }))}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              handleComment(post.id);
+                            }
+                          }}
+                          className="flex-1"
+                        />
+                        <Button 
+                          size="sm" 
+                          onClick={() => handleComment(post.id)}
+                          disabled={!commentTexts[post.id]?.trim()}
+                          icon={Send}
+                        >
+                          Post
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </CardContent>

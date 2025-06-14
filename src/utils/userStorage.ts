@@ -82,6 +82,9 @@ export interface Comment {
   userAvatar?: string;
   text: string;
   createdAt: string;
+  replies?: Comment[]; // Nested replies
+  likes: number;
+  likedBy: string[];
 }
 
 export interface CommunityPost {
@@ -393,7 +396,29 @@ export function getCommunityPosts(): CommunityPost[] {
             userId: 'user@example.com',
             userName: 'Racing Pro',
             text: 'Incredible lap time! What setup were you using?',
-            createdAt: new Date(Date.now() - 3600000).toISOString()
+            createdAt: new Date(Date.now() - 3600000).toISOString(),
+            likes: 3,
+            likedBy: [],
+            replies: [
+              {
+                id: 'r1',
+                userId: 'admin@example.com',
+                userName: 'Admin User',
+                text: 'Thanks! I was using a custom setup with lower downforce for the straights.',
+                createdAt: new Date(Date.now() - 3000000).toISOString(),
+                likes: 1,
+                likedBy: []
+              }
+            ]
+          },
+          {
+            id: 'c2',
+            userId: 'racer@example.com',
+            userName: 'Speed Demon',
+            text: 'Amazing! I need to practice more on Silverstone.',
+            createdAt: new Date(Date.now() - 1800000).toISOString(),
+            likes: 1,
+            likedBy: []
           }
         ],
         shares: 3,
@@ -476,7 +501,7 @@ export function likeCommunityPost(postId: string, userId: string): void {
   }
 }
 
-export function addCommentToCommunityPost(postId: string, comment: Omit<Comment, 'id' | 'createdAt'>): void {
+export function addCommentToCommunityPost(postId: string, comment: Omit<Comment, 'id' | 'createdAt' | 'likes' | 'likedBy'>): void {
   const posts = getCommunityPosts();
   const post = posts.find(p => p.id === postId);
   
@@ -484,12 +509,74 @@ export function addCommentToCommunityPost(postId: string, comment: Omit<Comment,
     const newComment: Comment = {
       ...comment,
       id: Date.now().toString(),
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      likes: 0,
+      likedBy: [],
+      replies: []
     };
     
     post.comments.push(newComment);
     localStorage.setItem(STORAGE_KEY_COMMUNITY_POSTS, JSON.stringify(posts));
   }
+}
+
+export function addReplyToComment(postId: string, commentId: string, reply: Omit<Comment, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'replies'>): void {
+  const posts = getCommunityPosts();
+  const post = posts.find(p => p.id === postId);
+  
+  if (post) {
+    const comment = findCommentById(post.comments, commentId);
+    if (comment) {
+      const newReply: Comment = {
+        ...reply,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString(),
+        likes: 0,
+        likedBy: []
+      };
+      
+      if (!comment.replies) {
+        comment.replies = [];
+      }
+      comment.replies.push(newReply);
+      localStorage.setItem(STORAGE_KEY_COMMUNITY_POSTS, JSON.stringify(posts));
+    }
+  }
+}
+
+export function likeComment(postId: string, commentId: string, userId: string): void {
+  const posts = getCommunityPosts();
+  const post = posts.find(p => p.id === postId);
+  
+  if (post) {
+    const comment = findCommentById(post.comments, commentId);
+    if (comment) {
+      const isLiked = comment.likedBy.includes(userId);
+      if (isLiked) {
+        comment.likedBy = comment.likedBy.filter(id => id !== userId);
+        comment.likes = Math.max(0, comment.likes - 1);
+      } else {
+        comment.likedBy.push(userId);
+        comment.likes += 1;
+      }
+      
+      localStorage.setItem(STORAGE_KEY_COMMUNITY_POSTS, JSON.stringify(posts));
+    }
+  }
+}
+
+// Helper function to find a comment by ID (including nested replies)
+function findCommentById(comments: Comment[], commentId: string): Comment | null {
+  for (const comment of comments) {
+    if (comment.id === commentId) {
+      return comment;
+    }
+    if (comment.replies) {
+      const found = findCommentById(comment.replies, commentId);
+      if (found) return found;
+    }
+  }
+  return null;
 }
 
 export function shareCommunityPost(postId: string, userId: string): void {
