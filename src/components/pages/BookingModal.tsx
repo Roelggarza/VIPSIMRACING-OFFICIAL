@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Calendar, Clock, Users, CreditCard, CheckCircle, AlertCircle, Timer, Wallet } from 'lucide-react';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
+import StripeCheckout from './StripeCheckout';
 import { User, addCreditsAndBalance, formatCreditsDisplay } from '../../utils/userStorage';
 
 interface BookingModalProps {
@@ -12,12 +13,13 @@ interface BookingModalProps {
 }
 
 export default function BookingModal({ package: pkg, user, onClose, onComplete }: BookingModalProps) {
+  const [currentStep, setCurrentStep] = useState<'booking' | 'payment' | 'complete'>('booking');
   const [bookingData, setBookingData] = useState({
     date: '',
     time: '',
     guests: 0,
     specialRequests: '',
-    paymentMethod: 'card'
+    paymentMethod: 'stripe'
   });
   const [isProcessing, setIsProcessing] = useState(false);
   const [isBooked, setIsBooked] = useState(false);
@@ -51,10 +53,12 @@ export default function BookingModal({ package: pkg, user, onClose, onComplete }
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleProceedToPayment = () => {
     if (!validateForm()) return;
+    setCurrentStep('payment');
+  };
 
+  const handlePaymentComplete = (paymentData: any) => {
     setIsProcessing(true);
 
     // Simulate payment processing
@@ -80,6 +84,7 @@ export default function BookingModal({ package: pkg, user, onClose, onComplete }
         
         setIsProcessing(false);
         setIsBooked(true);
+        setCurrentStep('complete');
         
         // Auto-close after success and update parent
         setTimeout(() => {
@@ -116,7 +121,18 @@ export default function BookingModal({ package: pkg, user, onClose, onComplete }
     return pkg.credits || 0;
   };
 
-  if (isBooked && transaction) {
+  if (currentStep === 'payment') {
+    return (
+      <StripeCheckout
+        package={pkg}
+        user={user}
+        onBack={() => setCurrentStep('booking')}
+        onComplete={handlePaymentComplete}
+      />
+    );
+  }
+
+  if (currentStep === 'complete' && isBooked && transaction) {
     return (
       <div className="text-center space-y-6">
         <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
@@ -180,7 +196,7 @@ export default function BookingModal({ package: pkg, user, onClose, onComplete }
   const newBalance = currentBalance + getTotalPrice();
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={(e) => { e.preventDefault(); handleProceedToPayment(); }} className="space-y-6">
       {/* Package Summary */}
       <div className={`bg-gradient-to-br ${pkg.color} rounded-lg p-4`}>
         <div className="flex items-center justify-between">
@@ -360,7 +376,7 @@ export default function BookingModal({ package: pkg, user, onClose, onComplete }
           disabled={isProcessing}
           icon={CreditCard}
         >
-          {isProcessing ? 'Processing Payment...' : `Purchase for $${getTotalPrice().toFixed(2)}`}
+          Proceed to Secure Checkout
         </Button>
         
         <Button 
@@ -374,6 +390,6 @@ export default function BookingModal({ package: pkg, user, onClose, onComplete }
           Cancel
         </Button>
       </div>
-    </form>
+    </div>
   );
 }

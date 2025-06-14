@@ -47,6 +47,7 @@ export default function Dashboard() {
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [isPackagesExpanded, setIsPackagesExpanded] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
+  const [showUserProfile, setShowUserProfile] = useState(false);
 
   useEffect(() => {
     const sessionUser = getSession();
@@ -111,6 +112,13 @@ export default function Dashboard() {
 
   const handleUserSelect = (selectedUser: UserType) => {
     setSelectedUser(selectedUser);
+  };
+
+  const handleViewOwnProfile = () => {
+    if (user) {
+      setSelectedUser(user);
+      setShowUserProfile(true);
+    }
   };
 
   const racingPackages = [
@@ -424,7 +432,10 @@ export default function Dashboard() {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="text-center pb-4 border-b border-slate-700">
+                  <div 
+                    className="text-center pb-4 border-b border-slate-700 cursor-pointer hover:bg-slate-700/20 rounded-lg p-2 transition-colors"
+                    onClick={handleViewOwnProfile}
+                  >
                     <div className="w-20 h-20 rounded-full overflow-hidden bg-red-500/20 border-2 border-red-500/30 mx-auto mb-3">
                       {user.profilePicture ? (
                         <img 
@@ -440,6 +451,7 @@ export default function Dashboard() {
                     </div>
                     <h3 className="font-bold text-white">{user.fullName}</h3>
                     <p className="text-sm text-slate-400">{user.email}</p>
+                    <p className="text-xs text-blue-400 mt-1">Click to view full profile</p>
                   </div>
                   
                   <div className="space-y-3">
@@ -665,7 +677,27 @@ export default function Dashboard() {
 
       {/* User Profile Modal */}
       <Modal
-        isOpen={!!selectedUser}
+        isOpen={!!selectedUser && showUserProfile}
+        onClose={() => {
+          setSelectedUser(null);
+          setShowUserProfile(false);
+        }}
+        title="User Profile"
+      >
+        {selectedUser && (
+          <UserProfile
+            user={selectedUser}
+            onClose={() => {
+              setSelectedUser(null);
+              setShowUserProfile(false);
+            }}
+          />
+        )}
+      </Modal>
+
+      {/* Leaderboard User Profile Modal */}
+      <Modal
+        isOpen={!!selectedUser && !showUserProfile}
         onClose={() => setSelectedUser(null)}
         title="User Profile"
       >

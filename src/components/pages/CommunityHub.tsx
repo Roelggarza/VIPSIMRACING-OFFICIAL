@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Image, Heart, MessageCircle, Share2, User, Crown, Calendar, Trophy, Video, Play, Send, Upload, Tag } from 'lucide-react';
+import { Globe, Image, Heart, MessageCircle, Share2, User, Crown, Calendar, Trophy, Video, Play, Send, Upload, Tag, Plus, Type, Camera } from 'lucide-react';
 import { getUsers, User as UserType, getCommunityPosts, CommunityPost, likeCommunityPost, addCommentToCommunityPost, shareCommunityPost, addCommunityPost } from '../../utils/userStorage';
 import Card, { CardHeader, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Modal from '../ui/Modal';
+import ImageDropZone from '../ui/ImageDropZone';
 
 interface CommunityHubProps {
   currentUser: UserType;
@@ -15,7 +16,7 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
   const [users, setUsers] = useState<UserType[]>([]);
   const [filter, setFilter] = useState<'all' | 'following' | 'vip'>('all');
   const [commentTexts, setCommentTexts] = useState<{[key: string]: string}>({});
-  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showCreatePost, setShowCreatePost] = useState(false);
   const [newPost, setNewPost] = useState({
     type: 'screenshot' as 'screenshot' | 'video' | 'lap_record' | 'highlight',
     title: '',
@@ -72,9 +73,14 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
     alert('Post shared!');
   };
 
-  const handleUploadPost = () => {
-    if (!newPost.title.trim() || !newPost.mediaUrl.trim()) {
-      alert('Please fill in the required fields');
+  const handleCreatePost = () => {
+    if (!newPost.title.trim()) {
+      alert('Please add a title for your post');
+      return;
+    }
+
+    if (!newPost.mediaUrl.trim()) {
+      alert('Please add an image to your post');
       return;
     }
 
@@ -96,7 +102,7 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
     });
 
     setPosts(getCommunityPosts()); // Refresh posts
-    setShowUploadModal(false);
+    setShowCreatePost(false);
     setNewPost({
       type: 'screenshot',
       title: '',
@@ -109,6 +115,10 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
       tags: '',
       isPublic: true
     });
+  };
+
+  const handleImageSelect = (imageData: string) => {
+    setNewPost(prev => ({ ...prev, mediaUrl: imageData }));
   };
 
   const getPostTypeIcon = (type: string) => {
@@ -163,14 +173,6 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
               >
                 VIP Only
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowUploadModal(true)}
-                icon={Upload}
-              >
-                Share Content
-              </Button>
             </div>
           </div>
         </CardHeader>
@@ -178,6 +180,55 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
           <p className="text-slate-300">
             Share your racing moments, lap records, and highlights with the community!
           </p>
+        </CardContent>
+      </Card>
+
+      {/* Create Post Section */}
+      <Card className="border-dashed border-2 border-slate-600 hover:border-red-500 transition-colors">
+        <CardContent 
+          className="p-6 cursor-pointer"
+          onClick={() => setShowCreatePost(true)}
+        >
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-600/50">
+              {currentUser.profilePicture ? (
+                <img 
+                  src={currentUser.profilePicture} 
+                  alt="Your profile" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <User className="w-6 h-6 text-slate-400" />
+                </div>
+              )}
+            </div>
+            <div className="flex-1">
+              <div className="bg-slate-700/50 rounded-lg p-4 text-slate-400 hover:bg-slate-700/70 transition-colors">
+                What's your latest racing achievement, {currentUser.fullName.split(' ')[0]}?
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-700">
+            <div className="flex space-x-4">
+              <div className="flex items-center space-x-2 text-slate-400 hover:text-red-400 transition-colors">
+                <Camera className="w-5 h-5" />
+                <span className="text-sm font-medium">Photo/Video</span>
+              </div>
+              <div className="flex items-center space-x-2 text-slate-400 hover:text-yellow-400 transition-colors">
+                <Trophy className="w-5 h-5" />
+                <span className="text-sm font-medium">Achievement</span>
+              </div>
+              <div className="flex items-center space-x-2 text-slate-400 hover:text-blue-400 transition-colors">
+                <Tag className="w-5 h-5" />
+                <span className="text-sm font-medium">Lap Record</span>
+              </div>
+            </div>
+            <Button size="sm" icon={Plus}>
+              Create Post
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
@@ -418,13 +469,14 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
         )}
       </div>
 
-      {/* Upload Modal */}
+      {/* Create Post Modal */}
       <Modal
-        isOpen={showUploadModal}
-        onClose={() => setShowUploadModal(false)}
-        title="Share Racing Content"
+        isOpen={showCreatePost}
+        onClose={() => setShowCreatePost(false)}
+        title="Share Your Racing Content"
       >
-        <div className="space-y-4">
+        <div className="space-y-6">
+          {/* Post Type Selection */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">Content Type</label>
@@ -452,6 +504,18 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
             </div>
           </div>
 
+          {/* Image Upload */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Upload Image/Video *
+            </label>
+            <ImageDropZone
+              onImageSelect={handleImageSelect}
+              className="w-full"
+            />
+          </div>
+
+          {/* Title and Description */}
           <Input
             label="Title *"
             placeholder="Give your content a catchy title..."
@@ -470,13 +534,7 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
             />
           </div>
 
-          <Input
-            label="Media URL *"
-            placeholder="https://example.com/your-image-or-video.jpg"
-            value={newPost.mediaUrl}
-            onChange={(e) => setNewPost(prev => ({ ...prev, mediaUrl: e.target.value }))}
-          />
-
+          {/* Game and Track Details */}
           <div className="grid grid-cols-2 gap-4">
             <Input
               label="Game"
@@ -492,6 +550,7 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
             />
           </div>
 
+          {/* Performance Details */}
           <div className="grid grid-cols-2 gap-4">
             <Input
               label="Lap Time"
@@ -507,6 +566,7 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
             />
           </div>
 
+          {/* Tags */}
           <Input
             label="Tags"
             placeholder="racing, silverstone, personal-best (comma separated)"
@@ -514,11 +574,12 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
             onChange={(e) => setNewPost(prev => ({ ...prev, tags: e.target.value }))}
           />
 
+          {/* Action Buttons */}
           <div className="flex space-x-3 pt-4">
-            <Button onClick={handleUploadPost} className="flex-1">
-              Share Content
+            <Button onClick={handleCreatePost} className="flex-1" icon={Upload}>
+              Share Post
             </Button>
-            <Button variant="outline" onClick={() => setShowUploadModal(false)} className="flex-1">
+            <Button variant="outline" onClick={() => setShowCreatePost(false)} className="flex-1">
               Cancel
             </Button>
           </div>
