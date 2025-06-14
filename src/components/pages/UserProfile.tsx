@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Crown, Trophy, Clock, Target, Calendar, MapPin, Edit } from 'lucide-react';
+import { User, Crown, Trophy, Clock, Target, Calendar, MapPin, Edit, ExternalLink, Link } from 'lucide-react';
 import { User as UserType, formatCreditsDisplay } from '../../utils/userStorage';
 import Card, { CardHeader, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
@@ -17,6 +17,64 @@ export default function UserProfile({ user, onClose }: UserProfileProps) {
         month: 'long' 
       })
     : 'Recently';
+
+  const connectedAccounts = Object.entries(user.socialAccounts || {}).filter(
+    ([_, account]) => account?.connected
+  );
+
+  const getSocialIcon = (platform: string) => {
+    const icons: { [key: string]: string } = {
+      steam: 'ST',
+      discord: 'DC',
+      twitch: 'TW',
+      youtube: 'YT',
+      twitter: 'X',
+      personalWebsite: 'WEB'
+    };
+    return icons[platform] || 'LNK';
+  };
+
+  const getSocialColor = (platform: string) => {
+    const colors: { [key: string]: string } = {
+      steam: 'bg-blue-600/20 text-blue-400',
+      discord: 'bg-indigo-600/20 text-indigo-400',
+      twitch: 'bg-purple-600/20 text-purple-400',
+      youtube: 'bg-red-600/20 text-red-400',
+      twitter: 'bg-sky-600/20 text-sky-400',
+      personalWebsite: 'bg-green-600/20 text-green-400'
+    };
+    return colors[platform] || 'bg-slate-600/20 text-slate-400';
+  };
+
+  const getSocialUrl = (platform: string, account: any) => {
+    switch (platform) {
+      case 'steam':
+        return account.profileUrl || `https://steamcommunity.com/id/${account.username}`;
+      case 'twitch':
+        return account.profileUrl || `https://twitch.tv/${account.username}`;
+      case 'twitter':
+        return account.profileUrl || `https://twitter.com/${account.username}`;
+      case 'youtube':
+        return account.channelUrl;
+      case 'personalWebsite':
+        return account.url;
+      default:
+        return null;
+    }
+  };
+
+  const getSocialDisplayName = (platform: string, account: any) => {
+    switch (platform) {
+      case 'discord':
+        return `${account.username}#${account.discriminator}`;
+      case 'youtube':
+        return account.channelName;
+      case 'personalWebsite':
+        return account.title;
+      default:
+        return account.username;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -91,6 +149,48 @@ export default function UserProfile({ user, onClose }: UserProfileProps) {
             </div>
           </div>
         </div>
+
+        {/* Social Accounts */}
+        {connectedAccounts.length > 0 && (
+          <Card>
+            <CardHeader>
+              <h3 className="text-lg font-bold text-white flex items-center">
+                <Link className="w-5 h-5 mr-2" />
+                Connected Accounts
+              </h3>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {connectedAccounts.map(([platform, account]) => {
+                  const url = getSocialUrl(platform, account);
+                  const displayName = getSocialDisplayName(platform, account);
+                  
+                  return (
+                    <div key={platform} className="flex items-center space-x-3 p-3 bg-slate-700/30 rounded-lg">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${getSocialColor(platform)}`}>
+                        <span className="text-xs font-bold">{getSocialIcon(platform)}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white truncate">{displayName}</p>
+                        <p className="text-xs text-slate-400 capitalize">{platform}</p>
+                      </div>
+                      {url && (
+                        <a 
+                          href={url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-300 transition-colors"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

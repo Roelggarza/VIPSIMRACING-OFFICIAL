@@ -18,6 +18,38 @@ export interface User {
   currentSimulator?: number | null; // 1-8 for simulator number
   isStreaming?: boolean;
   currentGame?: string;
+  socialAccounts?: {
+    steam?: {
+      username: string;
+      profileUrl: string;
+      connected: boolean;
+    };
+    discord?: {
+      username: string;
+      discriminator: string;
+      connected: boolean;
+    };
+    twitch?: {
+      username: string;
+      profileUrl: string;
+      connected: boolean;
+    };
+    youtube?: {
+      channelName: string;
+      channelUrl: string;
+      connected: boolean;
+    };
+    twitter?: {
+      username: string;
+      profileUrl: string;
+      connected: boolean;
+    };
+    personalWebsite?: {
+      url: string;
+      title: string;
+      connected: boolean;
+    };
+  };
   vipMembership?: {
     active: boolean;
     expiryDate: string;
@@ -98,7 +130,8 @@ export function getUsers(): User[] {
     lastActive: new Date(Date.now() - Math.random() * 86400000).toISOString(),
     currentSimulator: Math.random() > 0.8 ? Math.floor(Math.random() * 8) + 1 : null,
     isStreaming: Math.random() > 0.9,
-    currentGame: Math.random() > 0.7 ? getRandomGame() : undefined
+    currentGame: Math.random() > 0.7 ? getRandomGame() : undefined,
+    socialAccounts: user.socialAccounts || {}
   }));
 }
 
@@ -115,6 +148,7 @@ export function saveUser(user: Omit<User, 'registrationDate' | 'racingCredits' |
     racingCredits: 0,
     accountBalance: 0,
     isAdmin: users.length === 0, // First user is admin
+    socialAccounts: {},
     stats: {
       totalRaces: 0,
       bestLapTime: '--:--',
@@ -153,6 +187,7 @@ export function findUser(email: string, password: string): User | undefined {
   if (user && (user.racingCredits === undefined || user.accountBalance === undefined)) {
     user.racingCredits = user.racingCredits || 0;
     user.accountBalance = user.accountBalance || 0;
+    user.socialAccounts = user.socialAccounts || {};
     updateUser(user);
   }
   
@@ -175,6 +210,7 @@ export function getSession(): User | null {
   if (user && (user.racingCredits === undefined || user.accountBalance === undefined)) {
     user.racingCredits = user.racingCredits || 0;
     user.accountBalance = user.accountBalance || 0;
+    user.socialAccounts = user.socialAccounts || {};
   }
   
   return user;
