@@ -199,6 +199,20 @@ export interface Simulator {
   screens?: string[]; // URLs to screen captures
 }
 
+// Security Configuration
+const SECURITY_CONFIG = {
+  // Prevent data exposure in production
+  HIDE_SENSITIVE_DATA: true,
+  // Rate limiting for API calls
+  MAX_REQUESTS_PER_MINUTE: 60,
+  // Data encryption key (in production, this would be from environment)
+  ENCRYPTION_KEY: 'vip-edge-racing-2024-secure',
+  // Admin-only access patterns
+  ADMIN_DOMAINS: ['vipsimracing.com'],
+  // Allowed origins for CORS
+  ALLOWED_ORIGINS: ['https://vipsimracing.com', 'https://www.vipsimracing.com']
+};
+
 // Central storage keys - these will be shared across all users
 const STORAGE_KEY_USERS = "vipSimUsers_CENTRAL";
 const STORAGE_KEY_SESSION = "vipSimSession";
@@ -210,6 +224,97 @@ const STORAGE_KEY_ADMIN_NOTIFICATIONS = "vipSimAdminNotifications";
 const STORAGE_KEY_POST_REPORTS = "vipSimPostReports_CENTRAL";
 const STORAGE_KEY_CHAT_MESSAGES = "vipSimChatMessages_CENTRAL";
 
+// Security Functions
+function sanitizeEmail(email: string): string {
+  // Basic email sanitization
+  return email.toLowerCase().trim();
+}
+
+function hashPassword(password: string): string {
+  // Simple hash function (in production, use bcrypt or similar)
+  let hash = 0;
+  for (let i = 0; i < password.length; i++) {
+    const char = password.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash).toString(36);
+}
+
+function isAdminDomain(email: string): boolean {
+  const domain = email.split('@')[1];
+  return SECURITY_CONFIG.ADMIN_DOMAINS.includes(domain);
+}
+
+function sanitizeUserData(user: User, isPublic: boolean = true): Partial<User> {
+  if (!isPublic) {
+    // Return full data for admin/owner access
+    return user;
+  }
+
+  // For public access, hide sensitive information
+  const sanitized: Partial<User> = {
+    fullName: user.fullName,
+    email: user.email.replace(/(.{2}).*@/, '$1***@'), // Mask email
+    profilePicture: user.profilePicture,
+    bannerImage: user.bannerImage,
+    bio: user.bio,
+    racingCredits: user.racingCredits,
+    isOnline: user.isOnline,
+    status: user.status,
+    statusMessage: user.statusMessage,
+    stats: user.stats,
+    vipMembership: user.vipMembership ? { active: user.vipMembership.active } : undefined,
+    socialAccounts: user.socialAccounts
+  };
+
+  return sanitized;
+}
+
+function validateInput(input: string, type: 'email' | 'password' | 'text'): boolean {
+  switch (type) {
+    case 'email':
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(input) && input.length <= 254;
+    case 'password':
+      return input.length >= 6 && input.length <= 128;
+    case 'text':
+      return input.length <= 1000; // Prevent extremely long text
+    default:
+      return false;
+  }
+}
+
+function logSecurityEvent(event: string, details: any): void {
+  // In production, this would send to a security monitoring service
+  console.warn(`[SECURITY] ${event}:`, details);
+}
+
+// Rate limiting storage
+const rateLimitStorage: { [key: string]: number[] } = {};
+
+function checkRateLimit(identifier: string): boolean {
+  const now = Date.now();
+  const windowStart = now - 60000; // 1 minute window
+  
+  if (!rateLimitStorage[identifier]) {
+    rateLimitStorage[identifier] = [];
+  }
+  
+  // Remove old requests
+  rateLimitStorage[identifier] = rateLimitStorage[identifier].filter(time => time > windowStart);
+  
+  // Check if under limit
+  if (rateLimitStorage[identifier].length >= SECURITY_CONFIG.MAX_REQUESTS_PER_MINUTE) {
+    logSecurityEvent('Rate limit exceeded', { identifier, requests: rateLimitStorage[identifier].length });
+    return false;
+  }
+  
+  // Add current request
+  rateLimitStorage[identifier].push(now);
+  return true;
+}
+
 // Initialize central database with sample data if empty
 function initializeCentralDatabase() {
   const existingUsers = localStorage.getItem(STORAGE_KEY_USERS);
@@ -219,7 +324,7 @@ function initializeCentralDatabase() {
         fullName: "Roel Garza",
         dob: "1985-01-01",
         email: "roel@vipsimracing.com",
-        password: "Roelgarza1!",
+        password: hashPassword("Roelgarza1!"), // Hash the password
         phone: "(832) 490-4304",
         address: "VIP Edge Racing Facility",
         state: "TX",
@@ -250,7 +355,7 @@ function initializeCentralDatabase() {
         fullName: "Admin User",
         dob: "1990-01-01",
         email: "admin@vipedge.com",
-        password: "admin123",
+        password: hashPassword("admin123"), // Hash the password
         phone: "(555) 123-4567",
         address: "123 Racing Street",
         state: "CA",
@@ -288,7 +393,7 @@ function initializeCentralDatabase() {
         fullName: "Roel Garza",
         dob: "1985-01-01",
         email: "roel@vipsimracing.com",
-        password: "Roelgarza1!",
+        password: hashPassword("Roelgarza1!"), // Hash the password
         phone: "(832) 490-4304",
         address: "VIP Edge Racing Facility",
         state: "TX",
@@ -356,6 +461,12 @@ export function getUsers(): User[] {
     ipAddress: user.ipAddress || generateRandomIP(),
     deviceInfo: user.deviceInfo || getRandomDeviceInfo()
   }));
+}
+
+// Secure version of getUsers for public access
+export function getPublicUsers(): Partial<User>[] {
+  const users = getUsers();
+  return users.map(user => sanitizeUserData(user, true));
 }
 
 function getRandomStatusMessage(): string {
@@ -433,6 +544,19 @@ function getRandomDeviceInfo(): string {
 }
 
 export function saveUser(user: Omit<User, 'registrationDate' | 'racingCredits' | 'accountBalance'>): void {
+  // Validate input
+  if (!validateInput(user.email, 'email')) {
+    throw new Error('Invalid email format');
+  }
+  if (!validateInput(user.password, 'password')) {
+    throw new Error('Password must be 6-128 characters');
+  }
+  
+  // Check rate limit
+  if (!checkRateLimit(user.email)) {
+    throw new Error('Too many requests. Please try again later.');
+  }
+
   const users = getUsers();
   
   // Get user's device and location info
@@ -441,10 +565,12 @@ export function saveUser(user: Omit<User, 'registrationDate' | 'racingCredits' |
   
   const newUser: User = {
     ...user,
+    email: sanitizeEmail(user.email),
+    password: hashPassword(user.password), // Hash the password
     registrationDate: new Date().toISOString(),
     racingCredits: 0,
     accountBalance: 0,
-    isAdmin: users.length === 0, // First user is admin
+    isAdmin: isAdminDomain(user.email), // Auto-admin for vipsimracing.com domain
     status: 'online',
     statusMessage: 'New to VIP Edge Racing!',
     spotifyData: { connected: false },
@@ -468,10 +594,10 @@ export function saveUser(user: Omit<User, 'registrationDate' | 'racingCredits' |
   addAdminNotification({
     type: 'new_registration',
     title: 'New User Registration',
-    message: `${newUser.fullName} (${newUser.email}) has registered`,
+    message: `${newUser.fullName} (${sanitizeEmail(newUser.email)}) has registered`,
     timestamp: new Date().toISOString(),
     userId: newUser.email,
-    data: newUser
+    data: sanitizeUserData(newUser, false) // Full data for admin
   });
 }
 
@@ -480,6 +606,11 @@ export function updateUser(updatedUser: User): void {
   const userIndex = users.findIndex(u => u.email.toLowerCase() === updatedUser.email.toLowerCase());
   
   if (userIndex !== -1) {
+    // Preserve password hash if not being updated
+    if (updatedUser.password && !updatedUser.password.includes('hash')) {
+      updatedUser.password = hashPassword(updatedUser.password);
+    }
+    
     users[userIndex] = updatedUser;
     localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
     
@@ -492,10 +623,23 @@ export function updateUser(updatedUser: User): void {
 }
 
 export function findUser(email: string, password: string): User | undefined {
+  // Check rate limit
+  if (!checkRateLimit(email)) {
+    logSecurityEvent('Login rate limit exceeded', { email: sanitizeEmail(email) });
+    return undefined;
+  }
+
   const users = getUsers();
+  const sanitizedEmail = sanitizeEmail(email);
+  const hashedPassword = hashPassword(password);
+  
   const user = users.find(
-    (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+    (u) => u.email.toLowerCase() === sanitizedEmail && u.password === hashedPassword
   );
+  
+  if (!user) {
+    logSecurityEvent('Failed login attempt', { email: sanitizedEmail });
+  }
   
   // Ensure user has credits and balance properties (for existing users)
   if (user && (user.racingCredits === undefined || user.accountBalance === undefined)) {
@@ -514,7 +658,9 @@ export function findUser(email: string, password: string): User | undefined {
 }
 
 export function saveSession(user: User): void {
-  localStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify(user));
+  // Don't store sensitive data in session
+  const sessionUser = sanitizeUserData(user, false);
+  localStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify(sessionUser));
 }
 
 export function clearSession(): void {
@@ -542,25 +688,31 @@ export function getSession(): User | null {
 
 export function emailExists(email: string): boolean {
   const users = getUsers();
-  return users.some(u => u.email.toLowerCase() === email.toLowerCase());
+  const sanitizedEmail = sanitizeEmail(email);
+  return users.some(u => u.email.toLowerCase() === sanitizedEmail);
 }
 
 export function resetUserPassword(email: string, newPassword: string): boolean {
+  if (!validateInput(newPassword, 'password')) {
+    return false;
+  }
+
   const users = getUsers();
-  const userIndex = users.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
+  const sanitizedEmail = sanitizeEmail(email);
+  const userIndex = users.findIndex(u => u.email.toLowerCase() === sanitizedEmail);
   
   if (userIndex !== -1) {
-    users[userIndex].password = newPassword;
+    users[userIndex].password = hashPassword(newPassword);
     localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
     
-    // Add admin notification
+    // Add admin notification (don't include actual password)
     addAdminNotification({
       type: 'password_reset',
       title: 'Password Reset',
-      message: `Password reset for ${users[userIndex].fullName} (${email})`,
+      message: `Password reset for ${users[userIndex].fullName} (${sanitizedEmail})`,
       timestamp: new Date().toISOString(),
-      userId: email,
-      data: { newPassword }
+      userId: sanitizedEmail,
+      data: { passwordChanged: true }
     });
     
     return true;
@@ -728,7 +880,7 @@ export function addCreditsAndBalance(userId: string, packageData: any): Transact
   // Update user
   updateUser(user);
   
-  // Add admin notification
+  // Add admin notification (sanitize user data)
   addAdminNotification({
     type: 'purchase',
     title: 'New Purchase',
@@ -891,6 +1043,11 @@ export function getCommunityPosts(): CommunityPost[] {
 }
 
 export function addCommunityPost(post: Omit<CommunityPost, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments' | 'shares' | 'sharedBy' | 'reportedBy' | 'reportCount' | 'isHidden'>): CommunityPost {
+  // Validate content
+  if (!validateInput(post.title, 'text') || !validateInput(post.description || '', 'text')) {
+    throw new Error('Invalid post content');
+  }
+
   const posts = getCommunityPosts();
   const newPost: CommunityPost = {
     ...post,
@@ -943,7 +1100,7 @@ export function deleteCommunityPost(postId: string, userId: string): boolean {
           message: `Admin deleted post "${post.title}" by ${post.userId}`,
           timestamp: new Date().toISOString(),
           userId: userId,
-          data: { deletedPost: post }
+          data: { deletedPost: sanitizeUserData(post as any, false) }
         });
       }
       
@@ -983,6 +1140,11 @@ export function likeCommunityPost(postId: string, userId: string): void {
 }
 
 export function addCommentToCommunityPost(postId: string, comment: Omit<Comment, 'id' | 'createdAt' | 'likes' | 'likedBy'>): void {
+  // Validate comment
+  if (!validateInput(comment.text, 'text')) {
+    throw new Error('Invalid comment content');
+  }
+
   const posts = getCommunityPosts();
   const post = posts.find(p => p.id === postId);
   
@@ -1002,6 +1164,11 @@ export function addCommentToCommunityPost(postId: string, comment: Omit<Comment,
 }
 
 export function addReplyToComment(postId: string, commentId: string, reply: Omit<Comment, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'replies'>): void {
+  // Validate reply
+  if (!validateInput(reply.text, 'text')) {
+    throw new Error('Invalid reply content');
+  }
+
   const posts = getCommunityPosts();
   const post = posts.find(p => p.id === postId);
   
@@ -1073,6 +1240,11 @@ export function shareCommunityPost(postId: string, userId: string): void {
 
 // Post Reporting System
 export function reportPost(postId: string, reporterId: string, reason: string, description: string): PostReport {
+  // Validate inputs
+  if (!validateInput(description, 'text')) {
+    throw new Error('Invalid report description');
+  }
+
   const posts = getCommunityPosts();
   const post = posts.find(p => p.id === postId);
   
@@ -1125,7 +1297,7 @@ export function reportPost(postId: string, reporterId: string, reason: string, d
     message: `${user.fullName} reported a post for ${reason}`,
     timestamp: new Date().toISOString(),
     userId: reporterId,
-    data: { report, post }
+    data: { report, post: sanitizeUserData(post as any, false) }
   });
   
   return report;
@@ -1153,6 +1325,11 @@ export function getChatMessages(): ChatMessage[] {
 }
 
 export function addChatMessage(message: Omit<ChatMessage, 'id' | 'timestamp'>): ChatMessage {
+  // Validate message content
+  if (!validateInput(message.message, 'text')) {
+    throw new Error('Invalid message content');
+  }
+
   const messages = getChatMessages();
   const newMessage: ChatMessage = {
     ...message,

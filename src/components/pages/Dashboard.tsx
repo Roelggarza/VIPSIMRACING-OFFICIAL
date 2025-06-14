@@ -22,7 +22,8 @@ import {
   Gamepad2,
   Shield,
   Monitor,
-  Globe
+  Globe,
+  MessageCircle
 } from 'lucide-react';
 import { getSession, clearSession, User as UserType, formatCreditsDisplay, getUserTransactions } from '../../utils/userStorage';
 import Button from '../ui/Button';
@@ -38,6 +39,7 @@ import AdminDashboard from './AdminDashboard';
 import CommunityHub from './CommunityHub';
 import StatusBubble from '../ui/StatusBubble';
 import SpotifyWidget from '../ui/SpotifyWidget';
+import AIChat from '../ui/AIChat';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -51,6 +53,8 @@ export default function Dashboard() {
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [showSpotifyWidget, setShowSpotifyWidget] = useState(false);
+  const [showAIChat, setShowAIChat] = useState(false);
+  const [aiChatMinimized, setAiChatMinimized] = useState(false);
 
   useEffect(() => {
     const sessionUser = getSession();
@@ -589,9 +593,19 @@ export default function Dashboard() {
               </div>
             </div>
             
-            <Button variant="ghost" onClick={handleLogout} icon={LogOut}>
-              Sign Out
-            </Button>
+            <div className="flex items-center space-x-3">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setShowAIChat(true)}
+                icon={MessageCircle}
+              >
+                AI Support
+              </Button>
+              <Button variant="ghost" onClick={handleLogout} icon={LogOut}>
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -701,6 +715,16 @@ export default function Dashboard() {
           compact={true}
         />
       )}
+
+      {/* AI Chat Component */}
+      <AIChat
+        currentUser={user}
+        isOpen={showAIChat}
+        onClose={() => setShowAIChat(false)}
+        onMinimize={() => setAiChatMinimized(!aiChatMinimized)}
+        isMinimized={aiChatMinimized}
+        initialType="support"
+      />
 
       {/* Profile Edit Modal */}
       <Modal

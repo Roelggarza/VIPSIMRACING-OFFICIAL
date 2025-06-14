@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Image, Heart, MessageCircle, Share2, User, Crown, Calendar, Trophy, Video, Play, Send, Upload, Tag, Plus, Type, Camera, X, Reply, ThumbsUp, MoreHorizontal, Facebook, Twitter, Instagram, ExternalLink, Clipboard, Trash2, Flag, EyeOff, Eye } from 'lucide-react';
-import { getUsers, User as UserType, getCommunityPosts, CommunityPost, likeCommunityPost, addCommentToCommunityPost, addReplyToComment, likeComment, shareCommunityPost, addCommunityPost, Comment, deleteCommunityPost, reportPost, hidePost } from '../../utils/userStorage';
+import { Globe, Image, Heart, MessageCircle, Share2, User, Crown, Calendar, Trophy, Video, Play, Send, Upload, Tag, Plus, Type, Camera, X, Reply, ThumbsUp, MoreHorizontal, Facebook, Twitter, Instagram, ExternalLink, Clipboard, Flag, AlertTriangle } from 'lucide-react';
+import { getUsers, User as UserType, getCommunityPosts, CommunityPost, likeCommunityPost, addCommentToCommunityPost, addReplyToComment, likeComment, shareCommunityPost, addCommunityPost, Comment, reportPost } from '../../utils/userStorage';
 import Card, { CardHeader, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -21,12 +21,11 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showAIChat, setShowAIChat] = useState(false);
   const [selectedPostForShare, setSelectedPostForShare] = useState<CommunityPost | null>(null);
   const [selectedPostForReport, setSelectedPostForReport] = useState<CommunityPost | null>(null);
-  const [reportReason, setReportReason] = useState('');
+  const [reportReason, setReportReason] = useState<'spam' | 'inappropriate' | 'harassment' | 'copyright' | 'other'>('spam');
   const [reportDescription, setReportDescription] = useState('');
-  const [showAIChat, setShowAIChat] = useState(false);
-  const [aiChatMinimized, setAIChatMinimized] = useState(false);
   const [newPost, setNewPost] = useState({
     type: 'screenshot' as 'screenshot' | 'video' | 'lap_record' | 'highlight',
     title: '',
@@ -49,7 +48,7 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
   }, []);
 
   const filteredPosts = posts.filter(post => {
-    // Don't show hidden posts to non-admins
+    // Hide reported/hidden posts for non-admins
     if (post.isHidden && !currentUser.isAdmin) {
       return false;
     }
@@ -78,15 +77,19 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
     const commentText = commentTexts[postId]?.trim();
     if (!commentText) return;
 
-    addCommentToCommunityPost(postId, {
-      userId: currentUser.email,
-      userName: currentUser.fullName,
-      userAvatar: currentUser.profilePicture,
-      text: commentText
-    });
+    try {
+      addCommentToCommunityPost(postId, {
+        userId: currentUser.email,
+        userName: currentUser.fullName,
+        userAvatar: currentUser.profilePicture,
+        text: commentText
+      });
 
-    setCommentTexts(prev => ({ ...prev, [postId]: '' }));
-    refreshPosts();
+      setCommentTexts(prev => ({ ...prev, [postId]: '' }));
+      refreshPosts();
+    } catch (error) {
+      alert('Failed to add comment. Please try again.');
+    }
   };
 
   const handleReply = (postId: string, commentId: string) => {
@@ -94,15 +97,19 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
     const replyText = replyTexts[replyKey]?.trim();
     if (!replyText) return;
 
-    addReplyToComment(postId, commentId, {
-      userId: currentUser.email,
-      userName: currentUser.fullName,
-      userAvatar: currentUser.profilePicture,
-      text: replyText
-    });
+    try {
+      addReplyToComment(postId, commentId, {
+        userId: currentUser.email,
+        userName: currentUser.fullName,
+        userAvatar: currentUser.profilePicture,
+        text: replyText
+      });
 
-    setReplyTexts(prev => ({ ...prev, [replyKey]: '' }));
-    refreshPosts();
+      setReplyTexts(prev => ({ ...prev, [replyKey]: '' }));
+      refreshPosts();
+    } catch (error) {
+      alert('Failed to add reply. Please try again.');
+    }
   };
 
   const handleLikeComment = (postId: string, commentId: string) => {
@@ -110,25 +117,19 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
     refreshPosts();
   };
 
-  const handleDeletePost = (postId: string) => {
-    if (confirm('Are you sure you want to delete this post?')) {
-      const success = deleteCommunityPost(postId, currentUser.email);
-      if (success) {
-        refreshPosts();
-      } else {
-        alert('You can only delete your own posts.');
-      }
-    }
+  const handleShare = (post: CommunityPost) => {
+    setSelectedPostForShare(post);
+    setShowShareModal(true);
   };
 
-  const handleHidePost = (postId: string, isHidden: boolean) => {
-    hidePost(postId, isHidden);
-    refreshPosts();
+  const handleReport = (post: CommunityPost) => {
+    setSelectedPostForReport(post);
+    setShowReportModal(true);
   };
 
-  const handleReportPost = () => {
-    if (!selectedPostForReport || !reportReason.trim()) {
-      alert('Please select a reason for reporting.');
+  const handleSubmitReport = () => {
+    if (!selectedPostForReport || !reportDescription.trim()) {
+      alert('Please provide a description for your report.');
       return;
     }
 
@@ -137,16 +138,11 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
       alert('Thank you for your report. Our moderation team will review it shortly.');
       setShowReportModal(false);
       setSelectedPostForReport(null);
-      setReportReason('');
       setReportDescription('');
+      setReportReason('spam');
     } catch (error: any) {
-      alert(error.message);
+      alert(error.message || 'Failed to submit report. Please try again.');
     }
-  };
-
-  const handleShare = (post: CommunityPost) => {
-    setSelectedPostForShare(post);
-    setShowShareModal(true);
   };
 
   const handleInternalShare = (postId: string) => {
@@ -244,37 +240,41 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
       return;
     }
 
-    const tagsArray = newPost.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+    try {
+      const tagsArray = newPost.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
 
-    addCommunityPost({
-      userId: currentUser.email,
-      type: newPost.type,
-      title: newPost.title || 'Racing Update',
-      description: newPost.description,
-      mediaUrl: newPost.mediaUrl,
-      thumbnailUrl: newPost.type === 'video' ? newPost.mediaUrl : undefined,
-      game: newPost.game,
-      track: newPost.track,
-      lapTime: newPost.lapTime,
-      achievement: newPost.achievement,
-      tags: tagsArray,
-      isPublic: newPost.isPublic
-    });
+      addCommunityPost({
+        userId: currentUser.email,
+        type: newPost.type,
+        title: newPost.title || 'Racing Update',
+        description: newPost.description,
+        mediaUrl: newPost.mediaUrl,
+        thumbnailUrl: newPost.type === 'video' ? newPost.mediaUrl : undefined,
+        game: newPost.game,
+        track: newPost.track,
+        lapTime: newPost.lapTime,
+        achievement: newPost.achievement,
+        tags: tagsArray,
+        isPublic: newPost.isPublic
+      });
 
-    refreshPosts();
-    setShowCreatePost(false);
-    setNewPost({
-      type: 'screenshot',
-      title: '',
-      description: '',
-      mediaUrl: '',
-      game: '',
-      track: '',
-      lapTime: '',
-      achievement: '',
-      tags: '',
-      isPublic: true
-    });
+      refreshPosts();
+      setShowCreatePost(false);
+      setNewPost({
+        type: 'screenshot',
+        title: '',
+        description: '',
+        mediaUrl: '',
+        game: '',
+        track: '',
+        lapTime: '',
+        achievement: '',
+        tags: '',
+        isPublic: true
+      });
+    } catch (error) {
+      alert('Failed to create post. Please check your content and try again.');
+    }
   };
 
   const handleImageUpload = (file: File) => {
@@ -387,10 +387,6 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
     return date.toLocaleDateString();
   };
 
-  const canDeletePost = (post: CommunityPost) => {
-    return post.userId === currentUser.email || currentUser.isAdmin;
-  };
-
   const renderComment = (comment: Comment, postId: string, isReply: boolean = false) => {
     const replyKey = `${postId}-${comment.id}`;
     const isLiked = comment.likedBy.includes(currentUser.email);
@@ -416,11 +412,15 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
           
           <div className="flex-1 min-w-0">
             <div className="bg-slate-700/30 rounded-lg p-3">
-              <div className="flex items-center space-x-2 mb-1">
-                <p className="font-semibold text-white text-sm">{comment.userName}</p>
+              <div className="flex items-center justify-between">
+                <h4 className={`font-semibold ${comment.read ? 'text-slate-300' : 'text-white'} text-sm`}>
+                  {comment.userName}
+                </h4>
                 <p className="text-xs text-slate-500">{formatTimeAgo(comment.createdAt)}</p>
               </div>
-              <p className="text-slate-300 text-sm">{comment.text}</p>
+              <p className={`text-sm mt-1 ${comment.read ? 'text-slate-400' : 'text-slate-300'}`}>
+                {comment.text}
+              </p>
             </div>
             
             {/* Comment Actions */}
@@ -541,19 +541,20 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
                 VIP Only
               </Button>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 onClick={() => setShowAIChat(true)}
                 icon={MessageCircle}
               >
-                AI Assistant
+                AI Support
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <p className="text-slate-300">
-            Share your racing moments, lap records, and highlights with the community!
+            Share your racing moments, lap records, and highlights with the community! 
+            Need help? Use our AI support chat for instant assistance.
           </p>
         </CardContent>
       </Card>
@@ -629,22 +630,11 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
             const isLiked = post.likedBy.includes(currentUser.email);
             const isShared = post.sharedBy.includes(currentUser.email);
             const isVip = user.vipMembership?.active && new Date(user.vipMembership.expiryDate) > new Date();
-            const canDelete = canDeletePost(post);
             const isReported = post.reportedBy?.includes(currentUser.email);
 
             return (
-              <Card key={post.id} className={post.isHidden ? 'opacity-60 border-yellow-500/30' : ''}>
+              <Card key={post.id}>
                 <CardContent className="p-0">
-                  {/* Admin Notice for Hidden Posts */}
-                  {post.isHidden && currentUser.isAdmin && (
-                    <div className="bg-yellow-500/10 border-b border-yellow-500/30 p-3">
-                      <div className="flex items-center space-x-2 text-yellow-400">
-                        <EyeOff className="w-4 h-4" />
-                        <span className="text-sm font-medium">This post is hidden from public view</span>
-                      </div>
-                    </div>
-                  )}
-
                   {/* User Header */}
                   <div className="p-4 border-b border-slate-700/50">
                     <div className="flex items-center justify-between">
@@ -690,56 +680,11 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
                           </div>
                         </div>
                       </div>
-                      
-                      {/* Post Actions Menu */}
                       <div className="relative">
-                        <div className="flex items-center space-x-2">
-                          {/* Report Button */}
-                          {post.userId !== currentUser.email && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => {
-                                setSelectedPostForReport(post);
-                                setShowReportModal(true);
-                              }}
-                              className={`p-2 ${isReported ? 'text-red-400' : 'text-slate-400 hover:text-red-400'}`}
-                              title={isReported ? 'Already reported' : 'Report post'}
-                            >
-                              <Flag className="w-4 h-4" />
-                            </Button>
-                          )}
-                          
-                          {/* Admin Hide/Show Button */}
-                          {currentUser.isAdmin && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => handleHidePost(post.id, !post.isHidden)}
-                              className="p-2 text-slate-400 hover:text-yellow-400"
-                              title={post.isHidden ? 'Show post' : 'Hide post'}
-                            >
-                              {post.isHidden ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                            </Button>
-                          )}
-                          
-                          {/* Delete Button */}
-                          {canDelete && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => handleDeletePost(post.id)}
-                              className="p-2 text-slate-400 hover:text-red-400"
-                              title="Delete post"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          )}
-                          
-                          <Button variant="ghost" size="sm" icon={MoreHorizontal} className="p-2">
-                            <span className="sr-only">More options</span>
-                          </Button>
-                        </div>
+                        <Button variant="ghost" size="sm" icon={MoreHorizontal}>
+                          <span className="sr-only">More options</span>
+                        </Button>
+                        {/* Dropdown menu would go here */}
                       </div>
                     </div>
                   </div>
@@ -749,6 +694,16 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
                     <h3 className="text-lg font-bold text-white mb-2">{post.title}</h3>
                     {post.description && (
                       <p className="text-slate-300 mb-4">{post.description}</p>
+                    )}
+                    
+                    {/* Hidden post warning for admins */}
+                    {post.isHidden && currentUser.isAdmin && (
+                      <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4">
+                        <div className="flex items-center space-x-2 text-red-400">
+                          <AlertTriangle className="w-4 h-4" />
+                          <span className="text-sm font-semibold">This post is hidden due to reports</span>
+                        </div>
+                      </div>
                     )}
                   </div>
 
@@ -844,6 +799,18 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
                         >
                           {post.shares || 0}
                         </Button>
+                        {post.userId !== currentUser.email && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            icon={Flag}
+                            className={isReported ? 'text-red-500' : 'text-slate-500'}
+                            onClick={() => handleReport(post)}
+                            disabled={isReported}
+                          >
+                            {isReported ? 'Reported' : 'Report'}
+                          </Button>
+                        )}
                       </div>
                     </div>
 
@@ -1001,80 +968,69 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
         onClose={() => {
           setShowReportModal(false);
           setSelectedPostForReport(null);
-          setReportReason('');
           setReportDescription('');
+          setReportReason('spam');
         }}
-        title="Report Post"
+        title="Report Content"
       >
         {selectedPostForReport && (
           <div className="space-y-4">
             {/* Post Preview */}
             <div className="bg-slate-700/30 rounded-lg p-4">
-              <h4 className="font-semibold text-white mb-2">{selectedPostForReport.title}</h4>
-              {selectedPostForReport.description && (
-                <p className="text-slate-300 text-sm">{selectedPostForReport.description.substring(0, 100)}...</p>
-              )}
+              <h4 className="font-semibold text-white mb-2">Reporting: {selectedPostForReport.title}</h4>
+              <p className="text-slate-400 text-sm">
+                This will be sent to our moderation team for review.
+              </p>
             </div>
 
             {/* Report Reason */}
-            <div className="space-y-3">
-              <h3 className="text-lg font-semibold text-white">Why are you reporting this post?</h3>
-              
-              <div className="space-y-2">
-                {[
-                  { value: 'spam', label: 'Spam or misleading content' },
-                  { value: 'inappropriate', label: 'Inappropriate or offensive content' },
-                  { value: 'harassment', label: 'Harassment or bullying' },
-                  { value: 'copyright', label: 'Copyright violation' },
-                  { value: 'other', label: 'Other' }
-                ].map((reason) => (
-                  <label key={reason.value} className="flex items-center space-x-3 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="reportReason"
-                      value={reason.value}
-                      checked={reportReason === reason.value}
-                      onChange={(e) => setReportReason(e.target.value)}
-                      className="w-4 h-4 text-red-500 bg-slate-700 border-slate-600 focus:ring-red-500"
-                    />
-                    <span className="text-slate-300">{reason.label}</span>
-                  </label>
-                ))}
-              </div>
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-300">Reason for Report</label>
+              <select
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value as any)}
+                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+              >
+                <option value="spam">Spam</option>
+                <option value="inappropriate">Inappropriate Content</option>
+                <option value="harassment">Harassment or Bullying</option>
+                <option value="copyright">Copyright Violation</option>
+                <option value="other">Other</option>
+              </select>
             </div>
 
-            {/* Additional Details */}
+            {/* Report Description */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-slate-300">
-                Additional details (optional)
+                Description <span className="text-red-400">*</span>
               </label>
               <textarea
                 value={reportDescription}
                 onChange={(e) => setReportDescription(e.target.value)}
-                placeholder="Please provide any additional context about why you're reporting this post..."
-                rows={3}
-                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                placeholder="Please provide details about why you're reporting this content..."
+                rows={4}
+                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                required
               />
             </div>
 
             {/* Action Buttons */}
             <div className="flex space-x-3">
               <Button 
-                onClick={handleReportPost}
-                disabled={!reportReason}
-                className="flex-1"
+                onClick={handleSubmitReport}
+                disabled={!reportDescription.trim()}
+                icon={Flag}
               >
                 Submit Report
               </Button>
               <Button 
-                variant="outline" 
+                variant="outline"
                 onClick={() => {
                   setShowReportModal(false);
                   setSelectedPostForReport(null);
-                  setReportReason('');
                   setReportDescription('');
+                  setReportReason('spam');
                 }}
-                className="flex-1"
               >
                 Cancel
               </Button>
@@ -1082,7 +1038,8 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
 
             <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
               <p className="text-sm text-red-300">
-                <strong>Note:</strong> Reports are reviewed by our moderation team. False reports may result in account restrictions.
+                <strong>Note:</strong> False reports may result in restrictions on your account. 
+                Please only report content that genuinely violates our community guidelines.
               </p>
             </div>
           </div>
@@ -1270,13 +1227,11 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
         </div>
       </Modal>
 
-      {/* AI Chat Assistant */}
+      {/* AI Chat Component */}
       <AIChat
         currentUser={currentUser}
         isOpen={showAIChat}
         onClose={() => setShowAIChat(false)}
-        onMinimize={() => setAIChatMinimized(!aiChatMinimized)}
-        isMinimized={aiChatMinimized}
         initialType="general"
       />
     </div>
