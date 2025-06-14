@@ -130,8 +130,8 @@ export default function Dashboard() {
       name: 'TrackPass Basic',
       price: 30,
       duration: '30 min',
-      description: 'Solo only. No guests.',
-      features: ['30 minutes of racing', 'Solo experience', 'Basic telemetry'],
+      description: '1 Driver',
+      features: ['30 minutes of racing', '1 driver', 'Basic telemetry'],
       color: 'from-slate-500/20 to-slate-600/10',
       icon: Car,
       credits: 30
@@ -141,8 +141,8 @@ export default function Dashboard() {
       name: 'TrackPass Plus',
       price: 45,
       duration: '30 min',
-      description: 'Includes 1 guest.',
-      features: ['30 minutes of racing', '1 guest included', 'Advanced telemetry', 'Photo package'],
+      description: '2 Drivers',
+      features: ['30 minutes of racing', '2 drivers', 'Advanced telemetry', 'Photo package'],
       color: 'from-blue-500/20 to-blue-600/10',
       icon: Users,
       credits: 30
@@ -152,8 +152,8 @@ export default function Dashboard() {
       name: 'TrackPass Pro',
       price: 60,
       duration: '30 min',
-      description: 'Includes 2 guests.',
-      features: ['30 minutes of racing', '2 guests included', 'Pro telemetry', 'Video recording', 'Coaching tips'],
+      description: '3 Drivers',
+      features: ['30 minutes of racing', '3 drivers', 'Pro telemetry', 'Video recording', 'Coaching tips'],
       color: 'from-purple-500/20 to-purple-600/10',
       icon: Trophy,
       credits: 30
@@ -163,8 +163,8 @@ export default function Dashboard() {
       name: 'TrackPass Elite',
       price: 99.99,
       duration: '30 min',
-      description: 'Includes 3 guests.',
-      features: ['30 minutes of racing', '3 guests included', 'Elite telemetry', 'Professional video', 'Personal coaching', 'Priority booking'],
+      description: '4 Drivers',
+      features: ['30 minutes of racing', '4 drivers', 'Elite telemetry', 'Professional video', 'Personal coaching', 'Priority booking'],
       color: 'from-amber-500/20 to-amber-600/10',
       icon: Crown,
       credits: 30
@@ -176,19 +176,20 @@ export default function Dashboard() {
     name: 'TrackPass VIP Membership',
     price: 49.99,
     duration: 'monthly',
-    description: '25% discount on all sessions + 30 minutes',
+    description: '25% discount + 30 minutes included',
     features: [
       '25% discount on all sessions',
       '30 minutes of racing credits included',
-      '4 guest passes per month (1 per week, non-stacking)',
-      '2 free entries/month to exclusive events or sim challenges',
-      'Exclusive merch drops and giveaway',
-      'Priority access to bookings and exclusive content',
+      '4 guest passes per month',
+      '2 free entries/month to exclusive events',
+      'Exclusive merch drops and giveaways',
+      'Priority access to bookings',
       'Recognition on VIP leaderboard'
     ],
     color: 'from-red-500/20 to-red-600/10',
     icon: Zap,
-    credits: 30
+    credits: 30,
+    savings: 'Save $10.01 vs TrackPass Pro!'
   };
 
   if (loading) {

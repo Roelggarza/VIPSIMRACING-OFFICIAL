@@ -129,8 +129,8 @@ export default function Registration() {
       name: 'TrackPass Basic',
       price: 30,
       duration: '30 min',
-      description: 'Solo only. No guests.',
-      features: ['30 minutes of racing', 'Solo experience', 'Basic telemetry'],
+      description: '1 Driver',
+      features: ['30 minutes of racing', '1 driver', 'Basic telemetry'],
       color: 'from-slate-500/20 to-slate-600/10',
       credits: 30
     },
@@ -139,8 +139,8 @@ export default function Registration() {
       name: 'TrackPass Plus',
       price: 45,
       duration: '30 min',
-      description: 'Includes 1 guest.',
-      features: ['30 minutes of racing', '1 guest included', 'Advanced telemetry', 'Photo package'],
+      description: '2 Drivers',
+      features: ['30 minutes of racing', '2 drivers', 'Advanced telemetry', 'Photo package'],
       color: 'from-blue-500/20 to-blue-600/10',
       credits: 30
     },
@@ -149,8 +149,8 @@ export default function Registration() {
       name: 'TrackPass Pro',
       price: 60,
       duration: '30 min',
-      description: 'Includes 2 guests.',
-      features: ['30 minutes of racing', '2 guests included', 'Pro telemetry', 'Video recording', 'Coaching tips'],
+      description: '3 Drivers',
+      features: ['30 minutes of racing', '3 drivers', 'Pro telemetry', 'Video recording', 'Coaching tips'],
       color: 'from-purple-500/20 to-purple-600/10',
       credits: 30
     },
@@ -159,8 +159,8 @@ export default function Registration() {
       name: 'TrackPass Elite',
       price: 99.99,
       duration: '30 min',
-      description: 'Includes 3 guests.',
-      features: ['30 minutes of racing', '3 guests included', 'Elite telemetry', 'Professional video', 'Personal coaching', 'Priority booking'],
+      description: '4 Drivers',
+      features: ['30 minutes of racing', '4 drivers', 'Elite telemetry', 'Professional video', 'Personal coaching', 'Priority booking'],
       color: 'from-amber-500/20 to-amber-600/10',
       credits: 30
     }

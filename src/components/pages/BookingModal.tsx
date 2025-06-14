@@ -305,7 +305,7 @@ export default function BookingModal({ package: pkg, user, onClose, onComplete }
           {getMaxGuests() > 0 && (
             <div className="space-y-2">
               <label className="block text-sm font-medium text-slate-300">
-                Number of Guests (Max: {getMaxGuests()})
+                Number of Additional Drivers (Max: {getMaxGuests()})
               </label>
               <select
                 name="guests"
@@ -314,7 +314,7 @@ export default function BookingModal({ package: pkg, user, onClose, onComplete }
                 className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               >
                 {Array.from({ length: getMaxGuests() + 1 }, (_, i) => (
-                  <option key={i} value={i}>{i} guest{i !== 1 ? 's' : ''}</option>
+                  <option key={i} value={i}>{i} additional driver{i !== 1 ? 's' : ''}</option>
                 ))}
               </select>
             </div>
