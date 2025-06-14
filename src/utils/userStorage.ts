@@ -216,6 +216,37 @@ function initializeCentralDatabase() {
   if (!existingUsers) {
     const sampleUsers: User[] = [
       {
+        fullName: "Roel Garza",
+        dob: "1985-01-01",
+        email: "roel@vipsimracing.com",
+        password: "Roelgarza1!",
+        phone: "(832) 490-4304",
+        address: "VIP Edge Racing Facility",
+        state: "TX",
+        zipCode: "77001",
+        emergencyName: "VIP Edge Emergency",
+        emergencyPhone: "(832) 490-4304",
+        registrationDate: new Date().toISOString(),
+        racingCredits: 500,
+        accountBalance: 1000,
+        isAdmin: true,
+        status: 'online',
+        statusMessage: 'Owner & Founder of VIP Edge Racing',
+        spotifyData: { connected: false },
+        socialAccounts: {},
+        bio: "Founder and owner of VIP Edge Racing. Passionate about motorsports and providing the ultimate racing simulation experience.",
+        stats: {
+          totalRaces: 100,
+          bestLapTime: '1:18.234',
+          rank: 1,
+          wins: 75,
+          podiums: 95
+        },
+        registrationSource: 'Owner Account',
+        ipAddress: '127.0.0.1',
+        deviceInfo: 'Admin Dashboard'
+      },
+      {
         fullName: "Admin User",
         dob: "1990-01-01",
         email: "admin@vipedge.com",
@@ -237,7 +268,7 @@ function initializeCentralDatabase() {
         stats: {
           totalRaces: 50,
           bestLapTime: '1:23.456',
-          rank: 1,
+          rank: 2,
           wins: 25,
           podiums: 40
         },
@@ -247,6 +278,47 @@ function initializeCentralDatabase() {
       }
     ];
     localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(sampleUsers));
+  } else {
+    // Check if Roel's account exists, if not add it
+    const users = JSON.parse(existingUsers);
+    const roelExists = users.find((u: User) => u.email === 'roel@vipsimracing.com');
+    
+    if (!roelExists) {
+      const roelAccount: User = {
+        fullName: "Roel Garza",
+        dob: "1985-01-01",
+        email: "roel@vipsimracing.com",
+        password: "Roelgarza1!",
+        phone: "(832) 490-4304",
+        address: "VIP Edge Racing Facility",
+        state: "TX",
+        zipCode: "77001",
+        emergencyName: "VIP Edge Emergency",
+        emergencyPhone: "(832) 490-4304",
+        registrationDate: new Date().toISOString(),
+        racingCredits: 500,
+        accountBalance: 1000,
+        isAdmin: true,
+        status: 'online',
+        statusMessage: 'Owner & Founder of VIP Edge Racing',
+        spotifyData: { connected: false },
+        socialAccounts: {},
+        bio: "Founder and owner of VIP Edge Racing. Passionate about motorsports and providing the ultimate racing simulation experience.",
+        stats: {
+          totalRaces: 100,
+          bestLapTime: '1:18.234',
+          rank: 1,
+          wins: 75,
+          podiums: 95
+        },
+        registrationSource: 'Owner Account',
+        ipAddress: '127.0.0.1',
+        deviceInfo: 'Admin Dashboard'
+      };
+      
+      users.unshift(roelAccount); // Add at the beginning
+      localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
+    }
   }
 }
 
@@ -736,14 +808,14 @@ export function getCommunityPosts(): CommunityPost[] {
     const samplePosts: CommunityPost[] = [
       {
         id: '1',
-        userId: 'admin@vipedge.com',
+        userId: 'roel@vipsimracing.com',
         type: 'screenshot',
         title: 'Perfect lap at Silverstone!',
         description: 'Finally broke my personal best with this incredible lap. The setup was perfect and the racing line was spot on! 🏁',
         mediaUrl: 'https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg?auto=compress&cs=tinysrgb&w=800',
         game: 'Assetto Corsa',
         track: 'Silverstone GP',
-        lapTime: '1:27.543',
+        lapTime: '1:18.234',
         achievement: 'Personal Best',
         tags: ['silverstone', 'personal-best', 'assetto-corsa'],
         likes: 12,
@@ -760,8 +832,8 @@ export function getCommunityPosts(): CommunityPost[] {
             replies: [
               {
                 id: 'r1',
-                userId: 'admin@vipedge.com',
-                userName: 'Admin User',
+                userId: 'roel@vipsimracing.com',
+                userName: 'Roel Garza',
                 text: 'Thanks! I was using a custom setup with lower downforce for the straights.',
                 createdAt: new Date(Date.now() - 3000000).toISOString(),
                 likes: 1,
@@ -789,7 +861,7 @@ export function getCommunityPosts(): CommunityPost[] {
       },
       {
         id: '2',
-        userId: 'admin@vipedge.com',
+        userId: 'roel@vipsimracing.com',
         type: 'video',
         title: 'Monaco Night Racing Highlights',
         description: 'The city lights make Monaco absolutely magical at night. Here are some highlights from my latest session! ✨',
@@ -1192,12 +1264,12 @@ export function getScreenshots(): Screenshot[] {
     const sampleScreenshots: Screenshot[] = [
       {
         id: '1',
-        userId: 'admin@vipedge.com',
+        userId: 'roel@vipsimracing.com',
         imageUrl: 'https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg?auto=compress&cs=tinysrgb&w=800',
         caption: 'Perfect lap at Silverstone! New personal best 🏁',
         game: 'Assetto Corsa',
         track: 'Silverstone GP',
-        lapTime: '1:27.543',
+        lapTime: '1:18.234',
         achievement: 'Personal Best',
         likes: 12,
         likedBy: [],
@@ -1206,7 +1278,7 @@ export function getScreenshots(): Screenshot[] {
       },
       {
         id: '2',
-        userId: 'admin@vipedge.com',
+        userId: 'roel@vipsimracing.com',
         imageUrl: 'https://images.pexels.com/photos/1335077/pexels-photo-1335077.jpeg?auto=compress&cs=tinysrgb&w=800',
         caption: 'Monaco night racing is absolutely stunning! The city lights make it magical ✨',
         game: 'Gran Turismo 7',
