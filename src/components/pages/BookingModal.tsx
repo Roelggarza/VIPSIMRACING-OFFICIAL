@@ -390,6 +390,6 @@ export default function BookingModal({ package: pkg, user, onClose, onComplete }
           Cancel
         </Button>
       </div>
-    </div>
+    </form>
   );
 }
