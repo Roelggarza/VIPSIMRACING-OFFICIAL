@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, Monitor, Activity, Eye, Settings, AlertTriangle } from 'lucide-react';
-import { getUsers, getSimulators, User as UserType, Simulator, formatCreditsDisplay } from '../../utils/userStorage';
+import { Shield, Users, Monitor, Activity, Eye, Settings, AlertTriangle, Key, UserCheck, UserX } from 'lucide-react';
+import { getUsers, getSimulators, User as UserType, Simulator, formatCreditsDisplay, resetUserPassword, updateUser } from '../../utils/userStorage';
 import Card, { CardHeader, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
+import Input from '../ui/Input';
+import Modal from '../ui/Modal';
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState<UserType[]>([]);
   const [simulators, setSimulators] = useState<Simulator[]>([]);
   const [activeTab, setActiveTab] = useState<'users' | 'simulators'>('users');
+  const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [showUserDetails, setShowUserDetails] = useState(false);
 
   useEffect(() => {
     setUsers(getUsers());
@@ -23,6 +29,40 @@ export default function AdminDashboard() {
       return `Racing on Sim ${user.currentSimulator}`;
     }
     return user.isOnline ? 'Online' : 'Offline';
+  };
+
+  const handleResetPassword = () => {
+    if (!selectedUser || !newPassword.trim()) return;
+    
+    if (resetUserPassword(selectedUser.email, newPassword)) {
+      alert(`Password reset successfully for ${selectedUser.fullName}. New password: ${newPassword}`);
+      setShowPasswordModal(false);
+      setNewPassword('');
+      setSelectedUser(null);
+    } else {
+      alert('Failed to reset password');
+    }
+  };
+
+  const toggleAdminStatus = (user: UserType) => {
+    const updatedUser = { ...user, isAdmin: !user.isAdmin };
+    updateUser(updatedUser);
+    setUsers(getUsers()); // Refresh the list
+    
+    if (updatedUser.isAdmin) {
+      alert(`${user.fullName} has been granted admin privileges.`);
+    } else {
+      alert(`${user.fullName} admin privileges have been revoked.`);
+    }
+  };
+
+  const generateRandomPassword = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let password = '';
+    for (let i = 0; i < 8; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setNewPassword(password);
   };
 
   return (
@@ -115,6 +155,7 @@ export default function AdminDashboard() {
         <Card>
           <CardHeader>
             <h3 className="text-lg font-bold text-white">User Management</h3>
+            <p className="text-slate-400 text-sm">Manage user accounts, passwords, and admin privileges</p>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -159,15 +200,44 @@ export default function AdminDashboard() {
                         <p className="text-blue-400 font-semibold">${(user.accountBalance || 0).toFixed(2)}</p>
                       </div>
                       <div>
-                        <p className="text-slate-400">Last Active</p>
-                        <p className="text-slate-300 text-xs">
-                          {user.lastActive ? new Date(user.lastActive).toLocaleDateString() : 'Never'}
+                        <p className="text-slate-400">Password</p>
+                        <p className="text-yellow-400 font-mono text-xs bg-slate-800/50 px-2 py-1 rounded">
+                          {user.password}
                         </p>
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm" icon={Eye}>
-                      View Details
-                    </Button>
+                    <div className="flex space-x-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        icon={Eye}
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setShowUserDetails(true);
+                        }}
+                      >
+                        Details
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        icon={Key}
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setShowPasswordModal(true);
+                        }}
+                      >
+                        Reset Password
+                      </Button>
+                      <Button 
+                        variant={user.isAdmin ? "ghost" : "outline"} 
+                        size="sm" 
+                        icon={user.isAdmin ? UserX : UserCheck}
+                        onClick={() => toggleAdminStatus(user)}
+                      >
+                        {user.isAdmin ? 'Remove Admin' : 'Make Admin'}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -256,6 +326,125 @@ export default function AdminDashboard() {
           </Card>
         </div>
       )}
+
+      {/* Password Reset Modal */}
+      <Modal
+        isOpen={showPasswordModal}
+        onClose={() => {
+          setShowPasswordModal(false);
+          setNewPassword('');
+          setSelectedUser(null);
+        }}
+        title="Reset User Password"
+      >
+        {selectedUser && (
+          <div className="space-y-4">
+            <div className="bg-slate-700/30 rounded-lg p-4">
+              <h4 className="font-semibold text-white mb-2">User: {selectedUser.fullName}</h4>
+              <p className="text-slate-400 text-sm">Email: {selectedUser.email}</p>
+              <p className="text-slate-400 text-sm">Current Password: <span className="font-mono text-yellow-400">{selectedUser.password}</span></p>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-slate-300">New Password</label>
+              <div className="flex space-x-2">
+                <Input
+                  type="text"
+                  placeholder="Enter new password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="flex-1"
+                />
+                <Button variant="outline" onClick={generateRandomPassword}>
+                  Generate
+                </Button>
+              </div>
+            </div>
+            
+            <div className="flex space-x-3">
+              <Button onClick={handleResetPassword} disabled={!newPassword.trim()}>
+                Reset Password
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setNewPassword('');
+                  setSelectedUser(null);
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* User Details Modal */}
+      <Modal
+        isOpen={showUserDetails}
+        onClose={() => {
+          setShowUserDetails(false);
+          setSelectedUser(null);
+        }}
+        title="User Details"
+      >
+        {selectedUser && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-300">Full Name</label>
+                <p className="text-white">{selectedUser.fullName}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300">Email</label>
+                <p className="text-white">{selectedUser.email}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300">Phone</label>
+                <p className="text-white">{selectedUser.phone}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300">Date of Birth</label>
+                <p className="text-white">{new Date(selectedUser.dob).toLocaleDateString()}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300">Emergency Contact</label>
+                <p className="text-white">{selectedUser.emergencyName}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300">Emergency Phone</label>
+                <p className="text-white">{selectedUser.emergencyPhone}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300">Registration Date</label>
+                <p className="text-white">{new Date(selectedUser.registrationDate).toLocaleDateString()}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300">Account Status</label>
+                <div className="flex space-x-2">
+                  {selectedUser.isAdmin && (
+                    <span className="bg-blue-500/20 px-2 py-1 rounded text-xs text-blue-300">ADMIN</span>
+                  )}
+                  {selectedUser.vipMembership?.active && (
+                    <span className="bg-red-500/20 px-2 py-1 rounded text-xs text-red-300">VIP</span>
+                  )}
+                  {selectedUser.isOnline && (
+                    <span className="bg-green-500/20 px-2 py-1 rounded text-xs text-green-300">ONLINE</span>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            {selectedUser.bio && (
+              <div>
+                <label className="block text-sm font-medium text-slate-300">Bio</label>
+                <p className="text-white">{selectedUser.bio}</p>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

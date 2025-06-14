@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogIn, AlertCircle, Mail, ArrowLeft } from 'lucide-react';
-import { findUser, saveSession, emailExists } from '../../utils/userStorage';
+import { findUser, saveSession, emailExists, resetUserPassword } from '../../utils/userStorage';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Card, { CardHeader, CardContent } from '../ui/Card';
@@ -65,16 +65,27 @@ export default function Login() {
 
     setIsLoading(true);
     
-    // Simulate sending reset email
+    // Simulate sending reset email and actually reset password
     setTimeout(() => {
+      // Generate a temporary password
+      const tempPassword = Math.random().toString(36).slice(-8);
+      
+      // Reset the user's password
+      resetUserPassword(resetEmail, tempPassword);
+      
       setResetSent(true);
       setIsLoading(false);
       setError('');
+      
+      // Store temp password for display (in real app, this would be sent via email)
+      localStorage.setItem('tempPassword', tempPassword);
     }, 1000);
   };
 
   if (showResetPassword) {
     if (resetSent) {
+      const tempPassword = localStorage.getItem('tempPassword');
+      
       return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-red-900/20 flex items-center justify-center p-6">
           <Card className="max-w-md w-full">
@@ -83,17 +94,22 @@ export default function Login() {
                 <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
                   <Mail className="w-6 h-6 text-green-500" />
                 </div>
-                <h1 className="text-2xl font-bold text-white">Check Your Email</h1>
-                <p className="text-slate-400">Password reset instructions sent to {resetEmail}</p>
+                <h1 className="text-2xl font-bold text-white">Password Reset</h1>
+                <p className="text-slate-400">Your password has been reset</p>
               </div>
             </CardHeader>
 
             <CardContent>
               <div className="space-y-4">
                 <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
-                  <p className="text-sm text-green-300">
-                    We've sent password reset instructions to your email address. 
-                    Please check your inbox and follow the link to reset your password.
+                  <p className="text-sm text-green-300 mb-3">
+                    Your password has been reset successfully. Please use the temporary password below to log in:
+                  </p>
+                  <div className="bg-slate-800/50 rounded p-3 font-mono text-center">
+                    <span className="text-white font-bold text-lg">{tempPassword}</span>
+                  </div>
+                  <p className="text-xs text-green-300 mt-3">
+                    Please change this password after logging in for security.
                   </p>
                 </div>
                 
@@ -102,6 +118,7 @@ export default function Login() {
                     setShowResetPassword(false);
                     setResetSent(false);
                     setResetEmail('');
+                    localStorage.removeItem('tempPassword');
                   }}
                   variant="outline"
                   size="lg" 
@@ -126,7 +143,7 @@ export default function Login() {
                 <Mail className="w-6 h-6 text-blue-500" />
               </div>
               <h1 className="text-2xl font-bold text-white">Reset Password</h1>
-              <p className="text-slate-400">Enter your email to receive reset instructions</p>
+              <p className="text-slate-400">Enter your email to reset your password</p>
             </div>
           </CardHeader>
 
@@ -156,7 +173,7 @@ export default function Login() {
                 disabled={isLoading}
                 icon={Mail}
               >
-                {isLoading ? 'Sending...' : 'Send Reset Instructions'}
+                {isLoading ? 'Resetting...' : 'Reset Password'}
               </Button>
 
               <Button 

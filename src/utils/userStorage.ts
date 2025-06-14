@@ -75,6 +75,37 @@ export interface Transaction {
   description: string;
 }
 
+export interface Comment {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  text: string;
+  createdAt: string;
+}
+
+export interface CommunityPost {
+  id: string;
+  userId: string;
+  type: 'screenshot' | 'video' | 'lap_record' | 'highlight';
+  title: string;
+  description?: string;
+  mediaUrl: string;
+  thumbnailUrl?: string; // For videos
+  game?: string;
+  track?: string;
+  lapTime?: string;
+  achievement?: string;
+  tags?: string[];
+  likes: number;
+  likedBy: string[];
+  comments: Comment[];
+  shares: number;
+  sharedBy: string[];
+  createdAt: string;
+  isPublic: boolean;
+}
+
 export interface Screenshot {
   id: string;
   userId: string;
@@ -87,13 +118,6 @@ export interface Screenshot {
   likes: number;
   likedBy?: string[];
   comments?: Comment[];
-  createdAt: string;
-}
-
-export interface Comment {
-  id: string;
-  userId: string;
-  text: string;
   createdAt: string;
 }
 
@@ -111,6 +135,7 @@ const STORAGE_KEY_SESSION = "vipSimSession";
 const STORAGE_KEY_TRANSACTIONS = "vipSimTransactions";
 const STORAGE_KEY_SIMULATORS = "vipSimSimulators";
 const STORAGE_KEY_SCREENSHOTS = "vipSimScreenshots";
+const STORAGE_KEY_COMMUNITY_POSTS = "vipSimCommunityPosts";
 
 export function getUsers(): User[] {
   const usersStr = localStorage.getItem(STORAGE_KEY_USERS);
@@ -221,6 +246,18 @@ export function emailExists(email: string): boolean {
   return users.some(u => u.email.toLowerCase() === email.toLowerCase());
 }
 
+export function resetUserPassword(email: string, newPassword: string): boolean {
+  const users = getUsers();
+  const userIndex = users.findIndex(u => u.email.toLowerCase() === email.toLowerCase());
+  
+  if (userIndex !== -1) {
+    users[userIndex].password = newPassword;
+    localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
+    return true;
+  }
+  return false;
+}
+
 // Credit and Balance Management Functions
 export function addCreditsAndBalance(userId: string, packageData: any): Transaction {
   const users = getUsers();
@@ -328,7 +365,145 @@ export function formatCreditsDisplay(minutes: number): string {
   return `${hours}h ${remainingMinutes}m`;
 }
 
-// Screenshot Management
+// Community Posts Management
+export function getCommunityPosts(): CommunityPost[] {
+  const postsStr = localStorage.getItem(STORAGE_KEY_COMMUNITY_POSTS);
+  const posts = postsStr ? JSON.parse(postsStr) : [];
+  
+  // Initialize with sample posts if empty
+  if (posts.length === 0) {
+    const samplePosts: CommunityPost[] = [
+      {
+        id: '1',
+        userId: 'admin@example.com',
+        type: 'screenshot',
+        title: 'Perfect lap at Silverstone!',
+        description: 'Finally broke my personal best with this incredible lap. The setup was perfect and the racing line was spot on! 🏁',
+        mediaUrl: 'https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg?auto=compress&cs=tinysrgb&w=800',
+        game: 'Assetto Corsa',
+        track: 'Silverstone GP',
+        lapTime: '1:27.543',
+        achievement: 'Personal Best',
+        tags: ['silverstone', 'personal-best', 'assetto-corsa'],
+        likes: 12,
+        likedBy: [],
+        comments: [
+          {
+            id: 'c1',
+            userId: 'user@example.com',
+            userName: 'Racing Pro',
+            text: 'Incredible lap time! What setup were you using?',
+            createdAt: new Date(Date.now() - 3600000).toISOString()
+          }
+        ],
+        shares: 3,
+        sharedBy: [],
+        createdAt: new Date(Date.now() - 86400000).toISOString(),
+        isPublic: true
+      },
+      {
+        id: '2',
+        userId: 'admin@example.com',
+        type: 'video',
+        title: 'Monaco Night Racing Highlights',
+        description: 'The city lights make Monaco absolutely magical at night. Here are some highlights from my latest session! ✨',
+        mediaUrl: 'https://images.pexels.com/photos/1335077/pexels-photo-1335077.jpeg?auto=compress&cs=tinysrgb&w=800',
+        thumbnailUrl: 'https://images.pexels.com/photos/1335077/pexels-photo-1335077.jpeg?auto=compress&cs=tinysrgb&w=400',
+        game: 'Gran Turismo 7',
+        track: 'Monaco Street Circuit',
+        tags: ['monaco', 'night-racing', 'gran-turismo'],
+        likes: 8,
+        likedBy: [],
+        comments: [],
+        shares: 1,
+        sharedBy: [],
+        createdAt: new Date(Date.now() - 172800000).toISOString(),
+        isPublic: true
+      }
+    ];
+    
+    localStorage.setItem(STORAGE_KEY_COMMUNITY_POSTS, JSON.stringify(samplePosts));
+    return samplePosts;
+  }
+  
+  return posts;
+}
+
+export function addCommunityPost(post: Omit<CommunityPost, 'id' | 'createdAt' | 'likes' | 'likedBy' | 'comments' | 'shares' | 'sharedBy'>): CommunityPost {
+  const posts = getCommunityPosts();
+  const newPost: CommunityPost = {
+    ...post,
+    id: Date.now().toString(),
+    likes: 0,
+    likedBy: [],
+    comments: [],
+    shares: 0,
+    sharedBy: [],
+    createdAt: new Date().toISOString()
+  };
+  
+  posts.unshift(newPost); // Add to beginning for newest first
+  localStorage.setItem(STORAGE_KEY_COMMUNITY_POSTS, JSON.stringify(posts));
+  
+  return newPost;
+}
+
+export function updateCommunityPost(postId: string, updates: Partial<CommunityPost>): void {
+  const posts = getCommunityPosts();
+  const postIndex = posts.findIndex(p => p.id === postId);
+  
+  if (postIndex !== -1) {
+    posts[postIndex] = { ...posts[postIndex], ...updates };
+    localStorage.setItem(STORAGE_KEY_COMMUNITY_POSTS, JSON.stringify(posts));
+  }
+}
+
+export function likeCommunityPost(postId: string, userId: string): void {
+  const posts = getCommunityPosts();
+  const post = posts.find(p => p.id === postId);
+  
+  if (post) {
+    const isLiked = post.likedBy.includes(userId);
+    if (isLiked) {
+      post.likedBy = post.likedBy.filter(id => id !== userId);
+      post.likes = Math.max(0, post.likes - 1);
+    } else {
+      post.likedBy.push(userId);
+      post.likes += 1;
+    }
+    
+    localStorage.setItem(STORAGE_KEY_COMMUNITY_POSTS, JSON.stringify(posts));
+  }
+}
+
+export function addCommentToCommunityPost(postId: string, comment: Omit<Comment, 'id' | 'createdAt'>): void {
+  const posts = getCommunityPosts();
+  const post = posts.find(p => p.id === postId);
+  
+  if (post) {
+    const newComment: Comment = {
+      ...comment,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString()
+    };
+    
+    post.comments.push(newComment);
+    localStorage.setItem(STORAGE_KEY_COMMUNITY_POSTS, JSON.stringify(posts));
+  }
+}
+
+export function shareCommunityPost(postId: string, userId: string): void {
+  const posts = getCommunityPosts();
+  const post = posts.find(p => p.id === postId);
+  
+  if (post && !post.sharedBy.includes(userId)) {
+    post.sharedBy.push(userId);
+    post.shares += 1;
+    localStorage.setItem(STORAGE_KEY_COMMUNITY_POSTS, JSON.stringify(posts));
+  }
+}
+
+// Screenshot Management (Legacy - keeping for backward compatibility)
 export function getScreenshots(): Screenshot[] {
   const screenshotsStr = localStorage.getItem(STORAGE_KEY_SCREENSHOTS);
   const screenshots = screenshotsStr ? JSON.parse(screenshotsStr) : [];

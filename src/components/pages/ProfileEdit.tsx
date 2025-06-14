@@ -263,46 +263,11 @@ export default function ProfileEdit({ user, onSave, onCancel }: ProfileEditProps
                 <label className="block text-sm font-medium text-slate-300">
                   Profile Banner
                 </label>
-                <div className="relative">
-                  <div className="h-32 bg-gradient-to-r from-slate-700 via-slate-600 to-red-900/50 rounded-lg overflow-hidden">
-                    {form.bannerImage ? (
-                      <img 
-                        src={form.bannerImage} 
-                        alt="Banner" 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-r from-slate-700 via-slate-600 to-red-900/50 flex items-center justify-center">
-                        <Image className="w-8 h-8 text-slate-400" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="absolute bottom-2 right-2">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onload = (e) => {
-                            handleImageChange(e.target?.result as string, 'banner');
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                      className="hidden"
-                      id="banner-upload"
-                    />
-                    <label
-                      htmlFor="banner-upload"
-                      className="bg-slate-800/80 hover:bg-slate-700/80 text-white px-3 py-1 rounded-lg text-sm cursor-pointer flex items-center space-x-1"
-                    >
-                      <Upload className="w-4 h-4" />
-                      <span>Change</span>
-                    </label>
-                  </div>
-                </div>
+                <ImageUpload
+                  currentImage={form.bannerImage}
+                  onImageChange={(imageData) => handleImageChange(imageData, 'banner')}
+                  type="banner"
+                />
               </div>
 
               {/* Profile Picture */}
@@ -313,6 +278,7 @@ export default function ProfileEdit({ user, onSave, onCancel }: ProfileEditProps
                 <ImageUpload
                   currentImage={form.profilePicture}
                   onImageChange={(imageData) => handleImageChange(imageData, 'profile')}
+                  type="profile"
                 />
               </div>
             </div>
