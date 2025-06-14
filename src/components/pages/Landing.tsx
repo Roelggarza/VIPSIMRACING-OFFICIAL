@@ -13,13 +13,13 @@ export default function Landing() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-red-900/20 flex flex-col items-center justify-center p-6">
       <div className="max-w-4xl w-full text-center space-y-8">
         {/* Hero Section */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* VIP Sim Racing Logo */}
-          <div className="flex items-center justify-center mb-8">
+          <div className="flex items-center justify-center mb-6">
             <img 
               src="/Adobe Express - file.png" 
               alt="VIP Sim Racing" 
-              className="h-48 w-auto object-contain"
+              className="h-56 w-auto object-contain"
             />
           </div>
           
