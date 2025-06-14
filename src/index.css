@@ -2,17 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom background styles with directional visibility */
+/* Custom background styles with lower opacity for better image visibility */
 @layer base {
   body {
     background: 
       linear-gradient(
         135deg,
-        rgba(15, 23, 42, 0.25) 0%,
-        rgba(30, 41, 59, 0.35) 25%,
-        rgba(127, 29, 29, 0.45) 50%,
-        rgba(30, 41, 59, 0.65) 75%,
-        rgba(15, 23, 42, 0.75) 100%
+        rgba(15, 23, 42, 0.15) 0%,
+        rgba(30, 41, 59, 0.25) 25%,
+        rgba(127, 29, 29, 0.35) 50%,
+        rgba(30, 41, 59, 0.45) 75%,
+        rgba(15, 23, 42, 0.55) 100%
       ),
       url('/image.png');
     background-size: cover;
@@ -22,7 +22,7 @@
     min-height: 100vh;
   }
   
-  /* Directional overlay - lighter on top/left, darker on right */
+  /* Much lighter directional overlay - racing image more visible */
   body::before {
     content: '';
     position: fixed;
@@ -32,26 +32,26 @@
     bottom: 0;
     background: linear-gradient(
       135deg,
-      rgba(15, 23, 42, 0.05) 0%,
-      rgba(15, 23, 42, 0.10) 25%,
-      rgba(15, 23, 42, 0.20) 50%,
-      rgba(15, 23, 42, 0.35) 75%,
-      rgba(15, 23, 42, 0.45) 100%
+      rgba(15, 23, 42, 0.02) 0%,
+      rgba(15, 23, 42, 0.05) 25%,
+      rgba(15, 23, 42, 0.10) 50%,
+      rgba(15, 23, 42, 0.20) 75%,
+      rgba(15, 23, 42, 0.30) 100%
     );
     pointer-events: none;
     z-index: -1;
   }
 }
 
-/* Enhanced card backgrounds with better transparency */
+/* Enhanced card backgrounds with better transparency for image visibility */
 .bg-slate-800\/70 {
-  background-color: rgba(30, 41, 59, 0.90);
+  background-color: rgba(30, 41, 59, 0.85);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .bg-slate-700\/50 {
-  background-color: rgba(51, 65, 85, 0.85);
+  background-color: rgba(51, 65, 85, 0.80);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -124,13 +124,13 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Enhanced glassmorphism effects with better visibility */
 .glass-effect {
-  background: rgba(30, 41, 59, 0.85);
+  background: rgba(30, 41, 59, 0.80);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .glass-effect-light {
-  background: rgba(51, 65, 85, 0.75);
+  background: rgba(51, 65, 85, 0.70);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.12);
 }
@@ -163,7 +163,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Enhanced modal and card backgrounds */
 .modal-backdrop {
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(8px);
 }
 
@@ -172,9 +172,9 @@ h1, h2, h3, h4, h5, h6 {
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.8));
 }
 
-/* Card content with better contrast */
+/* Card content with better contrast but still showing background */
 .card-content-enhanced {
-  background: rgba(30, 41, 59, 0.92);
+  background: rgba(30, 41, 59, 0.88);
   backdrop-filter: blur(16px);
 }
 
@@ -185,13 +185,13 @@ h1, h2, h3, h4, h5, h6 {
     background-position: center center;
   }
   
-  /* Adjust directional overlay for mobile */
+  /* Adjust directional overlay for mobile - even lighter */
   body::before {
     background: linear-gradient(
       135deg,
-      rgba(15, 23, 42, 0.15) 0%,
-      rgba(15, 23, 42, 0.25) 50%,
-      rgba(15, 23, 42, 0.35) 100%
+      rgba(15, 23, 42, 0.10) 0%,
+      rgba(15, 23, 42, 0.15) 50%,
+      rgba(15, 23, 42, 0.25) 100%
     );
   }
 }
@@ -201,14 +201,14 @@ h1, h2, h3, h4, h5, h6 {
   body::before {
     background: linear-gradient(
       135deg,
-      rgba(15, 23, 42, 0.25) 0%,
-      rgba(15, 23, 42, 0.40) 50%,
-      rgba(15, 23, 42, 0.55) 100%
+      rgba(15, 23, 42, 0.20) 0%,
+      rgba(15, 23, 42, 0.30) 50%,
+      rgba(15, 23, 42, 0.40) 100%
     );
   }
   
   .glass-effect {
-    background: rgba(30, 41, 59, 0.95);
+    background: rgba(30, 41, 59, 0.90);
   }
 }
 
@@ -240,17 +240,17 @@ h1, h2, h3, h4, h5, h6 {
 .bg-visible-left {
   background: linear-gradient(
     90deg,
-    rgba(30, 41, 59, 0.70) 0%,
-    rgba(30, 41, 59, 0.85) 50%,
-    rgba(30, 41, 59, 0.95) 100%
+    rgba(30, 41, 59, 0.65) 0%,
+    rgba(30, 41, 59, 0.75) 50%,
+    rgba(30, 41, 59, 0.85) 100%
   );
 }
 
 .bg-visible-top {
   background: linear-gradient(
     180deg,
-    rgba(30, 41, 59, 0.70) 0%,
-    rgba(30, 41, 59, 0.85) 50%,
-    rgba(30, 41, 59, 0.95) 100%
+    rgba(30, 41, 59, 0.65) 0%,
+    rgba(30, 41, 59, 0.75) 50%,
+    rgba(30, 41, 59, 0.85) 100%
   );
 }
