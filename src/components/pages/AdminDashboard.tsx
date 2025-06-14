@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, Monitor, Activity, Eye, Settings, AlertTriangle, Key, UserCheck, UserX } from 'lucide-react';
-import { getUsers, getSimulators, User as UserType, Simulator, formatCreditsDisplay, resetUserPassword, updateUser } from '../../utils/userStorage';
+import { Shield, Users, Monitor, Activity, Eye, Settings, AlertTriangle, Key, UserCheck, UserX, Bell, BellOff, Clock, MapPin, Smartphone, Globe } from 'lucide-react';
+import { getUsers, getSimulators, User as UserType, Simulator, formatCreditsDisplay, resetUserPassword, updateUser, getAdminNotifications, markNotificationAsRead, getUnreadNotificationCount } from '../../utils/userStorage';
 import Card, { CardHeader, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -9,16 +9,26 @@ import Modal from '../ui/Modal';
 export default function AdminDashboard() {
   const [users, setUsers] = useState<UserType[]>([]);
   const [simulators, setSimulators] = useState<Simulator[]>([]);
-  const [activeTab, setActiveTab] = useState<'users' | 'simulators'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'simulators' | 'notifications'>('users');
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [showUserDetails, setShowUserDetails] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     setUsers(getUsers());
     setSimulators(getSimulators());
+    setNotifications(getAdminNotifications());
+    setUnreadCount(getUnreadNotificationCount());
   }, []);
+
+  const refreshData = () => {
+    setUsers(getUsers());
+    setNotifications(getAdminNotifications());
+    setUnreadCount(getUnreadNotificationCount());
+  };
 
   const getStatusColor = (isOnline: boolean) => {
     return isOnline ? 'text-green-400' : 'text-slate-400';
@@ -39,6 +49,7 @@ export default function AdminDashboard() {
       setShowPasswordModal(false);
       setNewPassword('');
       setSelectedUser(null);
+      refreshData();
     } else {
       alert('Failed to reset password');
     }
@@ -65,6 +76,37 @@ export default function AdminDashboard() {
     setNewPassword(password);
   };
 
+  const handleNotificationClick = (notification: any) => {
+    if (!notification.read) {
+      markNotificationAsRead(notification.id);
+      refreshData();
+    }
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'new_registration':
+        return <Users className="w-5 h-5 text-blue-500" />;
+      case 'password_reset':
+        return <Key className="w-5 h-5 text-yellow-500" />;
+      case 'purchase':
+        return <Activity className="w-5 h-5 text-green-500" />;
+      default:
+        return <Bell className="w-5 h-5 text-slate-500" />;
+    }
+  };
+
+  const formatNotificationTime = (timestamp: string) => {
+    const now = new Date();
+    const time = new Date(timestamp);
+    const diffInMinutes = Math.floor((now.getTime() - time.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+    return time.toLocaleDateString();
+  };
+
   return (
     <div className="space-y-6">
       {/* Admin Header */}
@@ -83,6 +125,20 @@ export default function AdminDashboard() {
                 icon={Users}
               >
                 User Management
+              </Button>
+              <Button
+                variant={activeTab === 'notifications' ? 'primary' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveTab('notifications')}
+                icon={Bell}
+                className="relative"
+              >
+                Notifications
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </Button>
               <Button
                 variant={activeTab === 'simulators' ? 'primary' : 'ghost'}
@@ -151,11 +207,86 @@ export default function AdminDashboard() {
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'users' ? (
+      {activeTab === 'notifications' ? (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white">Admin Notifications</h3>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-slate-400">{unreadCount} unread</span>
+                <Button variant="ghost" size="sm" onClick={refreshData}>
+                  Refresh
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {notifications.length === 0 ? (
+                <div className="text-center py-8 text-slate-400">
+                  <BellOff className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No notifications yet.</p>
+                </div>
+              ) : (
+                notifications.map((notification) => (
+                  <div 
+                    key={notification.id}
+                    onClick={() => handleNotificationClick(notification)}
+                    className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                      notification.read 
+                        ? 'bg-slate-700/20 border-slate-700/50' 
+                        : 'bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20'
+                    }`}
+                  >
+                    <div className="flex items-start space-x-3">
+                      <div className="flex-shrink-0">
+                        {getNotificationIcon(notification.type)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <h4 className={`font-semibold ${notification.read ? 'text-slate-300' : 'text-white'}`}>
+                            {notification.title}
+                          </h4>
+                          <div className="flex items-center space-x-2 text-xs text-slate-500">
+                            <Clock className="w-3 h-3" />
+                            <span>{formatNotificationTime(notification.timestamp)}</span>
+                          </div>
+                        </div>
+                        <p className={`text-sm mt-1 ${notification.read ? 'text-slate-400' : 'text-slate-300'}`}>
+                          {notification.message}
+                        </p>
+                        {notification.data && (
+                          <div className="mt-2 text-xs text-slate-500">
+                            {notification.type === 'new_registration' && (
+                              <div className="flex items-center space-x-4">
+                                <span>📧 {notification.data.email}</span>
+                                <span>📱 {notification.data.phone}</span>
+                                {notification.data.address && (
+                                  <span>📍 {notification.data.state}</span>
+                                )}
+                              </div>
+                            )}
+                            {notification.type === 'purchase' && notification.data.package && (
+                              <span>💰 ${notification.data.package.price} - {notification.data.package.name}</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {!notification.read && (
+                        <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      ) : activeTab === 'users' ? (
         <Card>
           <CardHeader>
             <h3 className="text-lg font-bold text-white">User Management</h3>
-            <p className="text-slate-400 text-sm">Manage user accounts, passwords, and admin privileges</p>
+            <p className="text-slate-400 text-sm">Manage user accounts, passwords, and admin privileges. All registrations from any device appear here.</p>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -186,6 +317,24 @@ export default function AdminDashboard() {
                       <p className={`text-xs ${getStatusColor(user.isOnline || false)}`}>
                         {getStatusText(user)}
                       </p>
+                      <div className="flex items-center space-x-3 text-xs text-slate-500 mt-1">
+                        <div className="flex items-center space-x-1">
+                          <Clock className="w-3 h-3" />
+                          <span>Registered: {new Date(user.registrationDate).toLocaleDateString()}</span>
+                        </div>
+                        {user.address && (
+                          <div className="flex items-center space-x-1">
+                            <MapPin className="w-3 h-3" />
+                            <span>{user.state}</span>
+                          </div>
+                        )}
+                        {user.deviceInfo && (
+                          <div className="flex items-center space-x-1">
+                            <Smartphone className="w-3 h-3" />
+                            <span>{user.deviceInfo.split(' ')[0]}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                   
@@ -198,12 +347,6 @@ export default function AdminDashboard() {
                       <div>
                         <p className="text-slate-400">Balance</p>
                         <p className="text-blue-400 font-semibold">${(user.accountBalance || 0).toFixed(2)}</p>
-                      </div>
-                      <div>
-                        <p className="text-slate-400">Address</p>
-                        <p className="text-slate-300 text-xs">
-                          {user.address ? `${user.address}, ${user.state} ${user.zipCode}` : 'Not provided'}
-                        </p>
                       </div>
                       <div>
                         <p className="text-slate-400">Password</p>
@@ -431,6 +574,18 @@ export default function AdminDashboard() {
               <div>
                 <label className="block text-sm font-medium text-slate-300">Registration Date</label>
                 <p className="text-white">{new Date(selectedUser.registrationDate).toLocaleDateString()}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300">Registration Source</label>
+                <p className="text-white text-xs">{selectedUser.registrationSource || 'Unknown'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300">Device Info</label>
+                <p className="text-white text-xs">{selectedUser.deviceInfo || 'Unknown'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300">IP Address</label>
+                <p className="text-white text-xs">{selectedUser.ipAddress || 'Unknown'}</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-300">Account Status</label>

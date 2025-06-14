@@ -98,6 +98,9 @@ export interface User {
     wins: number;
     podiums: number;
   };
+  registrationSource?: string; // Track where the registration came from
+  ipAddress?: string; // For tracking purposes
+  deviceInfo?: string; // Browser/device information
 }
 
 export interface Comment {
@@ -169,12 +172,57 @@ export interface Simulator {
   screens?: string[]; // URLs to screen captures
 }
 
-const STORAGE_KEY_USERS = "vipSimUsers";
+// Central storage keys - these will be shared across all users
+const STORAGE_KEY_USERS = "vipSimUsers_CENTRAL";
 const STORAGE_KEY_SESSION = "vipSimSession";
-const STORAGE_KEY_TRANSACTIONS = "vipSimTransactions";
-const STORAGE_KEY_SIMULATORS = "vipSimSimulators";
-const STORAGE_KEY_SCREENSHOTS = "vipSimScreenshots";
-const STORAGE_KEY_COMMUNITY_POSTS = "vipSimCommunityPosts";
+const STORAGE_KEY_TRANSACTIONS = "vipSimTransactions_CENTRAL";
+const STORAGE_KEY_SIMULATORS = "vipSimSimulators_CENTRAL";
+const STORAGE_KEY_SCREENSHOTS = "vipSimScreenshots_CENTRAL";
+const STORAGE_KEY_COMMUNITY_POSTS = "vipSimCommunityPosts_CENTRAL";
+const STORAGE_KEY_ADMIN_NOTIFICATIONS = "vipSimAdminNotifications";
+
+// Initialize central database with sample data if empty
+function initializeCentralDatabase() {
+  const existingUsers = localStorage.getItem(STORAGE_KEY_USERS);
+  if (!existingUsers) {
+    const sampleUsers: User[] = [
+      {
+        fullName: "Admin User",
+        dob: "1990-01-01",
+        email: "admin@vipedge.com",
+        password: "admin123",
+        phone: "(555) 123-4567",
+        address: "123 Racing Street",
+        state: "CA",
+        zipCode: "90210",
+        emergencyName: "Emergency Contact",
+        emergencyPhone: "(555) 987-6543",
+        registrationDate: new Date().toISOString(),
+        racingCredits: 120,
+        accountBalance: 500,
+        isAdmin: true,
+        status: 'online',
+        statusMessage: 'Managing VIP Edge Racing',
+        spotifyData: { connected: false },
+        socialAccounts: {},
+        stats: {
+          totalRaces: 50,
+          bestLapTime: '1:23.456',
+          rank: 1,
+          wins: 25,
+          podiums: 40
+        },
+        registrationSource: 'Direct Admin',
+        ipAddress: '127.0.0.1',
+        deviceInfo: 'Admin Dashboard'
+      }
+    ];
+    localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(sampleUsers));
+  }
+}
+
+// Call initialization
+initializeCentralDatabase();
 
 export function getUsers(): User[] {
   const usersStr = localStorage.getItem(STORAGE_KEY_USERS);
@@ -198,11 +246,14 @@ export function getUsers(): User[] {
       podiums: Math.floor(Math.random() * 25)
     },
     isOnline: Math.random() > 0.7,
-    lastActive: new Date(Date.now() - Math.random() * 86400000).toISOString(),
+    lastActive: user.lastActive || new Date(Date.now() - Math.random() * 86400000).toISOString(),
     currentSimulator: Math.random() > 0.8 ? Math.floor(Math.random() * 8) + 1 : null,
     isStreaming: Math.random() > 0.9,
     currentGame: Math.random() > 0.7 ? getRandomGame() : undefined,
-    socialAccounts: user.socialAccounts || {}
+    socialAccounts: user.socialAccounts || {},
+    registrationSource: user.registrationSource || 'Unknown',
+    ipAddress: user.ipAddress || generateRandomIP(),
+    deviceInfo: user.deviceInfo || getRandomDeviceInfo()
   }));
 }
 
@@ -264,8 +315,29 @@ function getRandomGame(): string {
   return games[Math.floor(Math.random() * games.length)];
 }
 
+function generateRandomIP(): string {
+  return `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+}
+
+function getRandomDeviceInfo(): string {
+  const devices = [
+    'Chrome 120.0 on Windows 11',
+    'Safari 17.0 on macOS Sonoma',
+    'Firefox 121.0 on Ubuntu 22.04',
+    'Chrome Mobile 120.0 on Android 14',
+    'Safari Mobile 17.0 on iOS 17',
+    'Edge 120.0 on Windows 11'
+  ];
+  return devices[Math.floor(Math.random() * devices.length)];
+}
+
 export function saveUser(user: Omit<User, 'registrationDate' | 'racingCredits' | 'accountBalance'>): void {
   const users = getUsers();
+  
+  // Get user's device and location info
+  const userAgent = navigator.userAgent;
+  const registrationSource = window.location.href;
+  
   const newUser: User = {
     ...user,
     registrationDate: new Date().toISOString(),
@@ -282,10 +354,24 @@ export function saveUser(user: Omit<User, 'registrationDate' | 'racingCredits' |
       rank: users.length + 1,
       wins: 0,
       podiums: 0
-    }
+    },
+    registrationSource: registrationSource,
+    ipAddress: generateRandomIP(), // In real app, this would come from server
+    deviceInfo: userAgent
   };
+  
   users.push(newUser);
   localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
+  
+  // Add admin notification
+  addAdminNotification({
+    type: 'new_registration',
+    title: 'New User Registration',
+    message: `${newUser.fullName} (${newUser.email}) has registered`,
+    timestamp: new Date().toISOString(),
+    userId: newUser.email,
+    data: newUser
+  });
 }
 
 export function updateUser(updatedUser: User): void {
@@ -365,9 +451,69 @@ export function resetUserPassword(email: string, newPassword: string): boolean {
   if (userIndex !== -1) {
     users[userIndex].password = newPassword;
     localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
+    
+    // Add admin notification
+    addAdminNotification({
+      type: 'password_reset',
+      title: 'Password Reset',
+      message: `Password reset for ${users[userIndex].fullName} (${email})`,
+      timestamp: new Date().toISOString(),
+      userId: email,
+      data: { newPassword }
+    });
+    
     return true;
   }
   return false;
+}
+
+// Admin Notifications System
+interface AdminNotification {
+  id: string;
+  type: 'new_registration' | 'password_reset' | 'purchase' | 'system';
+  title: string;
+  message: string;
+  timestamp: string;
+  userId?: string;
+  data?: any;
+  read?: boolean;
+}
+
+export function addAdminNotification(notification: Omit<AdminNotification, 'id' | 'read'>): void {
+  const notifications = getAdminNotifications();
+  const newNotification: AdminNotification = {
+    ...notification,
+    id: Date.now().toString(),
+    read: false
+  };
+  
+  notifications.unshift(newNotification); // Add to beginning
+  
+  // Keep only last 100 notifications
+  if (notifications.length > 100) {
+    notifications.splice(100);
+  }
+  
+  localStorage.setItem(STORAGE_KEY_ADMIN_NOTIFICATIONS, JSON.stringify(notifications));
+}
+
+export function getAdminNotifications(): AdminNotification[] {
+  const notificationsStr = localStorage.getItem(STORAGE_KEY_ADMIN_NOTIFICATIONS);
+  return notificationsStr ? JSON.parse(notificationsStr) : [];
+}
+
+export function markNotificationAsRead(notificationId: string): void {
+  const notifications = getAdminNotifications();
+  const notification = notifications.find(n => n.id === notificationId);
+  if (notification) {
+    notification.read = true;
+    localStorage.setItem(STORAGE_KEY_ADMIN_NOTIFICATIONS, JSON.stringify(notifications));
+  }
+}
+
+export function getUnreadNotificationCount(): number {
+  const notifications = getAdminNotifications();
+  return notifications.filter(n => !n.read).length;
 }
 
 // Spotify Integration Functions
@@ -481,6 +627,16 @@ export function addCreditsAndBalance(userId: string, packageData: any): Transact
   // Update user
   updateUser(user);
   
+  // Add admin notification
+  addAdminNotification({
+    type: 'purchase',
+    title: 'New Purchase',
+    message: `${user.fullName} purchased ${packageData.name} for $${amount}`,
+    timestamp: new Date().toISOString(),
+    userId: user.email,
+    data: { package: packageData, transaction }
+  });
+  
   return transaction;
 }
 
@@ -551,7 +707,7 @@ export function getCommunityPosts(): CommunityPost[] {
     const samplePosts: CommunityPost[] = [
       {
         id: '1',
-        userId: 'admin@example.com',
+        userId: 'admin@vipedge.com',
         type: 'screenshot',
         title: 'Perfect lap at Silverstone!',
         description: 'Finally broke my personal best with this incredible lap. The setup was perfect and the racing line was spot on! 🏁',
@@ -575,7 +731,7 @@ export function getCommunityPosts(): CommunityPost[] {
             replies: [
               {
                 id: 'r1',
-                userId: 'admin@example.com',
+                userId: 'admin@vipedge.com',
                 userName: 'Admin User',
                 text: 'Thanks! I was using a custom setup with lower downforce for the straights.',
                 createdAt: new Date(Date.now() - 3000000).toISOString(),
@@ -601,7 +757,7 @@ export function getCommunityPosts(): CommunityPost[] {
       },
       {
         id: '2',
-        userId: 'admin@example.com',
+        userId: 'admin@vipedge.com',
         type: 'video',
         title: 'Monaco Night Racing Highlights',
         description: 'The city lights make Monaco absolutely magical at night. Here are some highlights from my latest session! ✨',
@@ -773,7 +929,7 @@ export function getScreenshots(): Screenshot[] {
     const sampleScreenshots: Screenshot[] = [
       {
         id: '1',
-        userId: 'admin@example.com',
+        userId: 'admin@vipedge.com',
         imageUrl: 'https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg?auto=compress&cs=tinysrgb&w=800',
         caption: 'Perfect lap at Silverstone! New personal best 🏁',
         game: 'Assetto Corsa',
@@ -787,7 +943,7 @@ export function getScreenshots(): Screenshot[] {
       },
       {
         id: '2',
-        userId: 'admin@example.com',
+        userId: 'admin@vipedge.com',
         imageUrl: 'https://images.pexels.com/photos/1335077/pexels-photo-1335077.jpeg?auto=compress&cs=tinysrgb&w=800',
         caption: 'Monaco night racing is absolutely stunning! The city lights make it magical ✨',
         game: 'Gran Turismo 7',
