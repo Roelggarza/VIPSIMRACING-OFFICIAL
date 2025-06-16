@@ -180,6 +180,36 @@ export const RACING_GAMES = [
   }
 ];
 
+// Define getUsers first
+export const getUsers = (): User[] => {
+  const users = localStorage.getItem('vip_users');
+  return users ? JSON.parse(users) : [];
+};
+
+// Admin Notifications functions (needed by initializeStorage)
+export const addAdminNotification = (notification: {
+  type: string;
+  title: string;
+  message: string;
+  data?: any;
+}) => {
+  const notifications = getAdminNotifications();
+  const newNotification = {
+    id: Date.now().toString(),
+    ...notification,
+    timestamp: new Date().toISOString(),
+    read: false
+  };
+  
+  notifications.unshift(newNotification); // Add to beginning
+  localStorage.setItem('vip_admin_notifications', JSON.stringify(notifications));
+};
+
+export const getAdminNotifications = () => {
+  const notifications = localStorage.getItem('vip_admin_notifications');
+  return notifications ? JSON.parse(notifications) : [];
+};
+
 // Initialize with admin user and sample data
 const initializeStorage = () => {
   if (!localStorage.getItem('vip_users')) {
@@ -361,9 +391,6 @@ const initializeStorage = () => {
   }
 };
 
-// Call initialization
-initializeStorage();
-
 export const saveUser = (userData: Omit<User, 'registrationDate' | 'racingCredits' | 'accountBalance' | 'isAdmin' | 'stats'>) => {
   const users = getUsers();
   
@@ -417,11 +444,6 @@ export const saveUser = (userData: Omit<User, 'registrationDate' | 'racingCredit
       deviceInfo: newUser.deviceInfo
     }
   });
-};
-
-export const getUsers = (): User[] => {
-  const users = localStorage.getItem('vip_users');
-  return users ? JSON.parse(users) : [];
 };
 
 export const findUser = (email: string, password: string): User | null => {
@@ -795,30 +817,6 @@ export const likeComment = (postId: string, commentId: string, userId: string) =
   }
 };
 
-// Admin Notifications
-export const addAdminNotification = (notification: {
-  type: string;
-  title: string;
-  message: string;
-  data?: any;
-}) => {
-  const notifications = getAdminNotifications();
-  const newNotification = {
-    id: Date.now().toString(),
-    ...notification,
-    timestamp: new Date().toISOString(),
-    read: false
-  };
-  
-  notifications.unshift(newNotification); // Add to beginning
-  localStorage.setItem('vip_admin_notifications', JSON.stringify(notifications));
-};
-
-export const getAdminNotifications = () => {
-  const notifications = localStorage.getItem('vip_admin_notifications');
-  return notifications ? JSON.parse(notifications) : [];
-};
-
 export const markNotificationAsRead = (notificationId: string) => {
   const notifications = getAdminNotifications();
   const notificationIndex = notifications.findIndex((n: any) => n.id === notificationId);
@@ -1032,3 +1030,6 @@ export const generateAIResponse = (userMessage: string, chatType: 'support' | 'r
   
   return "Thanks for reaching out! I can help you with questions about VIP Edge Racing including our packages, pricing, hours, VIP membership, booking, and our racing simulators. For immediate assistance, you can also call us at (832) 490-4304 or email roel@vipsimracing.com. What would you like to know?";
 };
+
+// Call initialization at the end of the file
+initializeStorage();
