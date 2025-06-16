@@ -23,7 +23,10 @@ import {
   Shield,
   Monitor,
   Globe,
-  MessageCircle
+  MessageCircle,
+  MapPin,
+  Flag,
+  Eye
 } from 'lucide-react';
 import { getSession, clearSession, User as UserType, formatCreditsDisplay, getUserTransactions } from '../../utils/userStorage';
 import Button from '../ui/Button';
@@ -41,6 +44,20 @@ import StatusBubble from '../ui/StatusBubble';
 import SpotifyWidget from '../ui/SpotifyWidget';
 import AIChat from '../ui/AIChat';
 
+interface UpcomingSession {
+  id: string;
+  date: string;
+  track: string;
+  type: string;
+  description: string;
+  image: string;
+  participants: number;
+  maxParticipants: number;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced' | 'Pro';
+  duration: string;
+  game: string;
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState<UserType | null>(null);
@@ -55,6 +72,51 @@ export default function Dashboard() {
   const [showSpotifyWidget, setShowSpotifyWidget] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
   const [aiChatMinimized, setAiChatMinimized] = useState(false);
+  const [selectedSession, setSelectedSession] = useState<UpcomingSession | null>(null);
+  const [showSessionModal, setShowSessionModal] = useState(false);
+
+  // Sample upcoming sessions data
+  const upcomingSessions: UpcomingSession[] = [
+    {
+      id: '1',
+      date: 'Today, 3:00 PM',
+      track: 'Silverstone GP',
+      type: 'Practice Session',
+      description: 'Join us for an open practice session at the legendary Silverstone Grand Prix circuit. Perfect your racing line and improve your lap times on one of Formula 1\'s most iconic tracks. All skill levels welcome!',
+      image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg',
+      participants: 4,
+      maxParticipants: 8,
+      difficulty: 'Intermediate',
+      duration: '60 minutes',
+      game: 'F1 24'
+    },
+    {
+      id: '2',
+      date: 'Tomorrow, 7:00 PM',
+      track: 'Monaco Street Circuit',
+      type: 'Qualifying Session',
+      description: 'Experience the ultimate challenge of Monaco\'s narrow streets in this qualifying session. Set your fastest lap time and compete for pole position in this prestigious street circuit. Precision and concentration required!',
+      image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg',
+      participants: 6,
+      maxParticipants: 12,
+      difficulty: 'Advanced',
+      duration: '45 minutes',
+      game: 'Assetto Corsa Competizione'
+    },
+    {
+      id: '3',
+      date: 'Friday, 6:00 PM',
+      track: 'Spa-Francorchamps',
+      type: 'Championship Race',
+      description: 'The crown jewel of our racing calendar! Join the championship race at Spa-Francorchamps, featuring the famous Eau Rouge corner. This is a competitive race with championship points on the line. Bring your A-game!',
+      image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg',
+      participants: 8,
+      maxParticipants: 16,
+      difficulty: 'Pro',
+      duration: '90 minutes',
+      game: 'iRacing'
+    }
+  ];
 
   useEffect(() => {
     const sessionUser = getSession();
@@ -136,6 +198,32 @@ export default function Dashboard() {
     if (user) {
       setSelectedUser(user);
       setShowUserProfile(true);
+    }
+  };
+
+  const handleViewSession = (session: UpcomingSession) => {
+    setSelectedSession(session);
+    setShowSessionModal(true);
+  };
+
+  const handleJoinSession = (session: UpcomingSession) => {
+    // Simulate joining session
+    alert(`Joining ${session.type} at ${session.track}!\n\nYou'll be redirected to Simulator ${Math.floor(Math.random() * 8) + 1} in a moment.`);
+    setShowSessionModal(false);
+  };
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Beginner':
+        return 'text-green-400 bg-green-500/20';
+      case 'Intermediate':
+        return 'text-blue-400 bg-blue-500/20';
+      case 'Advanced':
+        return 'text-orange-400 bg-orange-500/20';
+      case 'Pro':
+        return 'text-red-400 bg-red-500/20';
+      default:
+        return 'text-slate-400 bg-slate-500/20';
     }
   };
 
@@ -412,19 +500,40 @@ export default function Dashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {[
-                      { date: 'Today, 3:00 PM', track: 'Silverstone GP', type: 'Practice Session' },
-                      { date: 'Tomorrow, 7:00 PM', track: 'Monaco Street', type: 'Qualifying' },
-                      { date: 'Friday, 6:00 PM', track: 'Spa-Francorchamps', type: 'Championship Race' }
-                    ].map((session, index) => (
-                      <div key={index} className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg">
-                        <div>
-                          <p className="font-semibold text-white">{session.track}</p>
-                          <p className="text-sm text-slate-400">{session.type}</p>
+                    {upcomingSessions.map((session) => (
+                      <div key={session.id} className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg hover:bg-slate-700/50 transition-colors">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-600">
+                            <img 
+                              src={session.image} 
+                              alt={session.track}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-white">{session.track}</p>
+                            <p className="text-sm text-slate-400">{session.type}</p>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <span className={`px-2 py-1 rounded text-xs font-bold ${getDifficultyColor(session.difficulty)}`}>
+                                {session.difficulty}
+                              </span>
+                              <span className="text-xs text-slate-500">
+                                {session.participants}/{session.maxParticipants} racers
+                              </span>
+                            </div>
+                          </div>
                         </div>
                         <div className="text-right">
                           <p className="text-sm text-red-400 font-medium">{session.date}</p>
-                          <Button variant="ghost" size="sm" className="text-xs">Join</Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-xs mt-1"
+                            icon={Eye}
+                            onClick={() => handleViewSession(session)}
+                          >
+                            View
+                          </Button>
                         </div>
                       </div>
                     ))}
@@ -725,6 +834,104 @@ export default function Dashboard() {
         isMinimized={aiChatMinimized}
         initialType="support"
       />
+
+      {/* Session Details Modal */}
+      <Modal
+        isOpen={showSessionModal}
+        onClose={() => setShowSessionModal(false)}
+        title="Session Details"
+      >
+        {selectedSession && (
+          <div className="space-y-6">
+            {/* Session Image */}
+            <div className="h-48 rounded-lg overflow-hidden">
+              <img 
+                src={selectedSession.image} 
+                alt={selectedSession.track}
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Session Info */}
+            <div className="space-y-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold text-white">{selectedSession.track}</h3>
+                  <p className="text-lg text-red-400 font-semibold">{selectedSession.type}</p>
+                </div>
+                <span className={`px-3 py-1 rounded-full text-sm font-bold ${getDifficultyColor(selectedSession.difficulty)}`}>
+                  {selectedSession.difficulty}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="flex items-center space-x-2">
+                  <Calendar className="w-4 h-4 text-slate-400" />
+                  <span className="text-white">{selectedSession.date}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Clock className="w-4 h-4 text-slate-400" />
+                  <span className="text-white">{selectedSession.duration}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Users className="w-4 h-4 text-slate-400" />
+                  <span className="text-white">{selectedSession.participants}/{selectedSession.maxParticipants} racers</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Gamepad2 className="w-4 h-4 text-slate-400" />
+                  <span className="text-white">{selectedSession.game}</span>
+                </div>
+              </div>
+
+              <div className="bg-slate-700/30 rounded-lg p-4">
+                <h4 className="font-semibold text-white mb-2">Session Description</h4>
+                <p className="text-slate-300 leading-relaxed">{selectedSession.description}</p>
+              </div>
+
+              {/* Track Info */}
+              <div className="bg-slate-700/30 rounded-lg p-4">
+                <h4 className="font-semibold text-white mb-2">Track Information</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-slate-400">Location:</p>
+                    <p className="text-white">{selectedSession.track}</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-400">Game:</p>
+                    <p className="text-white">{selectedSession.game}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Requirements */}
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                <h4 className="font-semibold text-blue-300 mb-2">Requirements</h4>
+                <ul className="text-sm text-blue-200 space-y-1">
+                  <li>• Valid racing credits required</li>
+                  <li>• {selectedSession.difficulty} skill level recommended</li>
+                  <li>• Arrive 10 minutes before session start</li>
+                  <li>• Follow VIP Edge racing etiquette</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Join Button */}
+            <div className="pt-4 border-t border-slate-700">
+              <Button 
+                className="w-full"
+                size="lg"
+                onClick={() => handleJoinSession(selectedSession)}
+                icon={Flag}
+              >
+                Join Session
+              </Button>
+              <p className="text-xs text-slate-500 text-center mt-2">
+                Joining will reserve your spot and deduct racing credits when the session begins.
+              </p>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       {/* Profile Edit Modal */}
       <Modal
