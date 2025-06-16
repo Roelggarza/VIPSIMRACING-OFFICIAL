@@ -143,40 +143,76 @@ export interface ChatMessage {
 
 export const RACING_GAMES = [
   {
-    id: 'assetto-corsa',
-    name: 'Assetto Corsa',
-    description: 'Ultra-realistic racing simulation with authentic physics',
-    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg'
+    id: 'assetto-corsa-competizione',
+    name: 'Assetto Corsa Competizione',
+    description: 'Official GT World Challenge game with authentic GT3 and GT4 racing',
+    image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg'
   },
   {
     id: 'iracing',
     name: 'iRacing',
-    description: 'Professional online racing simulation platform',
+    description: 'The world\'s premier online racing simulation platform',
     image: 'https://images.pexels.com/photos/1007410/pexels-photo-1007410.jpeg'
   },
   {
-    id: 'f1-2024',
-    name: 'F1 2024',
-    description: 'Official Formula 1 racing game with all teams and tracks',
+    id: 'f1-24',
+    name: 'F1 24',
+    description: 'Official Formula 1 racing game with all 2024 teams and circuits',
+    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg'
+  },
+  {
+    id: 'gran-turismo-7',
+    name: 'Gran Turismo 7',
+    description: 'The ultimate driving simulator with over 400 cars and legendary tracks',
+    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg'
+  },
+  {
+    id: 'dirt-rally-2',
+    name: 'DiRT Rally 2.0',
+    description: 'Challenging rally racing through diverse terrains and weather conditions',
+    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg'
+  },
+  {
+    id: 'forza-motorsport',
+    name: 'Forza Motorsport',
+    description: 'Turn 10\'s flagship racing simulation with dynamic time of day and weather',
     image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg'
   },
   {
-    id: 'gran-turismo',
-    name: 'Gran Turismo 7',
-    description: 'The ultimate driving simulator with stunning graphics',
-    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg'
-  },
-  {
-    id: 'dirt-rally',
-    name: 'DiRT Rally 2.0',
-    description: 'Challenging rally racing through diverse terrains',
-    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg'
-  },
-  {
-    id: 'project-cars',
-    name: 'Project CARS 3',
-    description: 'Dynamic racing with weather and day/night cycles',
+    id: 'rfactor-2',
+    name: 'rFactor 2',
+    description: 'Professional-grade racing simulation used by real racing teams',
     image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg'
+  },
+  {
+    id: 'automobilista-2',
+    name: 'Automobilista 2',
+    description: 'Brazilian racing simulation featuring diverse motorsport disciplines',
+    image: 'https://images.pexels.com/photos/1007410/pexels-photo-1007410.jpeg'
+  },
+  {
+    id: 'project-cars-3',
+    name: 'Project CARS 3',
+    description: 'Dynamic racing with career progression and authentic motorsport experience',
+    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg'
+  },
+  {
+    id: 'acc-british-gt',
+    name: 'ACC - British GT Pack',
+    description: 'British GT Championship expansion with iconic UK circuits',
+    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg'
+  },
+  {
+    id: 'beamng-drive',
+    name: 'BeamNG.drive',
+    description: 'Advanced vehicle simulation with realistic physics and damage modeling',
+    image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg'
+  },
+  {
+    id: 'wreckfest',
+    name: 'Wreckfest',
+    description: 'Demolition derby and banger racing with realistic damage physics',
+    image: 'https://images.pexels.com/photos/1007410/pexels-photo-1007410.jpeg'
   }
 ];
 
@@ -992,7 +1028,7 @@ export const generateAIResponse = (userMessage: string, chatType: 'support' | 'r
     }
     
     if (lowerMessage.includes('game') || lowerMessage.includes('simulator') || lowerMessage.includes('software')) {
-      return "We feature professional racing simulators with games including Assetto Corsa, iRacing, F1 2024, Gran Turismo 7, DiRT Rally 2.0, and Project CARS 3. All simulators have force feedback steering wheels, professional pedals, and triple monitor setups for maximum immersion. Which racing game interests you most?";
+      return "We feature professional racing simulators with games including Assetto Corsa Competizione, iRacing, F1 24, Gran Turismo 7, DiRT Rally 2.0, Forza Motorsport, rFactor 2, Automobilista 2, Project CARS 3, BeamNG.drive, and Wreckfest. All simulators have force feedback steering wheels, professional pedals, and triple monitor setups for maximum immersion. Which racing game interests you most?";
     }
     
     return "I'm here to help with any questions about VIP Edge Racing! I can assist with information about our packages, pricing, hours, VIP membership, booking, location, and our racing simulators. You can also contact us directly at (832) 490-4304 or roel@vipsimracing.com. What would you like to know?";
