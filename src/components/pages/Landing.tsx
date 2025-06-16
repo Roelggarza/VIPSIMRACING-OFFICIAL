@@ -108,12 +108,23 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* Contact Info Footer */}
-        <div className="pt-8 border-t border-slate-700/50">
-          <p className="text-slate-400 text-sm">
-            Contact us: <a href="tel:8324904304" className="text-red-400 hover:text-red-300 transition-colors">(832) 490-4304</a> | 
-            <a href="mailto:roel@vipsimracing.com" className="text-red-400 hover:text-red-300 transition-colors ml-1">roel@vipsimracing.com</a>
-          </p>
+        {/* Contact Info Footer - Made Much Smaller and Mobile-Friendly */}
+        <div className="pt-6 border-t border-slate-700/50">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-xs sm:text-sm text-slate-400">
+            <a 
+              href="tel:8324904304" 
+              className="text-red-400 hover:text-red-300 transition-colors font-medium"
+            >
+              (832) 490-4304
+            </a>
+            <span className="hidden sm:inline text-slate-600">|</span>
+            <a 
+              href="mailto:roel@vipsimracing.com" 
+              className="text-red-400 hover:text-red-300 transition-colors font-medium"
+            >
+              roel@vipsimracing.com
+            </a>
+          </div>
         </div>
       </div>
     </div>
