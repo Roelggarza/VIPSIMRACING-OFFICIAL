@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Gamepad2, Play, Star, Clock, Users, Download } from 'lucide-react';
+import { Gamepad2, Play, Star, Clock, Users, Download, ExternalLink } from 'lucide-react';
 import { User, RACING_GAMES } from '../../utils/userStorage';
 import Card, { CardHeader, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
@@ -11,9 +11,14 @@ interface GamesLibraryProps {
 export default function GamesLibrary({ user }: GamesLibraryProps) {
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
 
-  const handleLaunchGame = (gameId: string, gameName: string) => {
-    // Simulate game launch
-    alert(`Launching ${gameName}...\n\nThis would connect to the racing simulator and start the selected game.`);
+  const handleLaunchGame = (gameId: string, gameName: string, launchUrl?: string | null) => {
+    if (launchUrl) {
+      // Open external game URL in new tab
+      window.open(launchUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      // Simulate local game launch
+      alert(`Launching ${gameName}...\n\nThis would connect to the racing simulator and start the selected game.`);
+    }
   };
 
   return (
@@ -51,12 +56,20 @@ export default function GamesLibrary({ user }: GamesLibraryProps) {
           >
             <CardContent className="p-0">
               {/* Game Image */}
-              <div className="h-48 overflow-hidden rounded-t-xl">
+              <div className="h-48 overflow-hidden rounded-t-xl relative">
                 <img 
                   src={game.image} 
                   alt={game.name}
                   className="w-full h-full object-cover"
                 />
+                {game.launchUrl && (
+                  <div className="absolute top-2 right-2 bg-green-500/20 backdrop-blur-sm px-2 py-1 rounded-full border border-green-500/30">
+                    <span className="text-green-300 text-xs font-bold flex items-center">
+                      <ExternalLink className="w-3 h-3 mr-1" />
+                      WEB
+                    </span>
+                  </div>
+                )}
               </div>
               
               {/* Game Info */}
@@ -87,11 +100,11 @@ export default function GamesLibrary({ user }: GamesLibraryProps) {
                   className="w-full"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleLaunchGame(game.id, game.name);
+                    handleLaunchGame(game.id, game.name, game.launchUrl);
                   }}
-                  icon={Play}
+                  icon={game.launchUrl ? ExternalLink : Play}
                 >
-                  Launch Game
+                  {game.launchUrl ? 'Play Online' : 'Launch Game'}
                 </Button>
 
                 {/* Expanded Details */}
@@ -103,7 +116,7 @@ export default function GamesLibrary({ user }: GamesLibraryProps) {
                         <li>• Realistic physics engine</li>
                         <li>• Multiple racing tracks</li>
                         <li>• Career mode progression</li>
-                        <li>• Online multiplayer support</li>
+                        <li>• {game.launchUrl ? 'Browser-based gameplay' : 'Online multiplayer support'}</li>
                         <li>• Advanced telemetry data</li>
                       </ul>
                     </div>
@@ -111,9 +124,19 @@ export default function GamesLibrary({ user }: GamesLibraryProps) {
                     <div>
                       <h4 className="font-semibold text-white mb-2">System Requirements</h4>
                       <div className="text-sm text-slate-400">
-                        <p>✅ VIP Edge Racing Simulator</p>
-                        <p>✅ Active racing credits required</p>
-                        <p>✅ Compatible with all simulator setups</p>
+                        {game.launchUrl ? (
+                          <>
+                            <p>✅ Modern web browser</p>
+                            <p>✅ Stable internet connection</p>
+                            <p>✅ WebGL support</p>
+                          </>
+                        ) : (
+                          <>
+                            <p>✅ VIP Edge Racing Simulator</p>
+                            <p>✅ Active racing credits required</p>
+                            <p>✅ Compatible with all simulator setups</p>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -139,9 +162,9 @@ export default function GamesLibrary({ user }: GamesLibraryProps) {
                 key={game.id}
                 variant="outline"
                 className="h-20 flex-col space-y-2"
-                onClick={() => handleLaunchGame(game.id, game.name)}
+                onClick={() => handleLaunchGame(game.id, game.name, game.launchUrl)}
               >
-                <Gamepad2 className="w-6 h-6" />
+                {game.launchUrl ? <ExternalLink className="w-6 h-6" /> : <Gamepad2 className="w-6 h-6" />}
                 <span className="text-xs">{game.name}</span>
               </Button>
             ))}
@@ -160,6 +183,7 @@ export default function GamesLibrary({ user }: GamesLibraryProps) {
               <h4 className="font-semibold text-white mb-2">For Beginners</h4>
               <ul className="text-sm text-slate-400 space-y-1">
                 <li>• Start with Assetto Corsa for realistic physics</li>
+                <li>• Try our new Drift game for fun practice</li>
                 <li>• Practice braking points on each track</li>
                 <li>• Use racing line assists initially</li>
                 <li>• Focus on smooth inputs over speed</li>
@@ -172,6 +196,7 @@ export default function GamesLibrary({ user }: GamesLibraryProps) {
                 <li>• Learn to read tire temperature data</li>
                 <li>• Practice heel-toe downshifting</li>
                 <li>• Study telemetry for optimal lap times</li>
+                <li>• Perfect your drifting technique</li>
               </ul>
             </div>
           </div>

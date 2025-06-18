@@ -141,78 +141,109 @@ export interface ChatMessage {
   relatedPostId?: string;
 }
 
+export interface GameFile {
+  id: string;
+  gameId: string;
+  name: string;
+  description: string;
+  fileUrl: string;
+  fileType: 'setup' | 'mod' | 'update' | 'config' | 'server';
+  version?: string;
+  uploadDate: string;
+  isActive: boolean;
+}
+
 export const RACING_GAMES = [
   {
     id: 'assetto-corsa-competizione',
     name: 'Assetto Corsa Competizione',
     description: 'Official GT World Challenge game with authentic GT3 and GT4 racing',
-    image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg'
+    image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg',
+    launchUrl: null
   },
   {
     id: 'iracing',
     name: 'iRacing',
     description: 'The world\'s premier online racing simulation platform',
-    image: 'https://images.pexels.com/photos/1007410/pexels-photo-1007410.jpeg'
+    image: 'https://images.pexels.com/photos/1007410/pexels-photo-1007410.jpeg',
+    launchUrl: null
   },
   {
     id: 'f1-24',
     name: 'F1 24',
     description: 'Official Formula 1 racing game with all 2024 teams and circuits',
-    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg'
+    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg',
+    launchUrl: null
   },
   {
     id: 'gran-turismo-7',
     name: 'Gran Turismo 7',
     description: 'The ultimate driving simulator with over 400 cars and legendary tracks',
-    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg'
+    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg',
+    launchUrl: null
   },
   {
     id: 'dirt-rally-2',
     name: 'DiRT Rally 2.0',
     description: 'Challenging rally racing through diverse terrains and weather conditions',
-    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg'
+    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg',
+    launchUrl: null
   },
   {
     id: 'forza-motorsport',
     name: 'Forza Motorsport',
     description: 'Turn 10\'s flagship racing simulation with dynamic time of day and weather',
-    image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg'
+    image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg',
+    launchUrl: null
   },
   {
     id: 'rfactor-2',
     name: 'rFactor 2',
     description: 'Professional-grade racing simulation used by real racing teams',
-    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg'
+    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg',
+    launchUrl: null
   },
   {
     id: 'automobilista-2',
     name: 'Automobilista 2',
     description: 'Brazilian racing simulation featuring diverse motorsport disciplines',
-    image: 'https://images.pexels.com/photos/1007410/pexels-photo-1007410.jpeg'
+    image: 'https://images.pexels.com/photos/1007410/pexels-photo-1007410.jpeg',
+    launchUrl: null
   },
   {
     id: 'project-cars-3',
     name: 'Project CARS 3',
     description: 'Dynamic racing with career progression and authentic motorsport experience',
-    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg'
+    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg',
+    launchUrl: null
   },
   {
     id: 'acc-british-gt',
     name: 'ACC - British GT Pack',
     description: 'British GT Championship expansion with iconic UK circuits',
-    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg'
+    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg',
+    launchUrl: null
   },
   {
     id: 'beamng-drive',
     name: 'BeamNG.drive',
     description: 'Advanced vehicle simulation with realistic physics and damage modeling',
-    image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg'
+    image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg',
+    launchUrl: null
   },
   {
     id: 'wreckfest',
     name: 'Wreckfest',
     description: 'Demolition derby and banger racing with realistic damage physics',
-    image: 'https://images.pexels.com/photos/1007410/pexels-photo-1007410.jpeg'
+    image: 'https://images.pexels.com/photos/1007410/pexels-photo-1007410.jpeg',
+    launchUrl: null
+  },
+  {
+    id: 'drift-game',
+    name: 'Drift',
+    description: 'Master the art of drifting with realistic physics and challenging courses',
+    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg',
+    launchUrl: 'https://fups.itch.io/drift'
   }
 ];
 
@@ -244,6 +275,59 @@ export const addAdminNotification = (notification: {
 export const getAdminNotifications = () => {
   const notifications = localStorage.getItem('vip_admin_notifications');
   return notifications ? JSON.parse(notifications) : [];
+};
+
+// Game Files Management
+export const getGameFiles = (): GameFile[] => {
+  const files = localStorage.getItem('vip_game_files');
+  return files ? JSON.parse(files) : [];
+};
+
+export const addGameFile = (fileData: Omit<GameFile, 'id' | 'uploadDate'>): GameFile => {
+  const files = getGameFiles();
+  const newFile: GameFile = {
+    ...fileData,
+    id: Date.now().toString(),
+    uploadDate: new Date().toISOString()
+  };
+  
+  files.push(newFile);
+  localStorage.setItem('vip_game_files', JSON.stringify(files));
+  
+  // Add admin notification
+  addAdminNotification({
+    type: 'game_file_upload',
+    title: 'New Game File Added',
+    message: `${fileData.name} has been added to ${RACING_GAMES.find(g => g.id === fileData.gameId)?.name || 'Unknown Game'}`,
+    data: {
+      fileName: fileData.name,
+      gameId: fileData.gameId,
+      fileType: fileData.fileType
+    }
+  });
+  
+  return newFile;
+};
+
+export const updateGameFile = (fileId: string, updates: Partial<GameFile>) => {
+  const files = getGameFiles();
+  const fileIndex = files.findIndex(f => f.id === fileId);
+  
+  if (fileIndex !== -1) {
+    files[fileIndex] = { ...files[fileIndex], ...updates };
+    localStorage.setItem('vip_game_files', JSON.stringify(files));
+  }
+};
+
+export const deleteGameFile = (fileId: string) => {
+  const files = getGameFiles();
+  const filteredFiles = files.filter(f => f.id !== fileId);
+  localStorage.setItem('vip_game_files', JSON.stringify(filteredFiles));
+};
+
+export const getGameFilesByGameId = (gameId: string): GameFile[] => {
+  const files = getGameFiles();
+  return files.filter(f => f.gameId === gameId && f.isActive);
 };
 
 // Initialize with admin user and sample data
@@ -360,6 +444,7 @@ const initializeStorage = () => {
     localStorage.setItem('vip_admin_notifications', JSON.stringify([]));
     localStorage.setItem('vip_post_reports', JSON.stringify([]));
     localStorage.setItem('vip_chat_messages', JSON.stringify([]));
+    localStorage.setItem('vip_game_files', JSON.stringify([]));
   } else {
     // Check if the new admin user already exists, if not add them
     const users = getUsers();
@@ -423,6 +508,11 @@ const initializeStorage = () => {
         discount: 25
       };
       localStorage.setItem('vip_users', JSON.stringify(users));
+    }
+    
+    // Initialize game files if not exists
+    if (!localStorage.getItem('vip_game_files')) {
+      localStorage.setItem('vip_game_files', JSON.stringify([]));
     }
   }
 };
@@ -1028,7 +1118,7 @@ export const generateAIResponse = (userMessage: string, chatType: 'support' | 'r
     }
     
     if (lowerMessage.includes('game') || lowerMessage.includes('simulator') || lowerMessage.includes('software')) {
-      return "We feature professional racing simulators with games including Assetto Corsa Competizione, iRacing, F1 24, Gran Turismo 7, DiRT Rally 2.0, Forza Motorsport, rFactor 2, Automobilista 2, Project CARS 3, BeamNG.drive, and Wreckfest. All simulators have force feedback steering wheels, professional pedals, and triple monitor setups for maximum immersion. Which racing game interests you most?";
+      return "We feature professional racing simulators with games including Assetto Corsa Competizione, iRacing, F1 24, Gran Turismo 7, DiRT Rally 2.0, Forza Motorsport, rFactor 2, Automobilista 2, Project CARS 3, BeamNG.drive, Wreckfest, and our new Drift game. All simulators have force feedback steering wheels, professional pedals, and triple monitor setups for maximum immersion. Which racing game interests you most?";
     }
     
     return "I'm here to help with any questions about VIP Edge Racing! I can assist with information about our packages, pricing, hours, VIP membership, booking, location, and our racing simulators. You can also contact us directly at (832) 490-4304 or roel@vipsimracing.com. What would you like to know?";
