@@ -1,8 +1,11 @@
+import bcrypt from 'bcryptjs';
+import { hashPassword, verifyPassword, validatePasswordStrength } from './passwordSecurity';
+
 export interface User {
   fullName: string;
   dob: string;
   email: string;
-  password: string;
+  passwordHash: string; // Changed from 'password' to 'passwordHash'
   phone: string;
   address?: string;
   state?: string;
@@ -330,14 +333,52 @@ export const getGameFilesByGameId = (gameId: string): GameFile[] => {
   return files.filter(f => f.gameId === gameId && f.isActive);
 };
 
+// Migration function to hash existing plain-text passwords
+const migratePasswordsToHashed = async () => {
+  const users = getUsers();
+  let needsUpdate = false;
+  
+  for (const user of users) {
+    // Check if password is already hashed (bcrypt hashes start with $2a$, $2b$, or $2y$)
+    if (user.passwordHash && !user.passwordHash.startsWith('$2')) {
+      // This is a plain-text password that needs to be hashed
+      try {
+        user.passwordHash = await hashPassword(user.passwordHash);
+        needsUpdate = true;
+        console.log(`Migrated password for user: ${user.email}`);
+      } catch (error) {
+        console.error(`Failed to migrate password for user: ${user.email}`, error);
+      }
+    }
+    // Handle legacy 'password' field
+    else if ('password' in user && typeof (user as any).password === 'string') {
+      try {
+        user.passwordHash = await hashPassword((user as any).password);
+        delete (user as any).password; // Remove the old field
+        needsUpdate = true;
+        console.log(`Migrated legacy password for user: ${user.email}`);
+      } catch (error) {
+        console.error(`Failed to migrate legacy password for user: ${user.email}`, error);
+      }
+    }
+  }
+  
+  if (needsUpdate) {
+    localStorage.setItem('vip_users', JSON.stringify(users));
+    console.log('Password migration completed');
+  }
+};
+
 // Initialize with admin user and sample data
-const initializeStorage = () => {
+const initializeStorage = async () => {
   if (!localStorage.getItem('vip_users')) {
+    const adminPasswordHash = await hashPassword('Roelgarza1!');
+    
     const adminUser: User = {
       fullName: 'Roel Garza',
       dob: '1985-01-01',
       email: 'roelggarza@gmail.com',
-      password: 'Roelgarza1!',
+      passwordHash: adminPasswordHash,
       phone: '(832) 490-4304',
       address: '123 Racing Way',
       state: 'Texas',
@@ -384,7 +425,7 @@ const initializeStorage = () => {
       fullName: 'Roel Garza',
       dob: '1985-01-01',
       email: 'roel@vipsimracing.com',
-      password: 'Roelgarza1!',
+      passwordHash: adminPasswordHash,
       phone: '(832) 490-4304',
       address: '123 Racing Way',
       state: 'Texas',
@@ -446,16 +487,21 @@ const initializeStorage = () => {
     localStorage.setItem('vip_chat_messages', JSON.stringify([]));
     localStorage.setItem('vip_game_files', JSON.stringify([]));
   } else {
+    // Migrate existing passwords to hashed versions
+    await migratePasswordsToHashed();
+    
     // Check if the new admin user already exists, if not add them
     const users = getUsers();
     const existingAdmin = users.find(u => u.email === 'roelggarza@gmail.com');
     
     if (!existingAdmin) {
+      const adminPasswordHash = await hashPassword('Roelgarza1!');
+      
       const newAdmin: User = {
         fullName: 'Roel Garza',
         dob: '1985-01-01',
         email: 'roelggarza@gmail.com',
-        password: 'Roelgarza1!',
+        passwordHash: adminPasswordHash,
         phone: '(832) 490-4304',
         address: '123 Racing Way',
         state: 'Texas',
@@ -517,8 +563,17 @@ const initializeStorage = () => {
   }
 };
 
-export const saveUser = (userData: Omit<User, 'registrationDate' | 'racingCredits' | 'accountBalance' | 'isAdmin' | 'stats'>) => {
+export const saveUser = async (userData: Omit<User, 'registrationDate' | 'racingCredits' | 'accountBalance' | 'isAdmin' | 'stats' | 'passwordHash'> & { password: string }) => {
   const users = getUsers();
+  
+  // Validate password strength
+  const passwordValidation = validatePasswordStrength(userData.password);
+  if (!passwordValidation.isValid) {
+    throw new Error(passwordValidation.message);
+  }
+  
+  // Hash the password
+  const passwordHash = await hashPassword(userData.password);
   
   // Get device and location info
   const deviceInfo = `${navigator.platform} ${navigator.userAgent.split(' ')[0]}`;
@@ -526,6 +581,7 @@ export const saveUser = (userData: Omit<User, 'registrationDate' | 'racingCredit
   
   const newUser: User = {
     ...userData,
+    passwordHash, // Store hashed password
     registrationDate: new Date().toISOString(),
     racingCredits: 0,
     accountBalance: 0,
@@ -572,9 +628,18 @@ export const saveUser = (userData: Omit<User, 'registrationDate' | 'racingCredit
   });
 };
 
-export const findUser = (email: string, password: string): User | null => {
+export const findUser = async (email: string, password: string): Promise<User | null> => {
   const users = getUsers();
-  return users.find(user => user.email === email && user.password === password) || null;
+  const user = users.find(user => user.email === email);
+  
+  if (!user) {
+    return null;
+  }
+  
+  // Verify password against hash
+  const isValidPassword = await verifyPassword(password, user.passwordHash);
+  
+  return isValidPassword ? user : null;
 };
 
 export const emailExists = (email: string): boolean => {
@@ -639,12 +704,19 @@ export const updateUser = (updatedUser: User) => {
   }
 };
 
-export const resetUserPassword = (email: string, newPassword: string): boolean => {
+export const resetUserPassword = async (email: string, newPassword: string): Promise<boolean> => {
   const users = getUsers();
   const userIndex = users.findIndex(u => u.email === email);
   
   if (userIndex !== -1) {
-    users[userIndex].password = newPassword;
+    // Validate new password strength
+    const passwordValidation = validatePasswordStrength(newPassword);
+    if (!passwordValidation.isValid) {
+      throw new Error(passwordValidation.message);
+    }
+    
+    // Hash the new password
+    users[userIndex].passwordHash = await hashPassword(newPassword);
     localStorage.setItem('vip_users', JSON.stringify(users));
     
     // Add admin notification

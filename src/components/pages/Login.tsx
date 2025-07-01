@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogIn, AlertCircle, Mail, ArrowLeft } from 'lucide-react';
 import { findUser, saveSession, emailExists, resetUserPassword } from '../../utils/userStorage';
+import { generateSecurePassword } from '../../utils/passwordSecurity';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Card, { CardHeader, CardContent } from '../ui/Card';
@@ -36,9 +37,8 @@ export default function Login() {
 
     setIsLoading(true);
     
-    // Simulate API call delay
-    setTimeout(() => {
-      const user = findUser(form.email, form.password);
+    try {
+      const user = await findUser(form.email, form.password);
       if (!user) {
         setError('Invalid email or password. Please try again.');
         setIsLoading(false);
@@ -47,7 +47,11 @@ export default function Login() {
       
       saveSession(user);
       navigate('/dashboard');
-    }, 800);
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('An error occurred during login. Please try again.');
+      setIsLoading(false);
+    }
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -65,13 +69,12 @@ export default function Login() {
 
     setIsLoading(true);
     
-    // Simulate sending reset email and actually reset password
-    setTimeout(() => {
-      // Generate a temporary password
-      const tempPassword = Math.random().toString(36).slice(-8);
+    try {
+      // Generate a secure temporary password
+      const tempPassword = generateSecurePassword(12);
       
       // Reset the user's password
-      resetUserPassword(resetEmail, tempPassword);
+      await resetUserPassword(resetEmail, tempPassword);
       
       setResetSent(true);
       setIsLoading(false);
@@ -79,7 +82,10 @@ export default function Login() {
       
       // Store temp password for display (in real app, this would be sent via email)
       localStorage.setItem('tempPassword', tempPassword);
-    }, 1000);
+    } catch (error: any) {
+      setError(error.message || 'Failed to reset password. Please try again.');
+      setIsLoading(false);
+    }
   };
 
   if (showResetPassword) {
@@ -109,7 +115,7 @@ export default function Login() {
                     <span className="text-white font-bold text-lg">{tempPassword}</span>
                   </div>
                   <p className="text-xs text-green-300 mt-3">
-                    Please change this password after logging in for security.
+                    Please change this password after logging in for security. This password meets all security requirements.
                   </p>
                 </div>
                 

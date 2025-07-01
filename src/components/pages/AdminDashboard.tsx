@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Users, Monitor, Activity, Eye, Settings, AlertTriangle, Key, UserCheck, UserX, Bell, BellOff, Clock, MapPin, Smartphone, Globe, Flag, MessageCircle, Trash2, EyeOff, CheckCircle, XCircle } from 'lucide-react';
 import { getUsers, getSimulators, User as UserType, Simulator, formatCreditsDisplay, resetUserPassword, updateUser, getAdminNotifications, markNotificationAsRead, getUnreadNotificationCount, getPostReports, PostReport, updatePostReport, getCommunityPosts, hidePost, deleteCommunityPost, getChatMessages } from '../../utils/userStorage';
+import { generateSecurePassword } from '../../utils/passwordSecurity';
 import Card, { CardHeader, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -49,17 +50,22 @@ export default function AdminDashboard() {
     return user.isOnline ? 'Online' : 'Offline';
   };
 
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     if (!selectedUser || !newPassword.trim()) return;
     
-    if (resetUserPassword(selectedUser.email, newPassword)) {
-      alert(`Password reset successfully for ${selectedUser.fullName}. New password: ${newPassword}`);
-      setShowPasswordModal(false);
-      setNewPassword('');
-      setSelectedUser(null);
-      refreshData();
-    } else {
-      alert('Failed to reset password');
+    try {
+      const success = await resetUserPassword(selectedUser.email, newPassword);
+      if (success) {
+        alert(`Password reset successfully for ${selectedUser.fullName}. New password: ${newPassword}`);
+        setShowPasswordModal(false);
+        setNewPassword('');
+        setSelectedUser(null);
+        refreshData();
+      } else {
+        alert('Failed to reset password');
+      }
+    } catch (error: any) {
+      alert(`Failed to reset password: ${error.message}`);
     }
   };
 
@@ -76,11 +82,7 @@ export default function AdminDashboard() {
   };
 
   const generateRandomPassword = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let password = '';
-    for (let i = 0; i < 8; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+    const password = generateSecurePassword(12);
     setNewPassword(password);
   };
 
@@ -617,7 +619,7 @@ export default function AdminDashboard() {
                       <div>
                         <p className="text-slate-400">Password</p>
                         <p className="text-yellow-400 font-mono text-xs bg-slate-800/50 px-2 py-1 rounded">
-                          {user.password}
+                          ••••••••
                         </p>
                       </div>
                     </div>
@@ -872,7 +874,7 @@ export default function AdminDashboard() {
             <div className="bg-slate-700/30 rounded-lg p-4">
               <h4 className="font-semibold text-white mb-2">User: {selectedUser.fullName}</h4>
               <p className="text-slate-400 text-sm">Email: {selectedUser.email}</p>
-              <p className="text-slate-400 text-sm">Current Password: <span className="font-mono text-yellow-400">{selectedUser.password}</span></p>
+              <p className="text-slate-400 text-sm">Current Password: <span className="font-mono text-yellow-400">••••••••</span></p>
             </div>
             
             <div className="space-y-2">
@@ -886,9 +888,12 @@ export default function AdminDashboard() {
                   className="flex-1"
                 />
                 <Button variant="outline" onClick={generateRandomPassword}>
-                  Generate
+                  Generate Secure
                 </Button>
               </div>
+              <p className="text-xs text-slate-500">
+                Generated passwords meet all security requirements (8+ chars, uppercase, lowercase, number, special character)
+              </p>
             </div>
             
             <div className="flex space-x-3">

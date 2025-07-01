@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserPlus, AlertTriangle, CheckCircle, CreditCard, ChevronDown, ChevronUp, Crown, Zap } from 'lucide-react';
 import { saveUser, emailExists, addCreditsAndBalance } from '../../utils/userStorage';
+import { validatePasswordStrength } from '../../utils/passwordSecurity';
 import { RELEASE_WAIVER_TEXT } from '../../utils/constants';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -12,6 +13,7 @@ interface FormData {
   dob: string;
   email: string;
   password: string;
+  confirmPassword: string;
   phone: string;
   address: string;
   state: string;
@@ -30,6 +32,7 @@ export default function Registration() {
     dob: '',
     email: '',
     password: '',
+    confirmPassword: '',
     phone: '',
     address: '',
     state: '',
@@ -69,8 +72,17 @@ export default function Registration() {
     
     if (!form.password) {
       newErrors.password = 'Password is required';
-    } else if (form.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    } else {
+      const passwordValidation = validatePasswordStrength(form.password);
+      if (!passwordValidation.isValid) {
+        newErrors.password = passwordValidation.message;
+      }
+    }
+    
+    if (!form.confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (form.password !== form.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
     }
     
     if (!form.phone.trim()) newErrors.phone = 'Phone number is required';
@@ -90,12 +102,16 @@ export default function Registration() {
 
     setIsLoading(true);
     
-    // Simulate API call delay
-    setTimeout(() => {
-      saveUser(form);
+    try {
+      // Remove confirmPassword from the data sent to saveUser
+      const { confirmPassword, ...userData } = form;
+      await saveUser(userData);
       setSubmitted(true);
       setIsLoading(false);
-    }, 1000);
+    } catch (error: any) {
+      setErrors({ general: error.message || 'Registration failed. Please try again.' });
+      setIsLoading(false);
+    }
   };
 
   const handlePackagePurchase = async (packageData: any) => {
@@ -104,23 +120,23 @@ export default function Registration() {
     setIsProcessingPayment(true);
     setSelectedPackage(packageData.id);
 
-    // Simulate payment processing
-    setTimeout(() => {
-      try {
-        // Save user first
-        saveUser(form);
-        
-        // Add package to user account
-        addCreditsAndBalance(form.email, packageData);
-        
-        setSubmitted(true);
-        setIsProcessingPayment(false);
-      } catch (error) {
-        console.error('Package purchase failed:', error);
-        setIsProcessingPayment(false);
-        setErrors({ general: 'Package purchase failed. Please try again.' });
-      }
-    }, 2000);
+    try {
+      // Remove confirmPassword from the data sent to saveUser
+      const { confirmPassword, ...userData } = form;
+      
+      // Save user first
+      await saveUser(userData);
+      
+      // Add package to user account
+      addCreditsAndBalance(form.email, packageData);
+      
+      setSubmitted(true);
+      setIsProcessingPayment(false);
+    } catch (error: any) {
+      console.error('Package purchase failed:', error);
+      setIsProcessingPayment(false);
+      setErrors({ general: error.message || 'Package purchase failed. Please try again.' });
+    }
   };
 
   const racingPackages = [
@@ -276,16 +292,41 @@ export default function Registration() {
                 autoComplete="email"
               />
 
-              <Input
-                name="password"
-                type="password"
-                label="Create Password"
-                placeholder="Minimum 6 characters"
-                value={form.password}
-                onChange={handleChange}
-                error={errors.password}
-                autoComplete="new-password"
-              />
+              <div className="grid md:grid-cols-2 gap-4">
+                <Input
+                  name="password"
+                  type="password"
+                  label="Create Password"
+                  placeholder="Must include uppercase, lowercase, number, and special character"
+                  value={form.password}
+                  onChange={handleChange}
+                  error={errors.password}
+                  autoComplete="new-password"
+                />
+
+                <Input
+                  name="confirmPassword"
+                  type="password"
+                  label="Confirm Password"
+                  placeholder="Re-enter your password"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  error={errors.confirmPassword}
+                  autoComplete="new-password"
+                />
+              </div>
+
+              {/* Password Requirements */}
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+                <p className="text-blue-300 text-sm font-semibold mb-2">Password Requirements:</p>
+                <ul className="text-blue-200 text-xs space-y-1">
+                  <li>• At least 8 characters long</li>
+                  <li>• At least one uppercase letter (A-Z)</li>
+                  <li>• At least one lowercase letter (a-z)</li>
+                  <li>• At least one number (0-9)</li>
+                  <li>• At least one special character (!@#$%^&*)</li>
+                </ul>
+              </div>
 
               <Input
                 name="phone"
