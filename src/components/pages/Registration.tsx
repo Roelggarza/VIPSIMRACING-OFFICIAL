@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserPlus, AlertTriangle, CheckCircle, CreditCard, ChevronDown, ChevronUp, Crown, Zap } from 'lucide-react';
+import { UserPlus, AlertTriangle, CheckCircle, CreditCard, ChevronDown, ChevronUp, Crown, Zap, Gift, FileText } from 'lucide-react';
 import { saveUser, emailExists, addCreditsAndBalance } from '../../utils/userStorage';
 import { validatePasswordStrength } from '../../utils/passwordSecurity';
 import { RELEASE_WAIVER_TEXT } from '../../utils/constants';
@@ -20,6 +20,8 @@ interface FormData {
   zipCode: string;
   emergencyName: string;
   emergencyPhone: string;
+  agreeToTerms: boolean;
+  optInGiveaway: boolean;
 }
 
 interface FormErrors {
@@ -39,6 +41,8 @@ export default function Registration() {
     zipCode: '',
     emergencyName: '',
     emergencyPhone: '',
+    agreeToTerms: false,
+    optInGiveaway: false,
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitted, setSubmitted] = useState(false);
@@ -49,8 +53,11 @@ export default function Registration() {
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setForm(prev => ({ 
+      ...prev, 
+      [name]: type === 'checkbox' ? checked : value 
+    }));
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
@@ -91,6 +98,9 @@ export default function Registration() {
     if (!form.zipCode.trim()) newErrors.zipCode = 'ZIP code is required';
     if (!form.emergencyName.trim()) newErrors.emergencyName = 'Emergency contact name is required';
     if (!form.emergencyPhone.trim()) newErrors.emergencyPhone = 'Emergency contact phone is required';
+    
+    // Terms and conditions validation
+    if (!form.agreeToTerms) newErrors.agreeToTerms = 'You must agree to the terms and conditions to register';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -103,8 +113,8 @@ export default function Registration() {
     setIsLoading(true);
     
     try {
-      // Remove confirmPassword from the data sent to saveUser
-      const { confirmPassword, ...userData } = form;
+      // Remove confirmPassword, agreeToTerms, and optInGiveaway from the data sent to saveUser
+      const { confirmPassword, agreeToTerms, optInGiveaway, ...userData } = form;
       await saveUser(userData);
       setSubmitted(true);
       setIsLoading(false);
@@ -121,8 +131,8 @@ export default function Registration() {
     setSelectedPackage(packageData.id);
 
     try {
-      // Remove confirmPassword from the data sent to saveUser
-      const { confirmPassword, ...userData } = form;
+      // Remove confirmPassword, agreeToTerms, and optInGiveaway from the data sent to saveUser
+      const { confirmPassword, agreeToTerms, optInGiveaway, ...userData } = form;
       
       // Save user first
       await saveUser(userData);
@@ -219,6 +229,18 @@ export default function Registration() {
                   Your {selectedPackage === 'vip' ? 'VIP membership' : 'racing package'} has been activated!
                 </p>
               )}
+              {form.optInGiveaway && (
+                <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg p-3 mt-4">
+                  <div className="flex items-center justify-center space-x-2 text-yellow-300 mb-2">
+                    <Gift className="w-5 h-5" />
+                    <span className="font-bold">C7 Z06 GIVEAWAY ENTRY CONFIRMED!</span>
+                  </div>
+                  <p className="text-yellow-200 text-sm">
+                    You're entered to win a Chevrolet Corvette C7 Z06! No purchase necessary. 
+                    Winner will be announced on our social media channels.
+                  </p>
+                </div>
+              )}
               <p className="text-slate-400 text-sm">You can now log in to access your Racing Dashboard.</p>
             </div>
             
@@ -246,6 +268,24 @@ export default function Registration() {
           </CardHeader>
 
           <CardContent className="space-y-6">
+            {/* C7 Z06 Giveaway Banner */}
+            <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/50 rounded-lg p-4">
+              <div className="flex items-center justify-center space-x-3 mb-3">
+                <Gift className="w-8 h-8 text-yellow-400" />
+                <h2 className="text-2xl font-bold text-yellow-300">WIN A C7 Z06 CORVETTE!</h2>
+                <Gift className="w-8 h-8 text-yellow-400" />
+              </div>
+              <div className="text-center space-y-2">
+                <p className="text-yellow-200 font-semibold">
+                  🏆 FREE GIVEAWAY - NO PURCHASE NECESSARY 🏆
+                </p>
+                <p className="text-yellow-100 text-sm">
+                  Register today and opt-in below for your chance to win a Chevrolet Corvette C7 Z06! 
+                  Winner announced on our social media channels.
+                </p>
+              </div>
+            </div>
+
             {/* Liability Waiver */}
             <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 space-y-3">
               <div className="flex items-center space-x-2 text-red-400">
@@ -400,6 +440,65 @@ export default function Registration() {
                     onChange={handleChange}
                     error={errors.emergencyPhone}
                   />
+                </div>
+              </div>
+
+              {/* Terms and Conditions & Giveaway Opt-in */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-white">Agreement & Opt-ins</h3>
+                
+                {/* Terms and Conditions */}
+                <div className="bg-slate-700/30 rounded-lg p-4">
+                  <label className="flex items-start space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      name="agreeToTerms"
+                      checked={form.agreeToTerms}
+                      onChange={handleChange}
+                      className="mt-1 w-5 h-5 text-red-500 bg-slate-700 border-slate-600 rounded focus:ring-red-500 focus:ring-2"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <FileText className="w-5 h-5 text-blue-400" />
+                        <span className="text-white font-semibold">Agree to Terms and Conditions</span>
+                        <span className="text-red-400">*</span>
+                      </div>
+                      <p className="text-slate-300 text-sm">
+                        I agree to VIP Edge Racing's Terms of Service, Privacy Policy, and the liability waiver above. 
+                        I understand the risks associated with racing simulation activities.
+                      </p>
+                      {errors.agreeToTerms && (
+                        <p className="text-red-400 text-sm font-medium mt-2">{errors.agreeToTerms}</p>
+                      )}
+                    </div>
+                  </label>
+                </div>
+
+                {/* C7 Z06 Giveaway Opt-in */}
+                <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-lg p-4">
+                  <label className="flex items-start space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      name="optInGiveaway"
+                      checked={form.optInGiveaway}
+                      onChange={handleChange}
+                      className="mt-1 w-5 h-5 text-yellow-500 bg-slate-700 border-slate-600 rounded focus:ring-yellow-500 focus:ring-2"
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Gift className="w-5 h-5 text-yellow-400" />
+                        <span className="text-yellow-300 font-bold">OPT FOR FREE C7 Z06 GIVEAWAY</span>
+                      </div>
+                      <p className="text-yellow-200 text-sm">
+                        <strong>NO PURCHASE NECESSARY!</strong> Enter me in the free Chevrolet Corvette C7 Z06 giveaway. 
+                        I understand this is optional and does not affect my registration. Winner will be selected randomly 
+                        and announced on VIP Edge Racing social media channels.
+                      </p>
+                      <p className="text-yellow-300 text-xs mt-2 font-semibold">
+                        🏆 FREE TO ENTER • NO PURCHASE REQUIRED • VOID WHERE PROHIBITED 🏆
+                      </p>
+                    </div>
+                  </label>
                 </div>
               </div>
 
