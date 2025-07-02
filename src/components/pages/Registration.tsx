@@ -236,8 +236,11 @@ export default function Registration() {
                     <span className="font-bold">C7 Z06 GIVEAWAY ENTRY CONFIRMED!</span>
                   </div>
                   <p className="text-yellow-200 text-sm">
-                    You're entered to win a Chevrolet Corvette C7 Z06! No purchase necessary. 
+                    You're entered to win a Chevrolet Corvette C7 Z06! <strong>NO PURCHASE NECESSARY.</strong> 
                     Winner will be announced on our social media channels.
+                  </p>
+                  <p className="text-yellow-300 text-xs mt-2 font-bold">
+                    🏆 FREE TO ENTER • NO PURCHASE REQUIRED • VOID WHERE PROHIBITED 🏆
                   </p>
                 </div>
               )}
@@ -268,7 +271,7 @@ export default function Registration() {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {/* C7 Z06 Giveaway Banner */}
+            {/* C7 Z06 Giveaway Banner - Enhanced with NO PURCHASE NECESSARY */}
             <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/50 rounded-lg p-4">
               <div className="flex items-center justify-center space-x-3 mb-3">
                 <Gift className="w-8 h-8 text-yellow-400" />
@@ -276,13 +279,19 @@ export default function Registration() {
                 <Gift className="w-8 h-8 text-yellow-400" />
               </div>
               <div className="text-center space-y-2">
-                <p className="text-yellow-200 font-semibold">
+                <p className="text-yellow-200 font-bold text-lg">
                   🏆 FREE GIVEAWAY - NO PURCHASE NECESSARY 🏆
                 </p>
                 <p className="text-yellow-100 text-sm">
                   Register today and opt-in below for your chance to win a Chevrolet Corvette C7 Z06! 
-                  Winner announced on our social media channels.
+                  <strong> NO PURCHASE NECESSARY TO ENTER OR WIN.</strong> Registration is completely free.
                 </p>
+                <div className="bg-yellow-500/20 border border-yellow-400/50 rounded-lg p-3 mt-3">
+                  <p className="text-yellow-200 text-xs font-bold">
+                    ⚖️ LEGAL: NO PURCHASE NECESSARY. A PURCHASE WILL NOT INCREASE YOUR CHANCES OF WINNING. 
+                    VOID WHERE PROHIBITED. Winner announced on our social media channels. ⚖️
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -474,8 +483,8 @@ export default function Registration() {
                   </label>
                 </div>
 
-                {/* C7 Z06 Giveaway Opt-in */}
-                <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-lg p-4">
+                {/* C7 Z06 Giveaway Opt-in - Enhanced with NO PURCHASE NECESSARY */}
+                <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-2 border-yellow-500/40 rounded-lg p-4">
                   <label className="flex items-start space-x-3 cursor-pointer">
                     <input
                       type="checkbox"
@@ -487,14 +496,20 @@ export default function Registration() {
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
                         <Gift className="w-5 h-5 text-yellow-400" />
-                        <span className="text-yellow-300 font-bold">OPT FOR FREE C7 Z06 GIVEAWAY</span>
+                        <span className="text-yellow-300 font-bold">ENTER FREE C7 Z06 GIVEAWAY</span>
                       </div>
-                      <p className="text-yellow-200 text-sm">
+                      <p className="text-yellow-200 text-sm mb-2">
                         <strong>NO PURCHASE NECESSARY!</strong> Enter me in the free Chevrolet Corvette C7 Z06 giveaway. 
-                        I understand this is optional and does not affect my registration. Winner will be selected randomly 
-                        and announced on VIP Edge Racing social media channels.
+                        I understand this is completely optional and does not affect my registration in any way.
                       </p>
-                      <p className="text-yellow-300 text-xs mt-2 font-semibold">
+                      <div className="bg-yellow-500/20 border border-yellow-400/50 rounded p-2 mb-2">
+                        <p className="text-yellow-200 text-xs">
+                          <strong>IMPORTANT:</strong> This giveaway is FREE TO ENTER. You do not need to purchase anything 
+                          to enter or win. A purchase will not increase your chances of winning. Winner will be selected 
+                          randomly and announced on VIP Edge Racing social media channels.
+                        </p>
+                      </div>
+                      <p className="text-yellow-300 text-xs font-bold">
                         🏆 FREE TO ENTER • NO PURCHASE REQUIRED • VOID WHERE PROHIBITED 🏆
                       </p>
                     </div>
@@ -555,9 +570,17 @@ export default function Registration() {
           
           {showPackages && (
             <CardContent className="space-y-6">
-              <p className="text-slate-300 text-center">
-                Skip the wait! Purchase a racing package during registration and start racing immediately.
-              </p>
+              <div className="text-center space-y-2">
+                <p className="text-slate-300">
+                  Skip the wait! Purchase a racing package during registration and start racing immediately.
+                </p>
+                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+                  <p className="text-blue-300 text-sm">
+                    <strong>Note:</strong> The C7 Z06 giveaway is completely separate and FREE. 
+                    You can enter the giveaway without purchasing anything!
+                  </p>
+                </div>
+              </div>
 
               {/* VIP Membership - Featured */}
               <div className="border-2 border-red-500/50 rounded-lg p-1 bg-gradient-to-r from-red-500/10 to-red-600/5">
@@ -664,6 +687,7 @@ export default function Registration() {
                   <li>• No additional setup required</li>
                   <li>• VIP membership offers the best value with 25% ongoing savings</li>
                   <li>• All packages include professional telemetry and support</li>
+                  <li>• <strong>Remember:</strong> C7 Z06 giveaway entry is FREE regardless of purchase!</li>
                 </ul>
               </div>
             </CardContent>
