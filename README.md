@@ -24,14 +24,9 @@ This is the official VIP Edge Racing web application, designed for professional 
 - **Security**: bcryptjs for password hashing
 - **QR Codes**: qrcode.react for mobile access
 
-## 📱 Admin Access
-
-- **Primary Admin**: admin@vipsimracing.com / VIPEdge2024!
-- **Secondary Admin**: roel@vipsimracing.com / VIPEdge2024!
-
 ## 🏗️ Deployment
 
-This application is configured for deployment to **vipsimracing.com** via Netlify.
+This application is configured for deployment to **vipsimracing.com** via Vercel
 
 ### Build Settings
 - Build command: `npm run build`
@@ -46,7 +41,6 @@ This application is configured for deployment to **vipsimracing.com** via Netlif
 
 - **Business Phone**: (800) 897-5419
 - **Email**: roel@vipsimracing.com
-- **Owner**: Roel Garza
 
 ## 🎯 Production Ready
 
