@@ -484,13 +484,24 @@ export default function Registration() {
                 </div>
 
                 {/* C7 Z06 Giveaway Opt-in - Enhanced with NO PURCHASE NECESSARY */}
-                <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-2 border-yellow-500/40 rounded-lg p-4">
+                <div className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-2 border-yellow-500/40 rounded-lg p-4 relative">
+                  {/* Coming Soon Overlay */}
+                  <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+                    <div className="text-center">
+                      <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg px-6 py-3">
+                        <p className="text-yellow-300 font-bold text-lg">🚧 COMING SOON 🚧</p>
+                        <p className="text-yellow-200 text-sm mt-1">Giveaway details will be announced soon!</p>
+                      </div>
+                    </div>
+                  </div>
+                  
                   <label className="flex items-start space-x-3 cursor-pointer">
                     <input
                       type="checkbox"
                       name="optInGiveaway"
                       checked={form.optInGiveaway}
                       onChange={handleChange}
+                      disabled={true}
                       className="mt-1 w-5 h-5 text-yellow-500 bg-slate-700 border-slate-600 rounded focus:ring-yellow-500 focus:ring-2"
                     />
                     <div className="flex-1">
