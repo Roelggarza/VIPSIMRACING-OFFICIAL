@@ -7,7 +7,7 @@
 - **Status**: Production Ready
 
 ## Admin Credentials
-- **Primary Admin**: roelggarza@gmail.com / Roelgarza1!
+- **Primary Admin**: admin@vipsimracing.com / VIPEdge2024!
 - **Secondary Admin**: roel@vipsimracing.com / Roelgarza1!
 
 ## Key Features in This Version

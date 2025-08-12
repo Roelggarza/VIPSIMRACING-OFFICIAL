@@ -25,12 +25,12 @@
 
 ## Contact Information
 - **Owner**: Roel Garza
-- **Phone**: (832) 490-4304
+- **Phone**: (800) 897-5419
 - **Email**: roel@vipsimracing.com
 - **Domain**: vipsimracing.com
 
 ## Admin Credentials
-- Primary: roelggarza@gmail.com / Roelgarza1!
+- Primary: admin@vipsimracing.com / VIPEdge2024!
 - Secondary: roel@vipsimracing.com / Roelgarza1!
 
 ---

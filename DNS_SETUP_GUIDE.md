@@ -117,7 +117,7 @@ Netlify will automatically provision an SSL certificate for your custom domain o
 ## Contact Information
 
 If you need help with any of these steps:
-- **Phone**: (832) 490-4304
+- **Phone**: (800) 897-5419
 - **Email**: roel@vipsimracing.com
 
 ## Next Steps After DNS Update

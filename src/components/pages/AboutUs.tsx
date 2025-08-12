@@ -181,10 +181,10 @@ export default function AboutUs() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
                   size="lg"
-                  onClick={() => window.location.href = 'tel:8324904304'}
+                  onClick={() => window.location.href = 'tel:8008975419'}
                   icon={Phone}
                 >
-                  Call (832) 490-4304
+                  Call (800) 897-5419
                 </Button>
                 
                 <Button 
@@ -201,12 +201,12 @@ export default function AboutUs() {
                 <p className="text-slate-400 text-sm">
                   Visit us online at{' '}
                   <a 
-                    href="https://vipsimracing.com" 
+                    href="tel:8008975419" 
                     className="text-red-400 hover:text-red-300 transition-colors font-semibold"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    vipsimracing.com
+                    (800) 897-5419
                   </a>
                 </p>
               </div>

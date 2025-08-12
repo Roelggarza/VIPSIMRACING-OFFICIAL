@@ -372,99 +372,91 @@ const migratePasswordsToHashed = async () => {
 // Initialize with admin user and sample data
 const initializeStorage = async () => {
   if (!localStorage.getItem('vip_users')) {
-    const adminPasswordHash = await hashPassword('Roelgarza1!');
+    const adminPasswordHash = await hashPassword('VIPEdge2024!');
     
     const adminUser: User = {
-      fullName: 'Roel Garza',
+      fullName: 'VIP Edge Admin',
       dob: '1985-01-01',
-      email: 'roelggarza@gmail.com',
+      email: 'admin@vipsimracing.com',
       passwordHash: adminPasswordHash,
       phone: '(832) 490-4304',
-      address: '123 Racing Way',
+      address: '',
       state: 'Texas',
-      zipCode: '77001',
-      emergencyName: 'Emergency Contact',
-      emergencyPhone: '(832) 490-4305',
+      zipCode: '',
+      emergencyName: '',
+      emergencyPhone: '',
       registrationDate: new Date().toISOString(),
       profilePicture: '',
       bannerImage: '',
-      bio: 'Owner and founder of VIP Edge Racing. Passionate about motorsports and providing the ultimate racing simulation experience.',
-      racingCredits: 1000,
-      accountBalance: 500,
+      bio: 'VIP Edge Racing Administrator',
+      racingCredits: 0,
+      accountBalance: 0,
       isAdmin: true,
-      isOnline: true,
+      isOnline: false,
       lastActive: new Date().toISOString(),
       currentSimulator: null,
       isStreaming: false,
       currentGame: '',
-      status: 'online',
-      statusMessage: 'Managing VIP Edge Racing',
+      status: 'offline',
+      statusMessage: '',
       spotifyData: {
         connected: false
       },
       socialAccounts: {},
-      vipMembership: {
-        active: true,
-        expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-        discount: 25
-      },
+      vipMembership: undefined,
       stats: {
-        totalRaces: 150,
-        bestLapTime: '1:23.456',
+        totalRaces: 0,
+        bestLapTime: '--:--',
         rank: 1,
-        wins: 45,
-        podiums: 89
+        wins: 0,
+        podiums: 0
       },
-      registrationSource: 'Admin Account',
-      deviceInfo: 'Admin Dashboard',
-      ipAddress: '127.0.0.1'
+      registrationSource: 'System',
+      deviceInfo: 'Server',
+      ipAddress: 'localhost'
     };
 
-    // Also keep the original admin account
+    // Secondary admin account
     const originalAdmin: User = {
       fullName: 'Roel Garza',
       dob: '1985-01-01',
       email: 'roel@vipsimracing.com',
       passwordHash: adminPasswordHash,
-      phone: '(832) 490-4304',
-      address: '123 Racing Way',
+      phone: '(800) 897-5419',
+      address: '',
       state: 'Texas',
-      zipCode: '77001',
-      emergencyName: 'Emergency Contact',
-      emergencyPhone: '(832) 490-4305',
+      zipCode: '',
+      emergencyName: '',
+      emergencyPhone: '',
       registrationDate: new Date().toISOString(),
       profilePicture: '',
       bannerImage: '',
-      bio: 'Owner and founder of VIP Edge Racing. Passionate about motorsports and providing the ultimate racing simulation experience.',
-      racingCredits: 1000,
-      accountBalance: 500,
+      bio: 'Owner and founder of VIP Edge Racing.',
+      racingCredits: 0,
+      accountBalance: 0,
       isAdmin: true,
-      isOnline: true,
+      isOnline: false,
       lastActive: new Date().toISOString(),
       currentSimulator: null,
       isStreaming: false,
       currentGame: '',
-      status: 'online',
-      statusMessage: 'Managing VIP Edge Racing',
+      status: 'offline',
+      statusMessage: '',
       spotifyData: {
         connected: false
       },
       socialAccounts: {},
-      vipMembership: {
-        active: true,
-        expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-        discount: 25
-      },
+      vipMembership: undefined,
       stats: {
-        totalRaces: 150,
-        bestLapTime: '1:23.456',
-        rank: 1,
-        wins: 45,
-        podiums: 89
+        totalRaces: 0,
+        bestLapTime: '--:--',
+        rank: 2,
+        wins: 0,
+        podiums: 0
       },
-      registrationSource: 'Admin Account',
-      deviceInfo: 'Admin Dashboard',
-      ipAddress: '127.0.0.1'
+      registrationSource: 'System',
+      deviceInfo: 'Server',
+      ipAddress: 'localhost'
     };
 
     localStorage.setItem('vip_users', JSON.stringify([adminUser, originalAdmin]));
@@ -473,7 +465,7 @@ const initializeStorage = async () => {
     const simulators: Simulator[] = Array.from({ length: 8 }, (_, i) => ({
       id: i + 1,
       name: `Racing Simulator ${i + 1}`,
-      isActive: Math.random() > 0.3,
+      isActive: false,
       currentUser: undefined,
       currentGame: '',
       screens: []
@@ -495,52 +487,48 @@ const initializeStorage = async () => {
     const existingAdmin = users.find(u => u.email === 'roelggarza@gmail.com');
     
     if (!existingAdmin) {
-      const adminPasswordHash = await hashPassword('Roelgarza1!');
+      const adminPasswordHash = await hashPassword('VIPEdge2024!');
       
       const newAdmin: User = {
-        fullName: 'Roel Garza',
+        fullName: 'VIP Edge Admin',
         dob: '1985-01-01',
-        email: 'roelggarza@gmail.com',
+        email: 'admin@vipsimracing.com',
         passwordHash: adminPasswordHash,
-        phone: '(832) 490-4304',
-        address: '123 Racing Way',
+        phone: '(800) 897-5419',
+        address: '',
         state: 'Texas',
-        zipCode: '77001',
-        emergencyName: 'Emergency Contact',
-        emergencyPhone: '(832) 490-4305',
+        zipCode: '',
+        emergencyName: '',
+        emergencyPhone: '',
         registrationDate: new Date().toISOString(),
         profilePicture: '',
         bannerImage: '',
-        bio: 'Owner and founder of VIP Edge Racing. Passionate about motorsports and providing the ultimate racing simulation experience.',
-        racingCredits: 1000,
-        accountBalance: 500,
+        bio: 'VIP Edge Racing Administrator',
+        racingCredits: 0,
+        accountBalance: 0,
         isAdmin: true,
-        isOnline: true,
+        isOnline: false,
         lastActive: new Date().toISOString(),
         currentSimulator: null,
         isStreaming: false,
         currentGame: '',
-        status: 'online',
-        statusMessage: 'Managing VIP Edge Racing',
+        status: 'offline',
+        statusMessage: '',
         spotifyData: {
           connected: false
         },
         socialAccounts: {},
-        vipMembership: {
-          active: true,
-          expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-          discount: 25
-        },
+        vipMembership: undefined,
         stats: {
-          totalRaces: 150,
-          bestLapTime: '1:23.456',
+          totalRaces: 0,
+          bestLapTime: '--:--',
           rank: 1,
-          wins: 45,
-          podiums: 89
+          wins: 0,
+          podiums: 0
         },
-        registrationSource: 'Admin Account',
-        deviceInfo: 'Admin Dashboard',
-        ipAddress: '127.0.0.1'
+        registrationSource: 'System',
+        deviceInfo: 'Server',
+        ipAddress: 'localhost'
       };
       
       users.push(newAdmin);
@@ -548,11 +536,6 @@ const initializeStorage = async () => {
     } else if (!existingAdmin.isAdmin) {
       // Make sure the existing user is an admin
       existingAdmin.isAdmin = true;
-      existingAdmin.vipMembership = {
-        active: true,
-        expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-        discount: 25
-      };
       localStorage.setItem('vip_users', JSON.stringify(users));
     }
     

@@ -24,6 +24,10 @@
    - None required for current version
    - All data stored in localStorage
 
+## Admin Credentials
+- **Primary Admin**: admin@vipsimracing.com / VIPEdge2024!
+- **Secondary Admin**: roel@vipsimracing.com / Roelgarza1!
+
 ## Post-Deployment Testing
 - [ ] Visit vipsimracing.com
 - [ ] Test user registration
