@@ -112,10 +112,10 @@ export default function Landing() {
         <div className="pt-6 border-t border-slate-700/50">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-xs sm:text-sm text-slate-400">
             <a 
-              href="tel:8324904304" 
+              href="tel:8008975419" 
               className="text-red-400 hover:text-red-300 transition-colors font-medium"
             >
-              (832) 490-4304
+              (800) 897-5419
             </a>
             <span className="hidden sm:inline text-slate-600">|</span>
             <a 
