@@ -253,7 +253,24 @@ export const RACING_GAMES = [
 // Define getUsers first
 export const getUsers = (): User[] => {
   const users = localStorage.getItem('vip_users');
-  return users ? JSON.parse(users) : [];
+  if (!users) return [];
+  
+  try {
+    return JSON.parse(users);
+  } catch (error) {
+    // If parsing fails (corrupted/encrypted data), clear the storage and return empty array
+    console.warn('Corrupted user data detected, clearing localStorage and reinitializing...');
+    localStorage.removeItem('vip_users');
+    localStorage.removeItem('vip_session');
+    localStorage.removeItem('vip_simulators');
+    localStorage.removeItem('vip_transactions');
+    localStorage.removeItem('vip_community_posts');
+    localStorage.removeItem('vip_admin_notifications');
+    localStorage.removeItem('vip_post_reports');
+    localStorage.removeItem('vip_chat_messages');
+    localStorage.removeItem('vip_game_files');
+    return [];
+  }
 };
 
 // Admin Notifications functions (needed by initializeStorage)
