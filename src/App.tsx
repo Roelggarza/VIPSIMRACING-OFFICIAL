@@ -5,6 +5,7 @@ import Registration from './components/pages/Registration';
 import Login from './components/pages/Login';
 import Dashboard from './components/pages/Dashboard';
 import AboutUs from './components/pages/AboutUs';
+import Merch from './components/pages/Merch';
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/about" element={<AboutUs />} />
+        <Route path="/merch" element={<Merch />} />
         <Route path="/register" element={<Registration />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />

@@ -35,7 +35,7 @@ export default function Landing() {
         </div>
 
         {/* Action Buttons - Keeping same size */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
           <Button 
             size="lg" 
             icon={Flag}
@@ -45,14 +45,25 @@ export default function Landing() {
             GET STARTED
           </Button>
           
-          <Button 
-            variant="outline" 
-            size="lg"
-            onClick={() => navigate("/login")}
-            className="w-full sm:w-auto"
-          >
-            MEMBER LOGIN
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+            <Button 
+              variant="outline" 
+              size="lg"
+              onClick={() => navigate("/login")}
+              className="w-full sm:w-auto"
+            >
+              MEMBER LOGIN
+            </Button>
+            
+            <Button 
+              variant="secondary" 
+              size="lg"
+              onClick={() => navigate("/merch")}
+              className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-0"
+            >
+              MERCH
+            </Button>
+          </div>
         </div>
 
         {/* QR Code Section */}

@@ -161,91 +161,91 @@ export const RACING_GAMES = [
     id: 'assetto-corsa-competizione',
     name: 'Assetto Corsa Competizione',
     description: 'Official GT World Challenge game with authentic GT3 and GT4 racing',
-    image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg',
+    image: 'https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg',
     launchUrl: null
   },
   {
     id: 'iracing',
     name: 'iRacing',
     description: 'The world\'s premier online racing simulation platform',
-    image: 'https://images.pexels.com/photos/1007410/pexels-photo-1007410.jpeg',
+    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg',
     launchUrl: null
   },
   {
     id: 'f1-24',
     name: 'F1 24',
     description: 'Official Formula 1 racing game with all 2024 teams and circuits',
-    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg',
+    image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg',
     launchUrl: null
   },
   {
     id: 'gran-turismo-7',
     name: 'Gran Turismo 7',
     description: 'The ultimate driving simulator with over 400 cars and legendary tracks',
-    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg',
+    image: 'https://images.pexels.com/photos/1007410/pexels-photo-1007410.jpeg',
     launchUrl: null
   },
   {
     id: 'dirt-rally-2',
     name: 'DiRT Rally 2.0',
     description: 'Challenging rally racing through diverse terrains and weather conditions',
-    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg',
+    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg',
     launchUrl: null
   },
   {
     id: 'forza-motorsport',
     name: 'Forza Motorsport',
     description: 'Turn 10\'s flagship racing simulation with dynamic time of day and weather',
-    image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg',
+    image: 'https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg',
     launchUrl: null
   },
   {
     id: 'rfactor-2',
     name: 'rFactor 2',
     description: 'Professional-grade racing simulation used by real racing teams',
-    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg',
+    image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg',
     launchUrl: null
   },
   {
     id: 'automobilista-2',
     name: 'Automobilista 2',
     description: 'Brazilian racing simulation featuring diverse motorsport disciplines',
-    image: 'https://images.pexels.com/photos/1007410/pexels-photo-1007410.jpeg',
+    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg',
     launchUrl: null
   },
   {
     id: 'project-cars-3',
     name: 'Project CARS 3',
     description: 'Dynamic racing with career progression and authentic motorsport experience',
-    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg',
+    image: 'https://images.pexels.com/photos/1007410/pexels-photo-1007410.jpeg',
     launchUrl: null
   },
   {
     id: 'acc-british-gt',
     name: 'ACC - British GT Pack',
     description: 'British GT Championship expansion with iconic UK circuits',
-    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg',
+    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg',
     launchUrl: null
   },
   {
     id: 'beamng-drive',
     name: 'BeamNG.drive',
     description: 'Advanced vehicle simulation with realistic physics and damage modeling',
-    image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg',
+    image: 'https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg',
     launchUrl: null
   },
   {
     id: 'wreckfest',
     name: 'Wreckfest',
     description: 'Demolition derby and banger racing with realistic damage physics',
-    image: 'https://images.pexels.com/photos/1007410/pexels-photo-1007410.jpeg',
+    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg',
     launchUrl: null
   },
   {
     id: 'drift-game',
     name: 'Drift',
     description: 'Master the art of drifting with realistic physics and challenging courses',
-    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg',
+    image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg',
     launchUrl: 'https://fups.itch.io/drift'
   }
 ];
@@ -437,7 +437,7 @@ const initializeStorage = async () => {
     const originalAdmin: User = {
       fullName: 'Roel Garza',
       dob: '1985-01-01',
-      email: 'roel@vipsimracing.com',
+      email: 'roelggarza@gmail.com',
       passwordHash: adminPasswordHash,
       phone: '(800) 897-5419',
       address: '',
@@ -501,7 +501,7 @@ const initializeStorage = async () => {
     
     // Check if the new admin user already exists, if not add them
     const users = getUsers();
-    const existingAdmin = users.find(u => u.email === 'roelggarza@gmail.com');
+    const existingAdmin = users.find(u => u.email === 'admin@vipsimracing.com');
     
     if (!existingAdmin) {
       const adminPasswordHash = await hashPassword('VIPEdge2024!');
