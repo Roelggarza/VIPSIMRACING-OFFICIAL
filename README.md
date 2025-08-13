@@ -1,8 +1,8 @@
-# VIP Edge Racing - Professional Racing Simulator Web Application
+# VIP SIM RACING - Professional Racing Simulator Web Application
 
 ## 🏁 Production Deployment for vipsimracing.com
 
-This is the official VIP Edge Racing web application, designed for professional racing simulation experiences.
+This is the official VIP SIM RACING web application, designed for professional racing simulation experiences.
 
 ## 🚀 Features
 

@@ -522,7 +522,7 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Globe className="w-5 h-5 text-red-500" />
-              <h2 className="text-xl font-bold text-white">Community Hub</h2>
+              <h2 className="text-xl font-bold text-white">VIP SIM RACING Community</h2>
             </div>
             <div className="flex space-x-2">
               <Button

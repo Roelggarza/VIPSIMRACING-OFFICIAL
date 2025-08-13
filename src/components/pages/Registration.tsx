@@ -223,7 +223,7 @@ export default function Registration() {
             
             <div className="space-y-2">
               <h2 className="text-2xl font-bold text-white">Registration Complete!</h2>
-              <p className="text-slate-300">Welcome to VIP Edge, {form.fullName}!</p>
+              <p className="text-slate-300">Welcome to VIP SIM RACING, {form.fullName}!</p>
               {selectedPackage && (
                 <p className="text-green-400 text-sm">
                   Your {selectedPackage === 'vip' ? 'VIP membership' : 'racing package'} has been activated!
@@ -265,8 +265,8 @@ export default function Registration() {
               <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto">
                 <UserPlus className="w-6 h-6 text-red-500" />
               </div>
-              <h1 className="text-2xl font-bold text-white">Racing Simulator Registration</h1>
-              <p className="text-slate-400">Join VIP Edge for the ultimate racing experience</p>
+              <h1 className="text-2xl font-bold text-white">VIP SIM RACING Registration</h1>
+              <p className="text-slate-400">Join VIP SIM RACING for the ultimate racing experience</p>
             </div>
           </CardHeader>
 

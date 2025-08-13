@@ -148,7 +148,7 @@ export default function Login() {
               <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto">
                 <Mail className="w-6 h-6 text-blue-500" />
               </div>
-              <h1 className="text-2xl font-bold text-white">Reset Password</h1>
+              <h1 className="text-2xl font-bold text-white">Welcome Back to VIP SIM RACING</h1>
               <p className="text-slate-400">Enter your email to reset your password</p>
             </div>
           </CardHeader>
