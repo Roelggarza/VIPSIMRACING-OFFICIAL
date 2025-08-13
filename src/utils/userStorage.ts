@@ -392,7 +392,7 @@ const initializeStorage = async () => {
     const adminPasswordHash = await hashPassword('VIPEdge2024!');
     
     const adminUser: User = {
-      fullName: 'VIP Edge Admin',
+      fullName: 'VIP SIM RACING Admin',
       dob: '1985-01-01',
       email: 'admin@vipsimracing.com',
       passwordHash: adminPasswordHash,
@@ -405,7 +405,7 @@ const initializeStorage = async () => {
       registrationDate: new Date().toISOString(),
       profilePicture: '',
       bannerImage: '',
-      bio: 'VIP Edge Racing Administrator',
+      bio: 'VIP SIM RACING Administrator',
       racingCredits: 0,
       accountBalance: 0,
       isAdmin: true,
@@ -448,7 +448,7 @@ const initializeStorage = async () => {
       registrationDate: new Date().toISOString(),
       profilePicture: '',
       bannerImage: '',
-      bio: 'Owner and founder of VIP Edge Racing.',
+      bio: 'Owner and founder of VIP SIM RACING.',
       racingCredits: 0,
       accountBalance: 0,
       isAdmin: true,
@@ -507,7 +507,7 @@ const initializeStorage = async () => {
       const adminPasswordHash = await hashPassword('VIPEdge2024!');
       
       const newAdmin: User = {
-        fullName: 'VIP Edge Admin',
+        fullName: 'VIP SIM RACING Admin',
         dob: '1985-01-01',
         email: 'admin@vipsimracing.com',
         passwordHash: adminPasswordHash,
@@ -520,7 +520,7 @@ const initializeStorage = async () => {
         registrationDate: new Date().toISOString(),
         profilePicture: '',
         bannerImage: '',
-        bio: 'VIP Edge Racing Administrator',
+        bio: 'VIP SIM RACING Administrator',
         racingCredits: 0,
         accountBalance: 0,
         isAdmin: true,
@@ -723,7 +723,7 @@ export const resetUserPassword = async (email: string, newPassword: string): Pro
     addAdminNotification({
       type: 'password_reset',
       title: 'Password Reset',
-      message: `Password reset for ${users[userIndex].fullName} (${email})`,
+      message: `${newUser.fullName} has registered for VIP SIM RACING`,
       data: {
         email: email,
         resetTime: new Date().toISOString()
@@ -1174,7 +1174,7 @@ export const generateAIResponse = (userMessage: string, chatType: 'support' | 'r
     }
     
     if (lowerMessage.includes('hour') || lowerMessage.includes('time') || lowerMessage.includes('open')) {
-      return "VIP Edge Racing is open Monday-Thursday 4PM-10PM, Friday-Saturday 12PM-12AM, and Sunday 12PM-10PM. We recommend booking in advance, especially for weekends. VIP members get priority booking access. Would you like help making a reservation?";
+      return "VIP SIM RACING is open Monday-Thursday 4PM-10PM, Friday-Saturday 12PM-12AM, and Sunday 12PM-10PM. We recommend booking in advance, especially for weekends. VIP members get priority booking access. Would you like help making a reservation?";
     }
     
     if (lowerMessage.includes('vip') || lowerMessage.includes('membership')) {
@@ -1186,14 +1186,14 @@ export const generateAIResponse = (userMessage: string, chatType: 'support' | 'r
     }
     
     if (lowerMessage.includes('location') || lowerMessage.includes('address') || lowerMessage.includes('where')) {
-      return "VIP Edge Racing is located in the Houston, Texas area. For the exact address and directions, please contact us at (832) 490-4304 or roel@vipsimracing.com. We're easily accessible and have parking available for all guests.";
+      return "VIP SIM RACING is located in the Houston, Texas area. For the exact address and directions, please contact us at (832) 490-4304 or roel@vipsimracing.com. We're easily accessible and have parking available for all guests.";
     }
     
     if (lowerMessage.includes('game') || lowerMessage.includes('simulator') || lowerMessage.includes('software')) {
       return "We feature professional racing simulators with games including Assetto Corsa Competizione, iRacing, F1 24, Gran Turismo 7, DiRT Rally 2.0, Forza Motorsport, rFactor 2, Automobilista 2, Project CARS 3, BeamNG.drive, Wreckfest, and our new Drift game. All simulators have force feedback steering wheels, professional pedals, and triple monitor setups for maximum immersion. Which racing game interests you most?";
     }
     
-    return "I'm here to help with any questions about VIP Edge Racing! I can assist with information about our packages, pricing, hours, VIP membership, booking, location, and our racing simulators. You can also contact us directly at (832) 490-4304 or roel@vipsimracing.com. What would you like to know?";
+    return "I'm here to help with any questions about VIP SIM RACING! I can assist with information about our packages, pricing, hours, VIP membership, booking, location, and our racing simulators. You can also contact us directly at (832) 490-4304 or roel@vipsimracing.com. What would you like to know?";
   }
   
   // Report responses
@@ -1203,7 +1203,7 @@ export const generateAIResponse = (userMessage: string, chatType: 'support' | 'r
     }
     
     if (lowerMessage.includes('inappropriate') || lowerMessage.includes('offensive')) {
-      return "Thank you for reporting inappropriate content. We have strict community guidelines to ensure VIP Edge Racing remains welcoming for all members. Your report is being reviewed by our moderation team and appropriate action will be taken if the content violates our policies. We appreciate your vigilance in maintaining our community standards.";
+      return "Thank you for reporting inappropriate content. We have strict community guidelines to ensure VIP SIM RACING remains welcoming for all members. Your report is being reviewed by our moderation team and appropriate action will be taken if the content violates our policies. We appreciate your vigilance in maintaining our community standards.";
     }
     
     if (lowerMessage.includes('harassment') || lowerMessage.includes('bullying')) {
@@ -1215,18 +1215,18 @@ export const generateAIResponse = (userMessage: string, chatType: 'support' | 'r
   
   // General responses
   if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
-    return "Hello! Welcome to VIP Edge Racing! I'm here to help you with any questions about our racing simulators, packages, or services. Whether you're new to sim racing or a seasoned pro, we have something for everyone. What can I help you with today?";
+    return "Hello! Welcome to VIP SIM RACING! I'm here to help you with any questions about our racing simulators, packages, or services. Whether you're new to sim racing or a seasoned pro, we have something for everyone. What can I help you with today?";
   }
   
   if (lowerMessage.includes('help')) {
-    return "I'm here to help! I can assist you with information about our racing packages, VIP membership, facility hours, booking sessions, our racing simulators and games, pricing, and general questions about VIP Edge Racing. I can also help you report content or get support. What do you need help with?";
+    return "I'm here to help! I can assist you with information about our racing packages, VIP membership, facility hours, booking sessions, our racing simulators and games, pricing, and general questions about VIP SIM RACING. I can also help you report content or get support. What do you need help with?";
   }
   
   if (lowerMessage.includes('thank')) {
     return "You're very welcome! It's my pleasure to help. If you have any other questions about VIP Edge Racing, feel free to ask anytime. We're here to make your racing experience amazing! 🏁";
   }
   
-  return "Thanks for reaching out! I can help you with questions about VIP Edge Racing including our packages, pricing, hours, VIP membership, booking, and our racing simulators. For immediate assistance, you can also call us at (832) 490-4304 or email roel@vipsimracing.com. What would you like to know?";
+  return "Thanks for reaching out! I can help you with questions about VIP SIM RACING including our packages, pricing, hours, VIP membership, booking, and our racing simulators. For immediate assistance, you can also call us at (832) 490-4304 or email roel@vipsimracing.com. What would you like to know?";
 };
 
 // Call initialization at the end of the file

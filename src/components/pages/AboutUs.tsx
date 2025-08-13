@@ -9,7 +9,7 @@ export default function AboutUs() {
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-white">About VIP Edge Racing</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-white">About VIP SIM RACING</h1>
           <p className="text-xl text-slate-300 max-w-3xl mx-auto">
             Where passion meets precision. Experience the ultimate in professional racing simulation.
           </p>
@@ -28,7 +28,7 @@ export default function AboutUs() {
               <div className="space-y-4">
                 <h3 className="text-3xl font-bold text-white">Roel Garza</h3>
                 <p className="text-slate-300 text-lg leading-relaxed">
-                  Founder and owner of VIP Edge Racing, bringing years of passion for motorsports 
+                  Founder and owner of VIP SIM RACING, bringing years of passion for motorsports 
                   and cutting-edge simulation technology to create the ultimate racing experience. 
                   Dedicated to providing professional-grade equipment and unmatched customer service.
                 </p>
@@ -114,7 +114,7 @@ export default function AboutUs() {
           <CardHeader>
             <div className="flex items-center space-x-2">
               <Zap className="w-6 h-6 text-red-500" />
-              <h2 className="text-2xl font-bold text-white">What Sets VIP Edge Apart</h2>
+              <h2 className="text-2xl font-bold text-white">What Sets VIP SIM RACING Apart</h2>
             </div>
           </CardHeader>
           <CardContent>

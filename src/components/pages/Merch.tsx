@@ -25,10 +25,10 @@ export default function Merch() {
   const merchItems: MerchItem[] = [
     {
       id: 'vip-hoodie',
-      name: 'VIP Edge Racing Hoodie',
+      name: 'VIP SIM RACING Hoodie',
       price: 50,
       image: 'https://images.pexels.com/photos/8532616/pexels-photo-8532616.jpeg',
-      description: 'Premium quality hoodie with VIP Edge Racing logo. Perfect for the track or casual wear.',
+      description: 'Premium quality hoodie with VIP SIM RACING logo. Perfect for the track or casual wear.',
       sizes: ['S', 'M', 'L', 'XL', 'XXL'],
       colors: ['Black', 'Red', 'Gray'],
       inStock: false,
@@ -36,10 +36,10 @@ export default function Merch() {
     },
     {
       id: 'racing-hat',
-      name: 'VIP Edge Racing Cap',
+      name: 'VIP SIM RACING Cap',
       price: 30,
       image: 'https://images.pexels.com/photos/1124465/pexels-photo-1124465.jpeg',
-      description: 'Adjustable racing cap with embroidered VIP Edge logo. One size fits all.',
+      description: 'Adjustable racing cap with embroidered VIP SIM RACING logo. One size fits all.',
       sizes: ['One Size'],
       colors: ['Black', 'Red', 'White'],
       inStock: false,
@@ -47,10 +47,10 @@ export default function Merch() {
     },
     {
       id: 'racing-tshirt',
-      name: 'VIP Edge Racing T-Shirt',
+      name: 'VIP SIM RACING T-Shirt',
       price: 25,
       image: 'https://images.pexels.com/photos/8532616/pexels-photo-8532616.jpeg',
-      description: 'Comfortable cotton t-shirt with VIP Edge Racing design. Perfect for everyday wear.',
+      description: 'Comfortable cotton t-shirt with VIP SIM RACING design. Perfect for everyday wear.',
       sizes: ['S', 'M', 'L', 'XL', 'XXL'],
       colors: ['Black', 'Red', 'White', 'Gray'],
       inStock: false,
@@ -58,10 +58,10 @@ export default function Merch() {
     },
     {
       id: 'longsleeve-shirt',
-      name: 'VIP Edge Long Sleeve',
+      name: 'VIP SIM RACING Long Sleeve',
       price: 30,
       image: 'https://images.pexels.com/photos/8532616/pexels-photo-8532616.jpeg',
-      description: 'Long sleeve shirt with VIP Edge Racing branding. Great for cooler weather.',
+      description: 'Long sleeve shirt with VIP SIM RACING branding. Great for cooler weather.',
       sizes: ['S', 'M', 'L', 'XL', 'XXL'],
       colors: ['Black', 'Red', 'Navy'],
       inStock: false,
@@ -110,7 +110,7 @@ export default function Merch() {
           </Button>
           
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">VIP Edge Merch</h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">VIP SIM RACING Merch</h1>
             <p className="text-xl text-slate-300">Show your racing spirit</p>
           </div>
           
@@ -126,7 +126,7 @@ export default function Merch() {
               <ShoppingBag className="w-8 h-8 text-purple-400" />
             </div>
             <p className="text-purple-200 text-lg mb-4">
-              Our exclusive VIP Edge Racing merchandise is currently in production. 
+              Our exclusive VIP SIM RACING merchandise is currently in production. 
               Get ready to show your racing pride with premium quality gear!
             </p>
             <div className="bg-purple-500/20 border border-purple-400/50 rounded-lg p-4">
