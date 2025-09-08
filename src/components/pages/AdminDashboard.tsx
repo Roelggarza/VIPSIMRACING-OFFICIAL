@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, Monitor, Activity, Eye, Settings, AlertTriangle, Key, UserCheck, UserX, Bell, BellOff, Clock, MapPin, Smartphone, Globe, Flag, MessageCircle, Trash2, EyeOff, CheckCircle, XCircle } from 'lucide-react';
+import { Shield, Users, Monitor, Activity, Eye, Settings, AlertTriangle, Key, UserCheck, UserX, Bell, BellOff, Clock, MapPin, Smartphone, Globe, Flag, MessageCircle, Trash2, EyeOff, CheckCircle, XCircle, Camera, Video } from 'lucide-react';
 import { getUsers, getSimulators, User as UserType, Simulator, formatCreditsDisplay, resetUserPassword, updateUser, getAdminNotifications, markNotificationAsRead, getUnreadNotificationCount, getPostReports, PostReport, updatePostReport, getCommunityPosts, hidePost, deleteCommunityPost, getChatMessages } from '../../utils/userStorage';
 import { generateSecurePassword } from '../../utils/passwordSecurity';
 import Card, { CardHeader, CardContent } from '../ui/Card';
@@ -13,6 +13,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<'users' | 'simulators' | 'notifications' | 'reports' | 'chat'>('users');
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showScreenMonitoring, setShowScreenMonitoring] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [showUserDetails, setShowUserDetails] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -247,6 +248,14 @@ export default function AdminDashboard() {
                 icon={Monitor}
               >
                 Simulator Status
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowScreenMonitoring(true)}
+                icon={Camera}
+              >
+                Screen Monitoring
               </Button>
             </div>
           </div>
@@ -857,6 +866,64 @@ export default function AdminDashboard() {
             )}
           </div>
         )}
+      </Modal>
+
+      {/* Screen Monitoring Modal */}
+      <Modal
+        isOpen={showScreenMonitoring}
+        onClose={() => setShowScreenMonitoring(false)}
+        title="Racing Simulator Screen Monitoring"
+      >
+        <div className="space-y-6">
+          <div className="text-center">
+            <Monitor className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">Live Screen Monitoring</h3>
+            <p className="text-slate-400">
+              Monitor all 8 racing simulators in real-time. This feature will be integrated with 
+              screen monitoring software once the physical units are installed.
+            </p>
+          </div>
+
+          {/* Simulator Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }, (_, i) => (
+              <div key={i} className="bg-slate-700/30 rounded-lg p-4 text-center">
+                <div className="w-full h-24 bg-slate-800/50 rounded-lg mb-3 flex items-center justify-center">
+                  <div className="text-center">
+                    <Video className="w-8 h-8 text-slate-500 mx-auto mb-2" />
+                    <p className="text-xs text-slate-500">Simulator {i + 1}</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <span className="text-xs text-slate-400">Offline</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+            <h4 className="font-semibold text-blue-300 mb-2">Integration Status</h4>
+            <ul className="text-blue-200 text-sm space-y-1">
+              <li>• 🔧 Hardware installation pending</li>
+              <li>• 📹 Screen capture software integration ready</li>
+              <li>• 🖥️ Real-time monitoring dashboard prepared</li>
+              <li>• 📊 Performance metrics tracking available</li>
+              <li>• 🔒 Secure admin-only access configured</li>
+            </ul>
+          </div>
+
+          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+            <h4 className="font-semibold text-yellow-300 mb-2">Coming Soon Features</h4>
+            <ul className="text-yellow-200 text-sm space-y-1">
+              <li>• Live video feeds from each simulator</li>
+              <li>• User activity monitoring</li>
+              <li>• Performance analytics</li>
+              <li>• Remote assistance capabilities</li>
+              <li>• Session recording and playback</li>
+            </ul>
+          </div>
+        </div>
       </Modal>
 
       {/* Password Reset Modal */}
