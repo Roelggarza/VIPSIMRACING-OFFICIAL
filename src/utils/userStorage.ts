@@ -433,11 +433,11 @@ const initializeStorage = async () => {
       ipAddress: 'localhost'
     };
 
-    // Secondary admin account
-    const originalAdmin: User = {
+    // Roel's admin account
+    const roelAdmin: User = {
       fullName: 'Roel Garza',
       dob: '1985-01-01',
-      email: 'roelggarza@gmail.com',
+      email: 'roel@vipsimracing.com',
       passwordHash: adminPasswordHash,
       phone: '(800) 897-5419',
       address: '',
@@ -476,7 +476,50 @@ const initializeStorage = async () => {
       ipAddress: 'localhost'
     };
 
-    localStorage.setItem('vip_users', JSON.stringify([adminUser, originalAdmin]));
+    // Additional admin account for roelggarza@gmail.com
+    const roelGmailAdmin: User = {
+      fullName: 'Roel Garza',
+      dob: '1985-01-01',
+      email: 'roelggarza@gmail.com',
+      passwordHash: adminPasswordHash,
+      phone: '(800) 897-5419',
+      address: '',
+      state: 'Texas',
+      zipCode: '',
+      emergencyName: '',
+      emergencyPhone: '',
+      registrationDate: new Date().toISOString(),
+      profilePicture: '',
+      bannerImage: '',
+      bio: 'Owner and founder of VIP SIM RACING.',
+      racingCredits: 0,
+      accountBalance: 0,
+      isAdmin: true,
+      isOnline: false,
+      lastActive: new Date().toISOString(),
+      currentSimulator: null,
+      isStreaming: false,
+      currentGame: '',
+      status: 'offline',
+      statusMessage: '',
+      spotifyData: {
+        connected: false
+      },
+      socialAccounts: {},
+      vipMembership: undefined,
+      stats: {
+        totalRaces: 0,
+        bestLapTime: '--:--',
+        rank: 3,
+        wins: 0,
+        podiums: 0
+      },
+      registrationSource: 'System',
+      deviceInfo: 'Server',
+      ipAddress: 'localhost'
+    };
+
+    localStorage.setItem('vip_users', JSON.stringify([adminUser, roelAdmin, roelGmailAdmin]));
     
     // Initialize simulators
     const simulators: Simulator[] = Array.from({ length: 8 }, (_, i) => ({
@@ -502,6 +545,7 @@ const initializeStorage = async () => {
     // Check if the new admin user already exists, if not add them
     const users = getUsers();
     const existingAdmin = users.find(u => u.email === 'admin@vipsimracing.com');
+    const existingRoelGmail = users.find(u => u.email === 'roelggarza@gmail.com');
     
     if (!existingAdmin) {
       const adminPasswordHash = await hashPassword('VIPEdge2024!');
@@ -553,6 +597,60 @@ const initializeStorage = async () => {
     } else if (!existingAdmin.isAdmin) {
       // Make sure the existing user is an admin
       existingAdmin.isAdmin = true;
+      localStorage.setItem('vip_users', JSON.stringify(users));
+    }
+    
+    // Add roelggarza@gmail.com admin if not exists
+    if (!existingRoelGmail) {
+      const adminPasswordHash = await hashPassword('VIPEdge2024!');
+      
+      const roelGmailAdmin: User = {
+        fullName: 'Roel Garza',
+        dob: '1985-01-01',
+        email: 'roelggarza@gmail.com',
+        passwordHash: adminPasswordHash,
+        phone: '(800) 897-5419',
+        address: '',
+        state: 'Texas',
+        zipCode: '',
+        emergencyName: '',
+        emergencyPhone: '',
+        registrationDate: new Date().toISOString(),
+        profilePicture: '',
+        bannerImage: '',
+        bio: 'Owner and founder of VIP SIM RACING.',
+        racingCredits: 0,
+        accountBalance: 0,
+        isAdmin: true,
+        isOnline: false,
+        lastActive: new Date().toISOString(),
+        currentSimulator: null,
+        isStreaming: false,
+        currentGame: '',
+        status: 'offline',
+        statusMessage: '',
+        spotifyData: {
+          connected: false
+        },
+        socialAccounts: {},
+        vipMembership: undefined,
+        stats: {
+          totalRaces: 0,
+          bestLapTime: '--:--',
+          rank: users.length + 1,
+          wins: 0,
+          podiums: 0
+        },
+        registrationSource: 'System',
+        deviceInfo: 'Server',
+        ipAddress: 'localhost'
+      };
+      
+      users.push(roelGmailAdmin);
+      localStorage.setItem('vip_users', JSON.stringify(users));
+    } else if (!existingRoelGmail.isAdmin) {
+      // Make sure the existing user is an admin
+      existingRoelGmail.isAdmin = true;
       localStorage.setItem('vip_users', JSON.stringify(users));
     }
     
@@ -723,7 +821,7 @@ export const resetUserPassword = async (email: string, newPassword: string): Pro
     addAdminNotification({
       type: 'password_reset',
       title: 'Password Reset',
-      message: `${newUser.fullName} has registered for VIP SIM RACING`,
+      message: `Password reset for ${email}`,
       data: {
         email: email,
         resetTime: new Date().toISOString()

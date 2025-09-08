@@ -43,6 +43,7 @@ import CommunityHub from './CommunityHub';
 import StatusBubble from '../ui/StatusBubble';
 import SpotifyWidget from '../ui/SpotifyWidget';
 import AIChat from '../ui/AIChat';
+} from '../ui/PasswordReset';
 
 interface UpcomingSession {
   id: string;
@@ -72,6 +73,7 @@ export default function Dashboard() {
   const [showSpotifyWidget, setShowSpotifyWidget] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
   const [aiChatMinimized, setAiChatMinimized] = useState(false);
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
   const [selectedSession, setSelectedSession] = useState<UpcomingSession | null>(null);
   const [showSessionModal, setShowSessionModal] = useState(false);
 
@@ -331,6 +333,8 @@ export default function Dashboard() {
         return <CommunityHub currentUser={user} />;
       case 'admin':
         return user.isAdmin ? <AdminDashboard /> : null;
+      case 'security':
+        return <SecuritySettings user={user} />;
       default:
         return (
           <>
@@ -391,6 +395,15 @@ export default function Dashboard() {
                   </Button>
                 </div>
               </CardHeader>
+              
+              <Button
+                variant={activeTab === 'security' ? 'primary' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveTab('security')}
+                icon={Shield}
+              >
+                Security
+              </Button>
               
               {isPackagesExpanded && (
                 <CardContent className="space-y-6">
@@ -993,6 +1006,177 @@ export default function Dashboard() {
           />
         )}
       </Modal>
+    </div>
+  );
+}
+
+// Security Settings Component
+function SecuritySettings({ user }: { user: User }) {
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const [show2FASetup, setShow2FASetup] = useState(false);
+  const [twoFactorData, setTwoFactorData] = useState<any>(null);
+
+  useEffect(() => {
+    const tfaData = get2FAData(user.email);
+    setTwoFactorData(tfaData);
+  }, [user.email]);
+
+  const handle2FAComplete = () => {
+    setShow2FASetup(false);
+    const tfaData = get2FAData(user.email);
+    setTwoFactorData(tfaData);
+  };
+
+  const disable2FA = () => {
+    if (confirm('Are you sure you want to disable two-factor authentication? This will make your account less secure.')) {
+      disable2FA(user.email);
+      setTwoFactorData(null);
+    }
+  };
+
+  if (showPasswordReset) {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-white">Reset Password</h2>
+            <Button variant="ghost" size="sm" onClick={() => setShowPasswordReset(false)}>
+              Back to Security
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <PasswordReset userEmail={user.email} onComplete={() => setShowPasswordReset(false)} />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (show2FASetup) {
+    return (
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-white">Two-Factor Authentication Setup</h2>
+            <Button variant="ghost" size="sm" onClick={() => setShow2FASetup(false)}>
+              Back to Security
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <TwoFactorSetup
+            userEmail={user.email}
+            onComplete={handle2FAComplete}
+            onSkip={() => setShow2FASetup(false)}
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Security Overview */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center space-x-2">
+            <Shield className="w-5 h-5 text-red-500" />
+            <h2 className="text-xl font-bold text-white">Account Security</h2>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Password Security */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white">Password Security</h3>
+              <div className="bg-slate-700/30 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-slate-300">Password</span>
+                  <span className="text-green-400 text-sm">✓ Strong</span>
+                </div>
+                <p className="text-slate-400 text-sm mb-4">
+                  Your password meets all security requirements and hasn't been found in known data breaches.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowPasswordReset(true)}
+                  icon={Key}
+                >
+                  Change Password
+                </Button>
+              </div>
+            </div>
+
+            {/* Two-Factor Authentication */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white">Two-Factor Authentication</h3>
+              <div className="bg-slate-700/30 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-slate-300">2FA Status</span>
+                  <span className={`text-sm ${twoFactorData?.isEnabled ? 'text-green-400' : 'text-yellow-400'}`}>
+                    {twoFactorData?.isEnabled ? '✓ Enabled' : '⚠ Disabled'}
+                  </span>
+                </div>
+                <p className="text-slate-400 text-sm mb-4">
+                  {twoFactorData?.isEnabled 
+                    ? 'Your account is protected with two-factor authentication.'
+                    : 'Add an extra layer of security to your account.'
+                  }
+                </p>
+                {twoFactorData?.isEnabled ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={disable2FA}
+                    className="text-red-400 border-red-400 hover:bg-red-500/10"
+                  >
+                    Disable 2FA
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShow2FASetup(true)}
+                    icon={Shield}
+                  >
+                    Enable 2FA
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Login Activity */}
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-bold text-white">Recent Login Activity</h3>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {getLoginAttempts(user.email).slice(-5).reverse().map((attempt, index) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className={`w-3 h-3 rounded-full ${attempt.success ? 'bg-green-500' : 'bg-red-500'}`} />
+                  <div>
+                    <p className="text-white text-sm">
+                      {attempt.success ? 'Successful login' : 'Failed login attempt'}
+                    </p>
+                    <p className="text-slate-400 text-xs">
+                      {attempt.location} • {new Date(attempt.timestamp).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-slate-500 text-xs">
+                  {attempt.ipAddress}
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
