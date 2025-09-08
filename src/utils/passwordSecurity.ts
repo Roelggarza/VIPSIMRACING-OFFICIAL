@@ -164,7 +164,8 @@ export const generateRecoveryCodes = (count: number = 10): string[] => {
  */
 export const validateRecaptcha = async (token: string): Promise<boolean> => {
   try {
-    // In a real application, this would be done server-side
+    // In a real application, this would be done server-side with the secret key
+    // Secret key: 6LfUH8IrAAAAAMwZToyLYVgWn2i_NI-rHX4HHigj
     // For demo purposes, we'll simulate validation
     if (!token || token.length < 10) {
       return false;
@@ -174,8 +175,8 @@ export const validateRecaptcha = async (token: string): Promise<boolean> => {
     await new Promise(resolve => setTimeout(resolve, 500));
     
     // In production, you would make a server-side call to:
-    // https://www.google.com/recaptcha/api/siteverify
-    // with your secret key
+    // POST https://www.google.com/recaptcha/api/siteverify
+    // with secret=6LfUH8IrAAAAAMwZToyLYVgWn2i_NI-rHX4HHigj&response=${token}
     
     return true; // Simulate successful validation
   } catch (error) {

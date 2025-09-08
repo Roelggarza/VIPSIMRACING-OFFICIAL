@@ -5,6 +5,7 @@ interface RecaptchaWrapperProps {
   onExpired?: () => void;
   onError?: () => void;
   siteKey?: string;
+  secretKey?: string;
   theme?: 'light' | 'dark';
   size?: 'normal' | 'compact';
 }
@@ -20,6 +21,7 @@ export default function RecaptchaWrapper({
   onExpired,
   onError,
   siteKey = '6LfUH8IrAAAAAAcbbfT9-RAJauBsg0ZwukQHG3rM',
+  secretKey = '6LfUH8IrAAAAAMwZToyLYVgWn2i_NI-rHX4HHigj',
   theme = 'dark',
   size = 'normal'
 }: RecaptchaWrapperProps) {
