@@ -40,9 +40,8 @@
 - Comprehensive admin notifications
 
 ## Admin Credentials:
-- Primary: admin@vipsimracing.com / [Secure password - check admin dashboard]
-- Roel: roel@vipsimracing.com / [Secure password - check admin dashboard]
-- Roel Gmail: roelggarza@gmail.com / [Secure password - check admin dashboard]
+- Primary: admin@vipsimracing.com / VIPEdge2024!
+- Secondary: roel@vipsimracing.com / Roelgarza1!
 
 ## Contact Information:
 - Owner: Roel Garza

@@ -7,9 +7,8 @@
 - **Status**: Production Ready
 
 ## Admin Credentials
-- **Primary Admin**: admin@vipsimracing.com / [Secure password generated on first run]
-- **Roel Admin**: roel@vipsimracing.com / [Secure password generated on first run]  
-- **Roel Gmail**: roelggarza@gmail.com / [Secure password generated on first run]
+- **Primary Admin**: admin@vipsimracing.com / VIPEdge2024!
+- **Secondary Admin**: roel@vipsimracing.com / Roelgarza1!
 
 ## Key Features in This Version
 - ✅ Complete racing simulator booking system

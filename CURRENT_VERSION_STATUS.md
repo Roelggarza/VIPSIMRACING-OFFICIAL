@@ -30,9 +30,8 @@
 - **Domain**: vipsimracing.com
 
 ## Admin Credentials
-- Primary: admin@vipsimracing.com / [Secure password - use password reset]
-- Roel: roel@vipsimracing.com / [Secure password - use password reset]
-- Roel Gmail: roelggarza@gmail.com / [Secure password - use password reset]
+- Primary: admin@vipsimracing.com / VIPEdge2024!
+- Secondary: roel@vipsimracing.com / Roelgarza1!
 
 ---
 **This document tracks the official production version status**

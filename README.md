@@ -60,8 +60,6 @@ This application is production-ready with:
 - Admin role management
 - Content moderation system
 - User session management
-- No hardcoded credentials in source code
-- Secure admin account initialization
 
 ---
 

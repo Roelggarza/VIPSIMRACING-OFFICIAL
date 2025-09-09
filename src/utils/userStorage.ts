@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { hashPassword, verifyPassword, validatePasswordStrength, generateSecurePassword } from './passwordSecurity';
+import { hashPassword, verifyPassword, validatePasswordStrength } from './passwordSecurity';
 
 export interface User {
   fullName: string;
@@ -389,14 +389,14 @@ const migratePasswordsToHashed = async () => {
 // Initialize with admin user and sample data
 const initializeStorage = async () => {
   if (!localStorage.getItem('vip_users')) {
-    const adminPasswordHash = await hashPassword(generateSecurePassword(16));
+    const adminPasswordHash = await hashPassword('VIPEdge2024!');
     
     const adminUser: User = {
       fullName: 'VIP SIM RACING Admin',
       dob: '1985-01-01',
       email: 'admin@vipsimracing.com',
       passwordHash: adminPasswordHash,
-      phone: '(800) 897-5419',
+      phone: '(832) 490-4304',
       address: '',
       state: 'Texas',
       zipCode: '',
@@ -438,7 +438,7 @@ const initializeStorage = async () => {
       fullName: 'Roel Garza',
       dob: '1985-01-01',
       email: 'roel@vipsimracing.com',
-      passwordHash: await hashPassword(generateSecurePassword(16)),
+      passwordHash: adminPasswordHash,
       phone: '(800) 897-5419',
       address: '',
       state: 'Texas',
@@ -481,7 +481,7 @@ const initializeStorage = async () => {
       fullName: 'Roel Garza',
       dob: '1985-01-01',
       email: 'roelggarza@gmail.com',
-      passwordHash: await hashPassword(generateSecurePassword(16)),
+      passwordHash: adminPasswordHash,
       phone: '(800) 897-5419',
       address: '',
       state: 'Texas',
@@ -545,11 +545,10 @@ const initializeStorage = async () => {
     // Check if the new admin user already exists, if not add them
     const users = getUsers();
     const existingAdmin = users.find(u => u.email === 'admin@vipsimracing.com');
-    const existingRoel = users.find(u => u.email === 'roel@vipsimracing.com');
     const existingRoelGmail = users.find(u => u.email === 'roelggarza@gmail.com');
     
     if (!existingAdmin) {
-      const adminPasswordHash = await hashPassword(generateSecurePassword(16));
+      const adminPasswordHash = await hashPassword('VIPEdge2024!');
       
       const newAdmin: User = {
         fullName: 'VIP SIM RACING Admin',
@@ -601,69 +600,15 @@ const initializeStorage = async () => {
       localStorage.setItem('vip_users', JSON.stringify(users));
     }
     
-    // Add roel@vipsimracing.com admin if not exists
-    if (!existingRoel) {
-      const roelPasswordHash = await hashPassword(generateSecurePassword(16));
-      
-      const roelAdmin: User = {
-        fullName: 'Roel Garza',
-        dob: '1985-01-01',
-        email: 'roel@vipsimracing.com',
-        passwordHash: roelPasswordHash,
-        phone: '(800) 897-5419',
-        address: '',
-        state: 'Texas',
-        zipCode: '',
-        emergencyName: '',
-        emergencyPhone: '',
-        registrationDate: new Date().toISOString(),
-        profilePicture: '',
-        bannerImage: '',
-        bio: 'Owner and founder of VIP SIM RACING.',
-        racingCredits: 0,
-        accountBalance: 0,
-        isAdmin: true,
-        isOnline: false,
-        lastActive: new Date().toISOString(),
-        currentSimulator: null,
-        isStreaming: false,
-        currentGame: '',
-        status: 'offline',
-        statusMessage: '',
-        spotifyData: {
-          connected: false
-        },
-        socialAccounts: {},
-        vipMembership: undefined,
-        stats: {
-          totalRaces: 0,
-          bestLapTime: '--:--',
-          rank: users.length + 1,
-          wins: 0,
-          podiums: 0
-        },
-        registrationSource: 'System',
-        deviceInfo: 'Server',
-        ipAddress: 'localhost'
-      };
-      
-      users.push(roelAdmin);
-      localStorage.setItem('vip_users', JSON.stringify(users));
-    } else if (!existingRoel.isAdmin) {
-      // Make sure the existing user is an admin
-      existingRoel.isAdmin = true;
-      localStorage.setItem('vip_users', JSON.stringify(users));
-    }
-    
     // Add roelggarza@gmail.com admin if not exists
     if (!existingRoelGmail) {
-      const roelGmailPasswordHash = await hashPassword(generateSecurePassword(16));
+      const adminPasswordHash = await hashPassword('VIPEdge2024!');
       
       const roelGmailAdmin: User = {
         fullName: 'Roel Garza',
         dob: '1985-01-01',
         email: 'roelggarza@gmail.com',
-        passwordHash: roelGmailPasswordHash,
+        passwordHash: adminPasswordHash,
         phone: '(800) 897-5419',
         address: '',
         state: 'Texas',
