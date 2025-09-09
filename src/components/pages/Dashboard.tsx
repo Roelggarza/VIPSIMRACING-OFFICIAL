@@ -328,6 +328,16 @@ export default function Dashboard() {
               Admin
             </Button>
           )}
+          {(user.email === 'roelggarza@gmail.com' || user.email === 'roel@vipsimracing.com') && (
+            <Button
+              variant={activeTab === 'simulators' ? 'primary' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveTab('simulators')}
+              icon={Monitor}
+            >
+              Admin
+            </Button>
+          )}
         </div>
 
         {/* Tab Content */}
@@ -686,6 +696,108 @@ export default function Dashboard() {
         {activeTab === 'community' && <CommunityHub currentUser={user} />}
         {activeTab === 'games' && <GamesLibrary user={user} />}
         {activeTab === 'admin' && user.isAdmin && <AdminDashboard />}
+        {activeTab === 'simulators' && (user.email === 'roelggarza@gmail.com' || user.email === 'roel@vipsimracing.com') && (
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center space-x-2">
+                  <Monitor className="w-5 h-5 text-red-500" />
+                  <h2 className="text-xl font-bold text-white">Racing Simulators Status</h2>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {Array.from({ length: 8 }, (_, i) => (
+                    <Card key={i + 1} className="bg-gradient-to-br from-slate-600/20 to-slate-700/10">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-12 h-12 bg-slate-700/50 rounded-full flex items-center justify-center">
+                              <Monitor className="w-6 h-6 text-slate-400" />
+                            </div>
+                            <div>
+                              <h3 className="font-bold text-white">Simulator {i + 1}</h3>
+                              <div className="flex items-center space-x-2">
+                                <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+                                <span className="text-gray-400 text-sm">Offline</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-slate-400">Status:</span>
+                            <span className="text-gray-400">Not Active</span>
+                          </div>
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-slate-400">Current User:</span>
+                            <span className="text-slate-500">None</span>
+                          </div>
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-slate-400">Game:</span>
+                            <span className="text-slate-500">Not Running</span>
+                          </div>
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-slate-400">Session Time:</span>
+                            <span className="text-slate-500">--:--</span>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-4 pt-4 border-t border-slate-700">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full opacity-50 cursor-not-allowed"
+                            disabled
+                          >
+                            Start Session
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-bold text-white">Simulator Management</h3>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-gray-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Monitor className="w-8 h-8 text-gray-500" />
+                    </div>
+                    <h4 className="font-semibold text-white mb-2">All Simulators</h4>
+                    <p className="text-2xl font-bold text-gray-400">8</p>
+                    <p className="text-sm text-slate-400">Total Available</p>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Activity className="w-8 h-8 text-red-500" />
+                    </div>
+                    <h4 className="font-semibold text-white mb-2">Active Sessions</h4>
+                    <p className="text-2xl font-bold text-red-400">0</p>
+                    <p className="text-sm text-slate-400">Currently Racing</p>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-gray-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Users className="w-8 h-8 text-gray-500" />
+                    </div>
+                    <h4 className="font-semibold text-white mb-2">Available</h4>
+                    <p className="text-2xl font-bold text-gray-400">8</p>
+                    <p className="text-sm text-slate-400">Ready to Use</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
 
       {/* Modals */}
