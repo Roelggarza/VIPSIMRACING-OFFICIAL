@@ -494,20 +494,6 @@ export default function Registration() {
                 )}
               </div>
 
-              {/* reCAPTCHA */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-slate-300">
-                  Security Verification
-                </label>
-                <RecaptchaWrapper
-                  onVerify={handleRecaptchaVerify}
-                  onExpired={handleRecaptchaExpired}
-                />
-                {errors.recaptchaToken && (
-                  <p className="text-sm text-red-400 font-medium">{errors.recaptchaToken}</p>
-                )}
-              </div>
-
               <Input
                 name="phone"
                 type="tel"
