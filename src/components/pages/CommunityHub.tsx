@@ -203,6 +203,35 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
     });
   };
 
+  const handleRequestScreenShare = () => {
+    setIsRequestingScreenShare(true);
+    
+    // Simulate request submission
+    setTimeout(() => {
+      const newRequest = {
+        id: Date.now().toString(),
+        userId: currentUser.email,
+        userName: currentUser.fullName,
+        timestamp: new Date().toISOString(),
+        status: 'pending',
+        simulator: Math.floor(Math.random() * 8) + 1
+      };
+      
+      const requests = JSON.parse(localStorage.getItem('screen_share_requests') || '[]');
+      requests.push(newRequest);
+      localStorage.setItem('screen_share_requests', JSON.stringify(requests));
+      
+      setScreenShareRequests(requests);
+      setIsRequestingScreenShare(false);
+      alert('Screen share request submitted! An admin will review and approve it shortly.');
+    }, 1000);
+  };
+
+  useEffect(() => {
+    const requests = JSON.parse(localStorage.getItem('screen_share_requests') || '[]');
+    setScreenShareRequests(requests);
+  }, []);
+
   const shareViaWebAPI = async (post: CommunityPost) => {
     if (navigator.share) {
       try {
