@@ -257,6 +257,119 @@ export default function AdminDashboard() {
               >
                 Screen Monitoring
               </Button>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
+      {/* Screen Share Requests Management */}
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-bold text-white">Screen Share Requests</h3>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {(() => {
+              const requests = JSON.parse(localStorage.getItem('screen_share_requests') || '[]');
+              const pendingRequests = requests.filter((r: any) => r.status === 'pending');
+              
+              if (pendingRequests.length === 0) {
+                return (
+                  <div className="text-center py-8 text-slate-400">
+                    <Monitor className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>No pending screen share requests.</p>
+                  </div>
+                );
+              }
+              
+              return pendingRequests.map((request: any) => (
+                <div key={request.id} className="p-4 bg-slate-700/30 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-semibold text-white">{request.userName}</h4>
+                      <p className="text-slate-400 text-sm">
+                        Wants to share Simulator {request.simulator}
+                      </p>
+                      <p className="text-slate-500 text-xs">
+                        Requested: {new Date(request.timestamp).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const updatedRequests = requests.map((r: any) => 
+                            r.id === request.id ? { ...r, status: 'approved' } : r
+                          );
+                          localStorage.setItem('screen_share_requests', JSON.stringify(updatedRequests));
+                          window.location.reload();
+                        }}
+                        icon={CheckCircle}
+                        className="bg-green-500/10 hover:bg-green-500/20 border-green-500/30"
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const updatedRequests = requests.map((r: any) => 
+                            r.id === request.id ? { ...r, status: 'denied' } : r
+                          );
+                          localStorage.setItem('screen_share_requests', JSON.stringify(updatedRequests));
+                          window.location.reload();
+                        }}
+                        icon={XCircle}
+                        className="bg-red-500/10 hover:bg-red-500/20 border-red-500/30"
+                      >
+                        Deny
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ));
+            })()}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Simulator Status - Admin Only */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center space-x-2">
+            <Monitor className="w-5 h-5 text-red-500" />
+            <h2 className="text-xl font-bold text-white">Simulator Status</h2>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {simulators.map((simulator) => (
+              <div key={simulator.id} className="text-center p-4 bg-slate-700/30 rounded-lg">
+                <div className={`w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center ${
+                  simulator.isActive ? 'bg-green-500/20' : 'bg-red-500/20'
+                }`}>
+                  <Monitor className={`w-6 h-6 ${simulator.isActive ? 'text-green-500' : 'text-red-500'}`} />
+                </div>
+                <p className="font-semibold text-white text-sm">{simulator.name}</p>
+                <p className={`text-xs ${simulator.isActive ? 'text-green-400' : 'text-red-400'}`}>
+                  {simulator.isActive ? 'Available' : 'Offline'}
+                </p>
+                {simulator.currentUser && (
+                  <p className="text-xs text-slate-400 mt-1">
+                    {simulator.currentUser.fullName}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 text-center">
+            <p className="text-slate-400 text-sm">
+              {simulators.filter(s => s.isActive).length} of {simulators.length} simulators currently available
+            </p>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
