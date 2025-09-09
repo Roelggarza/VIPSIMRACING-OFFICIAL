@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { hashPassword, verifyPassword, validatePasswordStrength } from './passwordSecurity';
+import { hashPassword, verifyPassword, validatePasswordStrength, generateSecurePassword } from './passwordSecurity';
 
 export interface User {
   fullName: string;
