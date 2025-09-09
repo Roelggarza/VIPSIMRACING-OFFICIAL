@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogIn, AlertCircle, Mail, ArrowLeft, AlertTriangle } from 'lucide-react';
 import { findUser, saveSession, emailExists, resetUserPassword } from '../../utils/userStorage';
-import { generateSecurePassword, validateRecaptcha } from '../../utils/passwordSecurity';
+import { generateSecurePassword } from '../../utils/passwordSecurity';
 import { get2FAData, verifyTOTP, verifySMSOTP, verifyEmailOTP, verifyRecoveryCode, sendSMSOTP, sendEmailOTP } from '../../utils/twoFactorAuth';
 import { recordLoginAttempt, detectAnomalies, requiresAdditionalVerification, getSimulatedIP } from '../../utils/anomalyDetection';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Card, { CardHeader, CardContent } from '../ui/Card';
-import RecaptchaWrapper from '../ui/RecaptchaWrapper';
 
 interface FormData {
   email: string;
@@ -51,18 +50,6 @@ export default function Login() {
     
     if (!form.email.trim() || !form.password.trim()) {
       setError('Please fill in both fields.');
-      return;
-    }
-
-    if (!form.recaptchaToken) {
-      setError('Please complete the reCAPTCHA verification.');
-      return;
-    }
-
-    // Validate reCAPTCHA
-    const recaptchaValid = await validateRecaptcha(form.recaptchaToken);
-    if (!recaptchaValid) {
-      setError('reCAPTCHA verification failed. Please try again.');
       return;
     }
 
@@ -533,14 +520,6 @@ export default function Login() {
               autoComplete="current-password"
             />
 
-            {/* reCAPTCHA */}
-            <div className="space-y-2">
-              <RecaptchaWrapper
-                onVerify={handleRecaptchaVerify}
-                onExpired={handleRecaptchaExpired}
-              />
-            </div>
-
             {error && (
               <div className="flex items-center space-x-2 text-red-400 bg-red-500/10 p-3 rounded-lg">
                 <AlertCircle className="w-5 h-5 flex-shrink-0" />
@@ -552,7 +531,7 @@ export default function Login() {
               type="submit" 
               size="lg" 
               className="w-full"
-              disabled={isLoading || !form.recaptchaToken}
+              disabled={isLoading}
             >
               {isLoading ? 'Signing In...' : 'Sign In'}
             </Button>

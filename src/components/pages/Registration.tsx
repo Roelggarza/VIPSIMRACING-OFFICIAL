@@ -2,12 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserPlus, AlertTriangle, CheckCircle, CreditCard, ChevronDown, ChevronUp, Crown, Zap, Gift, FileText } from 'lucide-react';
 import { saveUser, emailExists, addCreditsAndBalance } from '../../utils/userStorage';
-import { validatePasswordStrength, checkPasswordBreach, validateRecaptcha } from '../../utils/passwordSecurity';
+import { validatePasswordStrength, checkPasswordBreach } from '../../utils/passwordSecurity';
 import { RELEASE_WAIVER_TEXT } from '../../utils/constants';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Card, { CardHeader, CardContent } from '../ui/Card';
-import RecaptchaWrapper from '../ui/RecaptchaWrapper';
 import TwoFactorSetup from '../ui/TwoFactorSetup';
 
 interface FormData {
@@ -46,7 +45,6 @@ export default function Registration() {
     emergencyPhone: '',
     agreeToTerms: false,
     optInGiveaway: false,
-    recaptchaToken: '',
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitted, setSubmitted] = useState(false);
@@ -102,13 +100,9 @@ export default function Registration() {
 
   const handleRecaptchaVerify = (token: string) => {
     setForm(prev => ({ ...prev, recaptchaToken: token }));
-    if (errors.recaptchaToken) {
-      setErrors(prev => ({ ...prev, recaptchaToken: '' }));
-    }
   };
 
   const handleRecaptchaExpired = () => {
-    setForm(prev => ({ ...prev, recaptchaToken: '' }));
   };
 
   const validateForm = (): boolean => {
@@ -151,9 +145,6 @@ export default function Registration() {
     // Terms and conditions validation
     if (!form.agreeToTerms) newErrors.agreeToTerms = 'You must agree to the terms and conditions to register';
 
-    // reCAPTCHA validation
-    if (!form.recaptchaToken) newErrors.recaptchaToken = 'Please complete the reCAPTCHA verification';
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -162,18 +153,11 @@ export default function Registration() {
     e.preventDefault();
     if (!validateForm()) return;
 
-    // Validate reCAPTCHA token
-    const recaptchaValid = await validateRecaptcha(form.recaptchaToken);
-    if (!recaptchaValid) {
-      setErrors({ recaptchaToken: 'reCAPTCHA verification failed. Please try again.' });
-      return;
-    }
-
     setIsLoading(true);
     
     try {
       // Remove confirmPassword, agreeToTerms, optInGiveaway, and recaptchaToken from the data sent to saveUser
-      const { confirmPassword, agreeToTerms, optInGiveaway, recaptchaToken, ...userData } = form;
+      const { confirmPassword, agreeToTerms, optInGiveaway, ...userData } = form;
       await saveUser(userData);
       
       // Simulate email verification (in real app, send verification email)
@@ -204,7 +188,7 @@ export default function Registration() {
 
     try {
       // Remove confirmPassword, agreeToTerms, optInGiveaway, and recaptchaToken from the data sent to saveUser
-      const { confirmPassword, agreeToTerms, optInGiveaway, recaptchaToken, ...userData } = form;
+      const { confirmPassword, agreeToTerms, optInGiveaway, ...userData } = form;
       
       // Save user first
       await saveUser(userData);
