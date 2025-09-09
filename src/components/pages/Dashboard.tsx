@@ -28,7 +28,8 @@ import {
   Star,
   Activity,
   Zap,
-  Gift
+  Gift,
+  ShoppingBag
 } from 'lucide-react';
 import { getSession, clearSession, User as UserType, formatCreditsDisplay, getSimulators } from '../../utils/userStorage';
 import Button from '../ui/Button';
@@ -42,6 +43,7 @@ import Leaderboard from './Leaderboard';
 import CommunityHub from './CommunityHub';
 import GamesLibrary from './GamesLibrary';
 import AdminDashboard from './AdminDashboard';
+import Merch from './Merch';
 import SpotifyWidget from '../ui/SpotifyWidget';
 import AIChat from '../ui/AIChat';
 import PasswordReset from '../ui/PasswordReset';
@@ -58,7 +60,7 @@ interface UpcomingSession {
 
 export default function Dashboard() {
   const [user, setUser] = useState<UserType | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'packages' | 'history' | 'profile' | 'leaderboard' | 'community' | 'games' | 'admin'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'packages' | 'merch' | 'history' | 'profile' | 'leaderboard' | 'community' | 'games' | 'admin'>('overview');
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [showProfileEdit, setShowProfileEdit] = useState(false);
@@ -267,6 +269,14 @@ export default function Dashboard() {
             icon={CreditCard}
           >
             Racing Packages
+          </Button>
+          <Button
+            variant={activeTab === 'merch' ? 'primary' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveTab('merch')}
+            icon={Gift}
+          >
+            Merch
           </Button>
           <Button
             variant={activeTab === 'games' ? 'primary' : 'ghost'}
