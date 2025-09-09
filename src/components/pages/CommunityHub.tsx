@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Image, Heart, MessageCircle, Share2, User, Crown, Calendar, Trophy, Video, Play, Send, Upload, Tag, Plus, Type, Camera, X, Reply, ThumbsUp, MoreHorizontal, Facebook, Twitter, Instagram, ExternalLink, Clipboard, Flag, AlertTriangle } from 'lucide-react';
+import { Globe, Image, Heart, MessageCircle, Share2, User, Crown, Calendar, Trophy, Video, Play, Send, Upload, Tag, Plus, Type, Camera, X, Reply, ThumbsUp, MoreHorizontal, Facebook, Twitter, Instagram, ExternalLink, Clipboard, Flag, AlertTriangle, Monitor } from 'lucide-react';
 import { getUsers, User as UserType, getCommunityPosts, CommunityPost, likeCommunityPost, addCommentToCommunityPost, addReplyToComment, likeComment, shareCommunityPost, addCommunityPost, Comment, reportPost } from '../../utils/userStorage';
 import Card, { CardHeader, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
@@ -22,10 +22,13 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
+  const [showScreenShare, setShowScreenShare] = useState(false);
   const [selectedPostForShare, setSelectedPostForShare] = useState<CommunityPost | null>(null);
   const [selectedPostForReport, setSelectedPostForReport] = useState<CommunityPost | null>(null);
   const [reportReason, setReportReason] = useState<'spam' | 'inappropriate' | 'harassment' | 'copyright' | 'other'>('spam');
   const [reportDescription, setReportDescription] = useState('');
+  const [screenShareRequests, setScreenShareRequests] = useState<any[]>([]);
+  const [isRequestingScreenShare, setIsRequestingScreenShare] = useState(false);
   const [newPost, setNewPost] = useState({
     type: 'screenshot' as 'screenshot' | 'video' | 'lap_record' | 'highlight',
     title: '',
@@ -203,35 +206,6 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
     });
   };
 
-  const handleRequestScreenShare = () => {
-    setIsRequestingScreenShare(true);
-    
-    // Simulate request submission
-    setTimeout(() => {
-      const newRequest = {
-        id: Date.now().toString(),
-        userId: currentUser.email,
-        userName: currentUser.fullName,
-        timestamp: new Date().toISOString(),
-        status: 'pending',
-        simulator: Math.floor(Math.random() * 8) + 1
-      };
-      
-      const requests = JSON.parse(localStorage.getItem('screen_share_requests') || '[]');
-      requests.push(newRequest);
-      localStorage.setItem('screen_share_requests', JSON.stringify(requests));
-      
-      setScreenShareRequests(requests);
-      setIsRequestingScreenShare(false);
-      alert('Screen share request submitted! An admin will review and approve it shortly.');
-    }, 1000);
-  };
-
-  useEffect(() => {
-    const requests = JSON.parse(localStorage.getItem('screen_share_requests') || '[]');
-    setScreenShareRequests(requests);
-  }, []);
-
   const shareViaWebAPI = async (post: CommunityPost) => {
     if (navigator.share) {
       try {
@@ -376,6 +350,23 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
     if (files.length > 0) {
       handleImageUpload(files[0]);
     }
+  };
+
+  const handleRequestScreenShare = () => {
+    setIsRequestingScreenShare(true);
+    // Simulate API call
+    setTimeout(() => {
+      const newRequest = {
+        id: Date.now().toString(),
+        userId: currentUser.email,
+        simulator: 'Racing Simulator',
+        timestamp: new Date().toISOString(),
+        status: 'pending'
+      };
+      setScreenShareRequests(prev => [...prev, newRequest]);
+      setIsRequestingScreenShare(false);
+      alert('Screen share request submitted! An admin will review it shortly.');
+    }, 1000);
   };
 
   const getPostTypeIcon = (type: string) => {
@@ -568,6 +559,14 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
                 icon={Crown}
               >
                 VIP Only
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowScreenShare(true)}
+                icon={Monitor}
+              >
+                Screen Share
               </Button>
               <Button
                 variant="ghost"
@@ -1073,6 +1072,88 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Screen Share Modal */}
+      <Modal
+        isOpen={showScreenShare}
+        onClose={() => setShowScreenShare(false)}
+        title="Racing Screen Share"
+      >
+        <div className="space-y-6">
+          <div className="text-center">
+            <Monitor className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">Share Your Racing Screen</h3>
+            <p className="text-slate-400">
+              Request to share your racing simulator screen with the community. 
+              An admin must approve your request before you can go live.
+            </p>
+          </div>
+
+          {/* Current Screen Share Requests */}
+          <div className="bg-slate-700/30 rounded-lg p-4">
+            <h4 className="font-semibold text-white mb-3">Your Screen Share Requests</h4>
+            {screenShareRequests.filter(r => r.userId === currentUser.email).length === 0 ? (
+              <p className="text-slate-400 text-sm">No pending requests</p>
+            ) : (
+              <div className="space-y-2">
+                {screenShareRequests
+                  .filter(r => r.userId === currentUser.email)
+                  .map((request) => (
+                    <div key={request.id} className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
+                      <div>
+                        <p className="text-white text-sm">Simulator {request.simulator}</p>
+                        <p className="text-slate-400 text-xs">
+                          {new Date(request.timestamp).toLocaleString()}
+                        </p>
+                      </div>
+                      <span className={`px-2 py-1 rounded text-xs font-bold ${
+                        request.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
+                        request.status === 'approved' ? 'bg-green-500/20 text-green-400' :
+                        'bg-red-500/20 text-red-400'
+                      }`}>
+                        {request.status.toUpperCase()}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+
+          {/* Request Screen Share */}
+          <div className="space-y-4">
+            <h4 className="font-semibold text-white">Request Screen Share Access</h4>
+            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+              <h5 className="font-semibold text-blue-300 mb-2">How it works:</h5>
+              <ul className="text-blue-200 text-sm space-y-1">
+                <li>• Submit a request to share your racing screen</li>
+                <li>• Admin reviews and approves legitimate requests</li>
+                <li>• Once approved, your screen appears in the community feed</li>
+                <li>• Other users can watch your racing sessions live</li>
+                <li>• Great for sharing techniques and epic moments!</li>
+              </ul>
+            </div>
+            
+            <Button 
+              onClick={handleRequestScreenShare}
+              disabled={isRequestingScreenShare}
+              className="w-full"
+              icon={Monitor}
+            >
+              {isRequestingScreenShare ? 'Submitting Request...' : 'Request Screen Share Access'}
+            </Button>
+          </div>
+
+          {/* Live Streams */}
+          <div className="bg-slate-700/30 rounded-lg p-4">
+            <h4 className="font-semibold text-white mb-3">Live Racing Streams</h4>
+            <div className="text-center py-4 text-slate-400">
+              <Video className="w-8 h-8 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">No live streams at the moment</p>
+              <p className="text-xs mt-1">Check back later for live racing action!</p>
+            </div>
+          </div>
+        </div>
       </Modal>
 
       {/* Create Post Modal - Facebook Style with Paste Support */}

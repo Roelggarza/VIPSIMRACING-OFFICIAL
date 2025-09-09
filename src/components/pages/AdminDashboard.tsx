@@ -257,10 +257,6 @@ export default function AdminDashboard() {
               >
                 Screen Monitoring
               </Button>
-            </div>
-          </div>
-        </CardHeader>
-      </Card>
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
