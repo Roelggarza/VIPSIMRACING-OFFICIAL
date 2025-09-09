@@ -25,8 +25,9 @@
    - All data stored in localStorage
 
 ## Admin Credentials
-- **Primary Admin**: admin@vipsimracing.com / VIPEdge2024!
-- **Secondary Admin**: roel@vipsimracing.com / Roelgarza1!
+- **Primary Admin**: admin@vipsimracing.com / [Generated secure password]
+- **Roel Admin**: roel@vipsimracing.com / [Generated secure password]
+- **Roel Gmail**: roelggarza@gmail.com / [Generated secure password]
 
 ## Post-Deployment Testing
 - [ ] Visit vipsimracing.com
