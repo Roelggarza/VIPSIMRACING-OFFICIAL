@@ -28,8 +28,7 @@ import {
   Activity,
   Zap,
   Gift,
-  ShoppingBag,
-  QrCode
+  ShoppingBag
 } from 'lucide-react';
 import { getSession, clearSession, User as UserType, formatCreditsDisplay, getSimulators } from '../../utils/userStorage';
 import Button from '../ui/Button';
@@ -47,7 +46,6 @@ import Merch from './Merch';
 import SpotifyWidget from '../ui/SpotifyWidget';
 import AIChat from '../ui/AIChat';
 import PasswordReset from '../ui/PasswordReset';
-import QRCode from 'qrcode.react';
 
 interface UpcomingSession {
   id: string;
@@ -204,8 +202,6 @@ export default function Dashboard() {
     return originalPrice;
   };
 
-  const dashboardUrl = window.location.origin + "/dashboard";
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-red-900/20 py-8 px-6">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -328,16 +324,6 @@ export default function Dashboard() {
               Admin
             </Button>
           )}
-          {(user.email === 'roelggarza@gmail.com' || user.email === 'roel@vipsimracing.com') && (
-            <Button
-              variant={activeTab === 'simulators' ? 'primary' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveTab('simulators')}
-              icon={Monitor}
-            >
-              Admin
-            </Button>
-          )}
         </div>
 
         {/* Tab Content */}
@@ -433,41 +419,6 @@ export default function Dashboard() {
                     <Edit className="w-6 h-6" />
                     <span className="text-sm">Edit Profile</span>
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* QR Code for Mobile Access */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center space-x-2">
-                  <QrCode className="w-5 h-5 text-red-500" />
-                  <h2 className="text-xl font-bold text-white">Mobile Access</h2>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center space-x-6">
-                  <div className="bg-white p-4 rounded-lg">
-                    <QRCode 
-                      value={dashboardUrl} 
-                      size={120}
-                      fgColor="#ef4444"
-                      bgColor="#ffffff"
-                      level="M"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-white mb-2">Quick Dashboard Access</h3>
-                    <p className="text-slate-300 mb-4">
-                      Scan this QR code with your mobile device to quickly access your racing dashboard on the go.
-                    </p>
-                    <div className="space-y-2 text-sm text-slate-400">
-                      <p>• View your racing credits and balance</p>
-                      <p>• Check upcoming sessions</p>
-                      <p>• Access community features</p>
-                      <p>• Purchase additional packages</p>
-                    </div>
-                  </div>
                 </div>
               </CardContent>
             </Card>
