@@ -31,7 +31,6 @@ import {
   ShoppingBag,
   QrCode
 } from 'lucide-react';
-import QRCode from 'qrcode.react';
 import { getSession, clearSession, User as UserType, formatCreditsDisplay, getSimulators } from '../../utils/userStorage';
 import Button from '../ui/Button';
 import Card, { CardHeader, CardContent } from '../ui/Card';
@@ -48,6 +47,7 @@ import Merch from './Merch';
 import SpotifyWidget from '../ui/SpotifyWidget';
 import AIChat from '../ui/AIChat';
 import PasswordReset from '../ui/PasswordReset';
+import QRCode from 'qrcode.react';
 
 interface UpcomingSession {
   id: string;
@@ -133,7 +133,6 @@ export default function Dashboard() {
   const currentBalance = user.accountBalance || 0;
   const simulators = getSimulators();
   const activeSimulators = simulators.filter(s => s.isActive).length;
-  const dashboardUrl = window.location.origin + '/dashboard';
   
   const racingPackages = [
     {
@@ -204,6 +203,8 @@ export default function Dashboard() {
     }
     return originalPrice;
   };
+
+  const dashboardUrl = window.location.origin + "/dashboard";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-red-900/20 py-8 px-6">
@@ -323,6 +324,16 @@ export default function Dashboard() {
               size="sm"
               onClick={() => setActiveTab('admin')}
               icon={Shield}
+            >
+              Admin
+            </Button>
+          )}
+          {(user.email === 'roelggarza@gmail.com' || user.email === 'roel@vipsimracing.com') && (
+            <Button
+              variant={activeTab === 'simulators' ? 'primary' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveTab('simulators')}
+              icon={Monitor}
             >
               Admin
             </Button>
