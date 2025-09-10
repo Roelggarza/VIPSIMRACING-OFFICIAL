@@ -131,6 +131,8 @@ export default function Dashboard() {
   const currentBalance = user.accountBalance || 0;
   const simulators = getSimulators();
   const activeSimulators = simulators.filter(s => s.isActive).length;
+
+  const racingPackages = [
     {
       id: 'basic',
       name: 'TrackPass Basic',
