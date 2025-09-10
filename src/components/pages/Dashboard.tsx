@@ -327,16 +327,6 @@ export default function Dashboard() {
               Admin
             </Button>
           )}
-          {(user.email === 'roelggarza@gmail.com' || user.email === 'roel@vipsimracing.com') && (
-            <Button
-              variant={activeTab === 'simulators' ? 'primary' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveTab('simulators')}
-              icon={Monitor}
-            >
-              Admin
-            </Button>
-          )}
         </div>
 
         {/* Tab Content */}
