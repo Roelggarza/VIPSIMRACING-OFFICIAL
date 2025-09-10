@@ -38,7 +38,7 @@ export default function Merch() {
       id: 'racing-hat',
       name: 'VIP SIM RACING Cap',
       price: 30,
-      image: 'https://images.pexels.com/photos/1124465/pexels-photo-1124465.jpeg',
+      image: 'https://scontent-hou1-1.xx.fbcdn.net/v/t1.15752-9/546324934_776648631730648_2379102014874501461_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=9f807c&_nc_ohc=8iKNRkMmz5oQ7kNvwHxQmqN&_nc_oc=Adn4ORoXXu5hNCV4cG_dVtxpCusgyc8BGy-W026st_F39qdw2kkdU1_kO6oR8SrhE6nSn2b6bhzuW_nksczMhyfj&_nc_zt=23&_nc_ht=scontent-hou1-1.xx&oh=03_Q7cD3QE056990pOMYGvC8zdmg3mJPmmPB49AvHO_Y4fF8vBpCQ&oe=68E89F6B',
       description: 'Adjustable racing cap with embroidered VIP SIM RACING logo. One size fits all.',
       sizes: ['One Size'],
       colors: ['Black', 'Red', 'White'],
