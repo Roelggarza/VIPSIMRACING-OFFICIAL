@@ -815,18 +815,23 @@ export const resetUserPassword = async (email: string, newPassword: string): Pro
     
     // Hash the new password
     users[userIndex].passwordHash = await hashPassword(newPassword);
+    users[userIndex].lastActive = new Date().toISOString();
     localStorage.setItem('vip_users', JSON.stringify(users));
     
     // Add admin notification
     addAdminNotification({
       type: 'password_reset',
       title: 'Password Reset',
-      message: `Password reset for ${email}`,
+      message: `Password reset completed for ${email} via OTP verification`,
       data: {
         email: email,
-        resetTime: new Date().toISOString()
+        resetTime: new Date().toISOString(),
+        method: 'OTP'
       }
     });
+    
+    // Invalidate all existing sessions for security
+    localStorage.removeItem('vip_session');
     
     return true;
   }
