@@ -195,14 +195,6 @@ export default function Merch() {
                     <div className="text-white text-sm font-medium">{item.sizes.join(', ')}</div>
                     <div className="text-slate-300 text-sm">{item.colors.join(', ')}</div>
                   </div>
-                      size="sm"
-                      className="w-full bg-purple-500/10 hover:bg-purple-500/20 border-purple-500/30 text-purple-300"
-                      onClick={() => handleNotifyMe(item.id)}
-                      icon={Bell}
-                    >
-                      Notify When Available
-                    </Button>
-                  </div>
                 </div>
               </CardContent>
             </Card>
