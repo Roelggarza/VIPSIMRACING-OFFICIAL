@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogIn, AlertCircle, Mail, ArrowLeft, AlertTriangle, Key } from 'lucide-react';
+import { LogIn, AlertCircle, Mail, ArrowLeft, AlertTriangle, Key, Home } from 'lucide-react';
 import { findUser, saveSession, emailExists, resetUserPassword } from '../../utils/userStorage';
 import { generateSecurePassword } from '../../utils/passwordSecurity';
 import { get2FAData, verifyTOTP, verifySMSOTP, verifyEmailOTP, verifyRecoveryCode, sendSMSOTP, sendEmailOTP } from '../../utils/twoFactorAuth';
@@ -336,6 +336,16 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-red-900/20 flex items-center justify-center p-6">
+      {/* Back Button */}
+      <Button 
+        variant="ghost" 
+        onClick={() => navigate('/')}
+        icon={ArrowLeft}
+        className="absolute top-6 left-6 text-slate-400 hover:text-white"
+      >
+        Back to Home
+      </Button>
+      
       <Card className="max-w-md w-full">
         <CardHeader>
           <div className="text-center space-y-2">

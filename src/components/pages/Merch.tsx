@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingBag, ArrowLeft, Star, AlertCircle, Bell } from 'lucide-react';
+import { ShoppingBag, ArrowLeft, Star, AlertCircle, Bell, CheckCircle } from 'lucide-react';
+import { addAdminNotification } from '../../utils/userStorage';
 import Button from '../ui/Button';
 import Card, { CardHeader, CardContent } from '../ui/Card';
 
@@ -19,8 +20,8 @@ interface MerchItem {
 export default function Merch() {
   const navigate = useNavigate();
   const [selectedItem, setSelectedItem] = useState<MerchItem | null>(null);
-  const [notifyEmails, setNotifyEmails] = useState<string[]>([]);
   const [email, setEmail] = useState('');
+  const [showThankYou, setShowThankYou] = useState(false);
 
   const merchItems: MerchItem[] = [
     {
@@ -91,7 +92,24 @@ export default function Merch() {
     existingNotifications.push(newNotification);
     localStorage.setItem('merch_notifications', JSON.stringify(existingNotifications));
 
-    alert('Thanks! We\'ll notify you when this item is back in stock.');
+    // Add admin notification
+    addAdminNotification({
+      type: 'merch_notification',
+      title: 'New Merch Restock Notification',
+      message: `${email.trim()} signed up for merch restock notifications`,
+      data: {
+        email: email.trim(),
+        itemId: itemId === 'all-items' ? 'All Items' : itemId,
+        timestamp: new Date().toISOString()
+      }
+    });
+
+    // Show thank you message
+    setShowThankYou(true);
+    setTimeout(() => {
+      setShowThankYou(false);
+    }, 3000);
+    
     setEmail('');
   };
 
@@ -155,6 +173,14 @@ export default function Merch() {
                 >
                   Notify When Available
                 </Button>
+                
+                {/* Thank You Message */}
+                {showThankYou && (
+                  <div className="flex items-center justify-center space-x-2 text-green-400 bg-green-500/10 p-3 rounded-lg border border-green-500/30">
+                    <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                    <span className="text-sm font-medium">Thank you for signing up! We'll notify you when items are available.</span>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>

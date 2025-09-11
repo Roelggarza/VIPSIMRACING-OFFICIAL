@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserPlus, AlertTriangle, CheckCircle, CreditCard, ChevronDown, ChevronUp, Crown, Zap, Gift, FileText } from 'lucide-react';
+import { UserPlus, AlertTriangle, CheckCircle, CreditCard, ChevronDown, ChevronUp, Crown, Zap, Gift, FileText, ArrowLeft } from 'lucide-react';
 import { saveUser, emailExists, addCreditsAndBalance } from '../../utils/userStorage';
 import { validatePasswordStrength, checkPasswordBreach } from '../../utils/passwordSecurity';
 import { RELEASE_WAIVER_TEXT } from '../../utils/constants';
@@ -339,6 +339,16 @@ export default function Registration() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-red-900/20 py-8 px-6">
+      {/* Back Button */}
+      <Button 
+        variant="ghost" 
+        onClick={() => navigate('/')}
+        icon={ArrowLeft}
+        className="absolute top-6 left-6 text-slate-400 hover:text-white"
+      >
+        Back to Home
+      </Button>
+      
       <div className="max-w-4xl mx-auto space-y-6">
         <Card>
           <CardHeader>
