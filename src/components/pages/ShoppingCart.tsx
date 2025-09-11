@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Plus, Minus, Trash2, CreditCard, ArrowLeft, Package, CheckCircle } from 'lucide-react';
+import { ShoppingCart as ShoppingCartIcon, Plus, Minus, Trash2, CreditCard, ArrowLeft, Package, CheckCircle } from 'lucide-react';
 import { getUserCart, updateCartItemQuantity, removeFromCart, clearCart, CartItem, Cart } from '../../utils/cartStorage';
 import { User } from '../../utils/userStorage';
 import Card, { CardHeader, CardContent } from '../ui/Card';
@@ -107,7 +107,7 @@ export default function ShoppingCart({ user, onBack }: ShoppingCartProps) {
         </Button>
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white flex items-center">
-            <ShoppingCart className="w-6 h-6 mr-2" />
+            <ShoppingCartIcon className="w-6 h-6 mr-2" />
             My Cart
           </h1>
           <p className="text-slate-400">{cart.itemCount} item{cart.itemCount !== 1 ? 's' : ''} in cart</p>
@@ -118,7 +118,7 @@ export default function ShoppingCart({ user, onBack }: ShoppingCartProps) {
       {cart.items.length === 0 ? (
         <Card>
           <CardContent className="text-center py-12">
-            <ShoppingCart className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+            <ShoppingCartIcon className="w-16 h-16 text-slate-500 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-white mb-2">Your cart is empty</h3>
             <p className="text-slate-400 mb-6">
               Add some VIP SIM RACING merchandise to get started!
