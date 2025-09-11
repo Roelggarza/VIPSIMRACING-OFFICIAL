@@ -505,14 +505,6 @@ export default function Dashboard() {
                       </a>
                     </div>
                   </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <MapPin className="w-6 h-6 text-red-500" />
-                    <div>
-                      <p className="font-semibold text-white">Location</p>
-                      <p className="text-slate-400">Houston, Texas Area</p>
-                    </div>
-                  </div>
                 </div>
               </CardContent>
             </Card>
