@@ -28,9 +28,11 @@ import {
   Activity,
   Zap,
   Gift,
-  ShoppingBag
+  ShoppingBag,
+  ShoppingCart as ShoppingCartIcon
 } from 'lucide-react';
 import { getSession, clearSession, User as UserType, formatCreditsDisplay, getSimulators } from '../../utils/userStorage';
+import { getCartItemCount } from '../../utils/cartStorage';
 import Button from '../ui/Button';
 import Card, { CardHeader, CardContent } from '../ui/Card';
 import Modal from '../ui/Modal';
@@ -43,9 +45,11 @@ import CommunityHub from './CommunityHub';
 import GamesLibrary from './GamesLibrary';
 import AdminDashboard from './AdminDashboard';
 import Merch from './Merch';
+import ShoppingCart from './ShoppingCart';
 import SpotifyWidget from '../ui/SpotifyWidget';
 import AIChat from '../ui/AIChat';
 import PasswordReset from '../ui/PasswordReset';
+import CartIcon from '../ui/CartIcon';
 
 interface UpcomingSession {
   id: string;
@@ -58,7 +62,7 @@ interface UpcomingSession {
 
 export default function Dashboard() {
   const [user, setUser] = useState<UserType | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'packages' | 'merch' | 'history' | 'profile' | 'leaderboard' | 'community' | 'games' | 'admin'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'packages' | 'merch' | 'cart' | 'history' | 'profile' | 'leaderboard' | 'community' | 'games' | 'admin'>('overview');
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [showProfileEdit, setShowProfileEdit] = useState(false);
@@ -68,6 +72,7 @@ export default function Dashboard() {
   const [showAIChat, setShowAIChat] = useState(false);
   const [showSpotifyWidget, setShowSpotifyWidget] = useState(false);
   const [upcomingSessions] = useState<UpcomingSession[]>([]);
+  const [cartItemCount, setCartItemCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -82,7 +87,16 @@ export default function Dashboard() {
     if (session.spotifyData?.connected) {
       setShowSpotifyWidget(true);
     }
+    
+    // Load cart item count
+    setCartItemCount(getCartItemCount(session.email));
   }, [navigate]);
+
+  const handleCartUpdate = () => {
+    if (user) {
+      setCartItemCount(getCartItemCount(user.email));
+    }
+  };
 
   const handleLogout = () => {
     clearSession();
@@ -239,6 +253,11 @@ export default function Dashboard() {
             <Button variant="ghost" onClick={() => setShowAIChat(true)} icon={MessageCircle}>
               AI Support
             </Button>
+            <CartIcon 
+              itemCount={cartItemCount} 
+              onClick={() => setActiveTab('cart')}
+              className="bg-slate-800/50 rounded-lg"
+            />
             <Button variant="ghost" onClick={() => setShowPasswordReset(true)} icon={Settings}>
               Security
             </Button>
@@ -273,6 +292,20 @@ export default function Dashboard() {
             icon={Gift}
           >
             Merch
+          </Button>
+          <Button
+            variant={activeTab === 'cart' ? 'primary' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveTab('cart')}
+            icon={ShoppingCartIcon}
+            className="relative"
+          >
+            My Cart
+            {cartItemCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {cartItemCount > 99 ? '99+' : cartItemCount}
+              </span>
+            )}
           </Button>
           <Button
             variant={activeTab === 'games' ? 'primary' : 'ghost'}
@@ -622,7 +655,21 @@ export default function Dashboard() {
           </div>
         )}
 
-        {activeTab === 'merch' && <Merch />}
+        {activeTab === 'merch' && (
+          <Merch 
+            showCartIcon={true} 
+            onCartClick={() => {
+              setActiveTab('cart');
+              handleCartUpdate();
+            }} 
+          />
+        )}
+        {activeTab === 'cart' && (
+          <ShoppingCart 
+            user={user} 
+            onBack={() => setActiveTab('merch')} 
+          />
+        )}
         {activeTab === 'history' && <TransactionHistory user={user} />}
         {activeTab === 'profile' && !showProfileEdit && (
           <div className="space-y-6">

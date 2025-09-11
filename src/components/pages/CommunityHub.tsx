@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Plus, Heart, Share2, MessageCircle, Flag, Camera, Video, Eye, EyeOff, Trash2, Monitor, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Globe, Plus, Heart, Share2, MessageCircle, Flag, Camera, Video, Eye, EyeOff, Trash2, Monitor, CheckCircle, XCircle, Clock, Edit } from 'lucide-react';
 import { 
   getCommunityPosts, 
   addCommunityPost, 
@@ -11,11 +11,15 @@ import {
   User as UserType,
   CommunityPost 
 } from '../../utils/userStorage';
+import { deletePostWithAudit } from '../../utils/postManagement';
+import { generatePostShareData } from '../../utils/socialSharing';
 import Card, { CardHeader, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Modal from '../ui/Modal';
 import ImageDropZone from '../ui/ImageDropZone';
+import SocialShareModal from '../ui/SocialShareModal';
+import PostEditModal from '../ui/PostEditModal';
 
 interface CommunityHubProps {
   currentUser: UserType;
@@ -38,6 +42,8 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
   const [activeTab, setActiveTab] = useState<'feed' | 'share' | 'live'>('feed');
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedPost, setSelectedPost] = useState<CommunityPost | null>(null);
   const [newPost, setNewPost] = useState({
     type: 'screenshot' as 'screenshot' | 'video' | 'lap_record' | 'highlight',
@@ -61,6 +67,7 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
     simulatorId: 1,
     game: ''
   });
+  const [shareData, setShareData] = useState<any>(null);
 
   useEffect(() => {
     setPosts(getCommunityPosts().filter(p => !p.isHidden));
@@ -119,6 +126,39 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
   const handleShare = (postId: string) => {
     shareCommunityPost(postId, currentUser.email);
     setPosts(getCommunityPosts().filter(p => !p.isHidden));
+  };
+
+  const handleSharePost = (post: CommunityPost) => {
+    const postShareData = generatePostShareData(post);
+    setShareData(postShareData);
+    setSelectedPost(post);
+    setShowShareModal(true);
+  };
+
+  const handleEditPost = (post: CommunityPost) => {
+    setSelectedPost(post);
+    setShowEditModal(true);
+  };
+
+  const handleDeletePost = (post: CommunityPost) => {
+    if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+      return;
+    }
+
+    const result = deletePostWithAudit(post.id, currentUser.email);
+    
+    if (result.success) {
+      setPosts(getCommunityPosts().filter(p => !p.isHidden));
+      alert('Post deleted successfully');
+    } else {
+      alert(result.errors?.join('\n') || 'Failed to delete post');
+    }
+  };
+
+  const handlePostUpdated = (updatedPost: any) => {
+    setPosts(getCommunityPosts().filter(p => !p.isHidden));
+    setShowEditModal(false);
+    setSelectedPost(null);
   };
 
   const handleReport = () => {
@@ -274,17 +314,43 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
                             <p className="text-sm text-slate-400">{formatTimeAgo(post.createdAt)}</p>
                           </div>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedPost(post);
-                            setShowReportModal(true);
-                          }}
-                          icon={Flag}
-                        >
-                          Report
-                        </Button>
+                        <div className="flex items-center space-x-2">
+                          {/* User's own post controls */}
+                          {post.userId === currentUser.email && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditPost(post)}
+                                icon={Edit}
+                                className="text-blue-400 hover:text-blue-300"
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeletePost(post)}
+                                icon={Trash2}
+                                className="text-red-400 hover:text-red-300"
+                              >
+                                Delete
+                              </Button>
+                            </>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedPost(post);
+                              setShowReportModal(true);
+                            }}
+                            icon={Flag}
+                            className="text-slate-400 hover:text-slate-300"
+                          >
+                            Report
+                          </Button>
+                        </div>
                       </div>
 
                       {/* Post Content */}
@@ -365,7 +431,10 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleShare(post.id)}
+                            onClick={() => {
+                              handleShare(post.id);
+                              handleSharePost(post);
+                            }}
                             className={isShared ? 'text-blue-400' : 'text-slate-400'}
                           >
                             <Share2 className="w-4 h-4 mr-1" />
@@ -725,6 +794,30 @@ export default function CommunityHub({ currentUser }: CommunityHubProps) {
           </div>
         </div>
       </Modal>
+
+      {/* Social Share Modal */}
+      <SocialShareModal
+        isOpen={showShareModal}
+        onClose={() => {
+          setShowShareModal(false);
+          setSelectedPost(null);
+          setShareData(null);
+        }}
+        shareData={shareData}
+        title="Share Racing Post"
+      />
+
+      {/* Post Edit Modal */}
+      <PostEditModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedPost(null);
+        }}
+        post={selectedPost}
+        userEmail={currentUser.email}
+        onPostUpdated={handlePostUpdated}
+      />
 
       {/* Report Modal */}
       <Modal
