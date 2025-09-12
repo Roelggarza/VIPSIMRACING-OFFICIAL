@@ -85,13 +85,16 @@ export const validatePostContent = (postData: any): { isValid: boolean; issues: 
     issues.push('Description must be less than 500 characters');
   }
   
-  // Content filtering (basic profanity and spam detection)
-  const inappropriateWords = ['spam', 'scam', 'fake', 'cheat', 'hack'];
+  // Enhanced content filtering
+  const inappropriateWords = [
+    'spam', 'scam', 'fake', 'cheat', 'hack', 'bot', 'exploit', 
+    'glitch', 'bug abuse', 'unfair', 'rigged'
+  ];
   const content = `${postData.title} ${postData.description}`.toLowerCase();
   
   for (const word of inappropriateWords) {
     if (content.includes(word)) {
-      issues.push('Content contains potentially inappropriate language');
+      issues.push(`Content contains potentially inappropriate language: "${word}"`);
       break;
     }
   }
@@ -100,6 +103,17 @@ export const validatePostContent = (postData: any): { isValid: boolean; issues: 
   if (postData.mediaUrl) {
     try {
       new URL(postData.mediaUrl);
+      
+      // Check if it's a data URL (base64 image)
+      if (postData.mediaUrl.startsWith('data:image/')) {
+        // Validate image size (rough estimate)
+        const sizeInBytes = (postData.mediaUrl.length * 3) / 4;
+        const sizeInMB = sizeInBytes / (1024 * 1024);
+        
+        if (sizeInMB > 10) {
+          issues.push('Image size must be less than 10MB');
+        }
+      }
     } catch {
       issues.push('Invalid media URL provided');
     }
@@ -110,6 +124,30 @@ export const validatePostContent = (postData: any): { isValid: boolean; issues: 
     const lapTimeRegex = /^\d{1,2}:\d{2}\.\d{3}$/;
     if (!lapTimeRegex.test(postData.lapTime)) {
       issues.push('Lap time must be in format MM:SS.mmm (e.g., 1:23.456)');
+    }
+  }
+  
+  // Game validation
+  if (postData.game && postData.game.length > 50) {
+    issues.push('Game name must be less than 50 characters');
+  }
+  
+  // Track validation
+  if (postData.track && postData.track.length > 50) {
+    issues.push('Track name must be less than 50 characters');
+  }
+  
+  // Tags validation
+  if (postData.tags && Array.isArray(postData.tags)) {
+    if (postData.tags.length > 10) {
+      issues.push('Maximum 10 tags allowed');
+    }
+    
+    for (const tag of postData.tags) {
+      if (tag.length > 20) {
+        issues.push('Each tag must be less than 20 characters');
+        break;
+      }
     }
   }
   

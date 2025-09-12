@@ -984,6 +984,16 @@ export const getCommunityPosts = (): CommunityPost[] => {
 
 export const addCommunityPost = (postData: Omit<CommunityPost, 'id' | 'likes' | 'likedBy' | 'shares' | 'sharedBy' | 'comments' | 'createdAt'>) => {
   const posts = getCommunityPosts();
+  
+  // Validate required fields
+  if (!postData.title?.trim()) {
+    throw new Error('Post title is required');
+  }
+  
+  if (!postData.userId?.trim()) {
+    throw new Error('User ID is required');
+  }
+  
   const newPost: CommunityPost = {
     ...postData,
     id: Date.now().toString(),
@@ -992,11 +1002,25 @@ export const addCommunityPost = (postData: Omit<CommunityPost, 'id' | 'likes' | 
     shares: 0,
     sharedBy: [],
     comments: [],
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    isPublic: postData.isPublic !== false // Default to true if not specified
   };
   
-  posts.push(newPost);
+  posts.unshift(newPost); // Add to beginning for newest first
   localStorage.setItem('vip_community_posts', JSON.stringify(posts));
+  
+  // Add admin notification
+  addAdminNotification({
+    type: 'new_post',
+    title: 'New Community Post',
+    message: `${postData.userId} shared: ${postData.title}`,
+    data: {
+      postId: newPost.id,
+      type: postData.type,
+      title: postData.title
+    }
+  });
+  
   return newPost;
 };
 
@@ -1014,10 +1038,29 @@ export const likeCommunityPost = (postId: string, userId: string) => {
     } else {
       post.likedBy.push(userId);
       post.likes += 1;
+      
+      // Notify post author if it's not their own like
+      if (post.userId !== userId) {
+        const users = getUsers();
+        const liker = users.find(u => u.email === userId);
+        
+        addAdminNotification({
+          type: 'post_like',
+          title: 'Someone Liked Your Post',
+          message: `${liker?.fullName || 'Someone'} liked "${post.title}"`,
+          data: {
+            postId: postId,
+            likerName: liker?.fullName || 'Unknown User'
+          }
+        });
+      }
     }
     
     localStorage.setItem('vip_community_posts', JSON.stringify(posts));
+    return post;
   }
+  
+  throw new Error('Post not found');
 };
 
 export const shareCommunityPost = (postId: string, userId: string) => {
@@ -1030,8 +1073,28 @@ export const shareCommunityPost = (postId: string, userId: string) => {
       post.sharedBy.push(userId);
       post.shares += 1;
       localStorage.setItem('vip_community_posts', JSON.stringify(posts));
+      
+      // Notify post author if it's not their own share
+      if (post.userId !== userId) {
+        const users = getUsers();
+        const sharer = users.find(u => u.email === userId);
+        
+        addAdminNotification({
+          type: 'post_share',
+          title: 'Someone Shared Your Post',
+          message: `${sharer?.fullName || 'Someone'} shared "${post.title}"`,
+          data: {
+            postId: postId,
+            sharerName: sharer?.fullName || 'Unknown User'
+          }
+        });
+      }
+      
+      return post;
     }
   }
+  
+  throw new Error('Post not found or already shared');
 };
 
 export const addCommentToCommunityPost = (postId: string, commentData: Omit<Comment, 'id' | 'likes' | 'likedBy' | 'replies' | 'createdAt'>) => {
@@ -1048,12 +1111,31 @@ export const addCommentToCommunityPost = (postId: string, commentData: Omit<Comm
       likes: 0,
       likedBy: [],
       replies: [],
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      read: false
     };
     
     post.comments.push(newComment);
     localStorage.setItem('vip_community_posts', JSON.stringify(posts));
+    
+    // Notify post author if it's not their own comment
+    if (post.userId !== commentData.userId) {
+      addAdminNotification({
+        type: 'new_comment',
+        title: 'New Comment on Your Post',
+        message: `${commentData.userName} commented on "${post.title}"`,
+        data: {
+          postId: postId,
+          commentId: newComment.id,
+          commenterName: commentData.userName
+        }
+      });
+    }
+    
+    return newComment;
   }
+  
+  throw new Error('Post not found');
 };
 
 export const addReplyToComment = (postId: string, commentId: string, replyData: Omit<Comment, 'id' | 'likes' | 'likedBy' | 'replies' | 'createdAt'>) => {
