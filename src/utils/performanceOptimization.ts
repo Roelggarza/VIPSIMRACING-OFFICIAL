@@ -321,3 +321,5 @@ export const performanceMonitor = {
 // Cleanup expired cache entries every 5 minutes
 setInterval(() => {
   performanceCache.cleanup();
+}
+)
