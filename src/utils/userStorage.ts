@@ -979,11 +979,257 @@ export const disconnectSpotify = (email: string) => {
 // Community Posts
 export const getCommunityPosts = (): CommunityPost[] => {
   const posts = localStorage.getItem('vip_community_posts');
-  return posts ? JSON.parse(posts) : [];
+  try {
+    return posts ? JSON.parse(posts) : [];
+  } catch (error) {
+    console.error('Error parsing community posts:', error);
+    // Reset corrupted data
+    localStorage.setItem('vip_community_posts', JSON.stringify([]));
+    return [];
+  }
 };
 
 export const addCommunityPost = (postData: Omit<CommunityPost, 'id' | 'likes' | 'likedBy' | 'shares' | 'sharedBy' | 'comments' | 'createdAt'>) => {
-  const posts = getCommunityPosts();
+  try {
+    const posts = getCommunityPosts();
+    
+    // Validate required fields
+    if (!postData.title?.trim()) {
+      throw new Error('Post title is required');
+    }
+    
+    if (!postData.userId?.trim()) {
+      throw new Error('User ID is required');
+    }
+    
+    const newPost: CommunityPost = {
+      ...postData,
+      id: Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9),
+      likes: 0,
+      likedBy: [],
+      shares: 0,
+      sharedBy: [],
+      comments: [],
+      createdAt: new Date().toISOString(),
+      isPublic: postData.isPublic !== false,
+      isHidden: false,
+      reportedBy: []
+    };
+    
+    posts.unshift(newPost);
+    localStorage.setItem('vip_community_posts', JSON.stringify(posts));
+    
+    // Add admin notification
+    addAdminNotification({
+      type: 'new_post',
+      title: 'New Community Post',
+      message: `${postData.userId} shared: ${postData.title}`,
+      data: {
+        postId: newPost.id,
+        type: postData.type,
+        title: postData.title
+      }
+    });
+    
+    return newPost;
+  } catch (error) {
+    console.error('Error adding community post:', error);
+    throw error;
+  }
+};
+
+export const likeCommunityPost = (postId: string, userId: string) => {
+  try {
+    const posts = getCommunityPosts();
+    const postIndex = posts.findIndex(p => p.id === postId);
+    
+    if (postIndex === -1) {
+      throw new Error('Post not found');
+    }
+    
+    const post = posts[postIndex];
+    const isLiked = post.likedBy.includes(userId);
+    
+    if (isLiked) {
+      post.likedBy = post.likedBy.filter(id => id !== userId);
+      post.likes = Math.max(0, post.likes - 1);
+    } else {
+      post.likedBy.push(userId);
+      post.likes += 1;
+      
+      // Notify post author if it's not their own like
+      if (post.userId !== userId) {
+        const users = getUsers();
+        const liker = users.find(u => u.email === userId);
+        
+        addAdminNotification({
+          type: 'post_like',
+          title: 'Someone Liked Your Post',
+          message: `${liker?.fullName || 'Someone'} liked "${post.title}"`,
+          data: {
+            postId: postId,
+            likerName: liker?.fullName || 'Unknown User'
+          }
+        });
+      }
+    }
+    
+    localStorage.setItem('vip_community_posts', JSON.stringify(posts));
+    return post;
+  } catch (error) {
+    console.error('Error liking post:', error);
+    throw error;
+  }
+};
+
+export const shareCommunityPost = (postId: string, userId: string) => {
+  try {
+    const posts = getCommunityPosts();
+    const postIndex = posts.findIndex(p => p.id === postId);
+    
+    if (postIndex === -1) {
+      throw new Error('Post not found');
+    }
+    
+    const post = posts[postIndex];
+    if (!post.sharedBy.includes(userId)) {
+      post.sharedBy.push(userId);
+      post.shares += 1;
+      localStorage.setItem('vip_community_posts', JSON.stringify(posts));
+      
+      // Notify post author if it's not their own share
+      if (post.userId !== userId) {
+        const users = getUsers();
+        const sharer = users.find(u => u.email === userId);
+        
+        addAdminNotification({
+          type: 'post_share',
+          title: 'Someone Shared Your Post',
+          message: `${sharer?.fullName || 'Someone'} shared "${post.title}"`,
+          data: {
+            postId: postId,
+            sharerName: sharer?.fullName || 'Unknown User'
+          }
+        });
+      }
+      
+      return post;
+    }
+    
+    return post;
+  } catch (error) {
+    console.error('Error sharing post:', error);
+    throw error;
+  }
+};
+
+export const addCommentToCommunityPost = (postId: string, commentData: Omit<Comment, 'id' | 'likes' | 'likedBy' | 'replies' | 'createdAt'>) => {
+  try {
+    const posts = getCommunityPosts();
+    const postIndex = posts.findIndex(p => p.id === postId);
+    
+    if (postIndex === -1) {
+      throw new Error('Post not found');
+    }
+    
+    const post = posts[postIndex];
+    if (!post.comments) post.comments = [];
+    
+    const newComment: Comment = {
+      ...commentData,
+      id: Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9),
+      likes: 0,
+      likedBy: [],
+      replies: [],
+      createdAt: new Date().toISOString(),
+      read: false
+    };
+    
+    post.comments.push(newComment);
+    localStorage.setItem('vip_community_posts', JSON.stringify(posts));
+    
+    // Notify post author if it's not their own comment
+    if (post.userId !== commentData.userId) {
+      addAdminNotification({
+        type: 'new_comment',
+        title: 'New Comment on Your Post',
+        message: `${commentData.userName} commented on "${post.title}"`,
+        data: {
+          postId: postId,
+          commentId: newComment.id,
+          commenterName: commentData.userName
+        }
+      });
+    }
+    
+    return newComment;
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    throw error;
+  }
+};
+
+export const reportPost = (postId: string, reporterId: string, reason: 'spam' | 'inappropriate' | 'harassment' | 'copyright' | 'other', description: string) => {
+  try {
+    const reports = getPostReports();
+    const posts = getCommunityPosts();
+    const users = getUsers();
+    
+    const post = posts.find(p => p.id === postId);
+    const reporter = users.find(u => u.email === reporterId);
+    
+    if (!post || !reporter) {
+      throw new Error('Post or reporter not found');
+    }
+    
+    // Check if user already reported this post
+    const existingReport = reports.find(r => r.postId === postId && r.reporterId === reporterId);
+    if (existingReport) {
+      throw new Error('You have already reported this post');
+    }
+    
+    const newReport: PostReport = {
+      id: Date.now().toString(),
+      postId,
+      reporterId,
+      reporterName: reporter.fullName,
+      reason,
+      description,
+      timestamp: new Date().toISOString(),
+      status: 'pending',
+      post
+    };
+    
+    reports.push(newReport);
+    localStorage.setItem('vip_post_reports', JSON.stringify(reports));
+    
+    // Add to post's reported list
+    const postIndex = posts.findIndex(p => p.id === postId);
+    if (postIndex !== -1) {
+      if (!posts[postIndex].reportedBy) posts[postIndex].reportedBy = [];
+      posts[postIndex].reportedBy!.push(reporterId);
+      localStorage.setItem('vip_community_posts', JSON.stringify(posts));
+    }
+    
+    // Add admin notification
+    addAdminNotification({
+      type: 'post_report',
+      title: 'New Content Report',
+      message: `${reporter.fullName} reported a post for ${reason}`,
+      data: {
+        postId,
+        reporterId,
+        reason,
+        description
+      }
+    });
+    
+    return newReport;
+  } catch (error) {
+    console.error('Error reporting post:', error);
+    throw error;
+  }
+};
   
   // Validate required fields
   if (!postData.title?.trim()) {

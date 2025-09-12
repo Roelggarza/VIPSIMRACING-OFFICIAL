@@ -164,6 +164,177 @@ export const validatePostContent = (postData: any): { isValid: boolean; issues: 
  * @returns object with success status and post data or errors
  */
 export const createPostWithValidation = (postData: any, userEmail: string): { success: boolean; post?: any; errors?: string[] } => {
+  try {
+    const validation = validatePostContent(postData);
+    
+    if (!validation.isValid) {
+      return {
+        success: false,
+        errors: validation.issues
+      };
+    }
+    
+    // Import required functions dynamically to avoid circular dependencies
+    const userStorage = require('./userStorage');
+    const { addCommunityPost, getUsers } = userStorage;
+    
+    const post = addCommunityPost(postData);
+    const users = getUsers();
+    const user = users.find((u: any) => u.email === userEmail);
+    
+    // Log the creation
+    addPostAuditLog({
+      postId: post.id,
+      action: 'created',
+      performedBy: userEmail,
+      performerName: user?.fullName || 'Unknown User',
+      newData: post
+    });
+    
+    return {
+      success: true,
+      post
+    };
+  } catch (error) {
+    console.error('Error creating post:', error);
+    return {
+      success: false,
+      errors: ['Failed to create post. Please try again.']
+    };
+  }
+};
+
+/**
+ * Edit post with validation and audit logging
+ * @param postId - ID of post to edit
+ * @param updates - Updates to apply
+ * @param userEmail - User performing the edit
+ * @returns object with success status and errors
+ */
+export const editPostWithValidation = (postId: string, updates: any, userEmail: string): { success: boolean; errors?: string[] } => {
+  try {
+    const validation = validatePostContent(updates);
+    
+    if (!validation.isValid) {
+      return {
+        success: false,
+        errors: validation.issues
+      };
+    }
+    
+    // Import required functions dynamically
+    const userStorage = require('./userStorage');
+    const { getCommunityPosts, getUsers } = userStorage;
+    
+    const posts = getCommunityPosts();
+    const postIndex = posts.findIndex((p: any) => p.id === postId);
+    
+    if (postIndex === -1) {
+      return {
+        success: false,
+        errors: ['Post not found']
+      };
+    }
+    
+    const originalPost = { ...posts[postIndex] };
+    const users = getUsers();
+    const user = users.find((u: any) => u.email === userEmail);
+    
+    // Check permissions
+    if (originalPost.userId !== userEmail && !user?.isAdmin) {
+      return {
+        success: false,
+        errors: ['You can only edit your own posts']
+      };
+    }
+    
+    // Apply updates
+    posts[postIndex] = { 
+      ...originalPost, 
+      ...updates, 
+      editedAt: new Date().toISOString(),
+      editedBy: userEmail
+    };
+    localStorage.setItem('vip_community_posts', JSON.stringify(posts));
+    
+    // Log the edit
+    addPostAuditLog({
+      postId,
+      action: 'edited',
+      performedBy: userEmail,
+      performerName: user?.fullName || 'Unknown User',
+      previousData: originalPost,
+      newData: posts[postIndex]
+    });
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error editing post:', error);
+    return {
+      success: false,
+      errors: ['Failed to edit post. Please try again.']
+    };
+  }
+};
+
+/**
+ * Delete post with audit logging
+ * @param postId - ID of post to delete
+ * @param userEmail - User performing the deletion
+ * @param reason - Reason for deletion
+ * @returns object with success status and errors
+ */
+export const deletePostWithAudit = (postId: string, userEmail: string, reason?: string): { success: boolean; errors?: string[] } => {
+  try {
+    // Import required functions dynamically
+    const userStorage = require('./userStorage');
+    const { getCommunityPosts, getUsers } = userStorage;
+    
+    const posts = getCommunityPosts();
+    const users = getUsers();
+    
+    const postIndex = posts.findIndex((p: any) => p.id === postId);
+    if (postIndex === -1) {
+      return {
+        success: false,
+        errors: ['Post not found']
+      };
+    }
+    
+    const post = posts[postIndex];
+    const user = users.find((u: any) => u.email === userEmail);
+    
+    // Check permissions
+    if (post.userId !== userEmail && !user?.isAdmin) {
+      return {
+        success: false,
+        errors: ['You can only delete your own posts']
+      };
+    }
+    
+    // Remove post
+    const deletedPost = posts.splice(postIndex, 1)[0];
+    localStorage.setItem('vip_community_posts', JSON.stringify(posts));
+    
+    // Log the deletion
+    addPostAuditLog({
+      postId,
+      action: 'deleted',
+      performedBy: userEmail,
+      performerName: user?.fullName || 'Unknown User',
+      reason: reason || (user?.isAdmin ? 'Admin deletion' : 'User deletion'),
+      previousData: deletedPost
+    });
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting post:', error);
+    return {
+      success: false,
+      errors: ['Failed to delete post. Please try again.']
+    };
+  }
+};
   const validation = validatePostContent(postData);
   
   if (!validation.isValid) {
