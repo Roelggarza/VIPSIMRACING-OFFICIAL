@@ -335,6 +335,14 @@ export const deletePostWithAudit = (postId: string, userEmail: string, reason?: 
     };
   }
 };
+
+/**
+ * Create post with validation and audit logging
+ * @param postData - Post data
+ * @param userEmail - User creating the post
+ * @returns object with success status and post data or errors
+ */
+export const createPost = (postData: any, userEmail: string): { success: boolean; post?: any; errors?: string[] } => {
   const validation = validatePostContent(postData);
   
   if (!validation.isValid) {
@@ -378,7 +386,7 @@ export const deletePostWithAudit = (postId: string, userEmail: string, reason?: 
  * @param userEmail - User performing the edit
  * @returns boolean - Success status
  */
-export const editPostWithValidation = (postId: string, updates: any, userEmail: string): { success: boolean; errors?: string[] } => {
+export const editPost = (postId: string, updates: any, userEmail: string): { success: boolean; errors?: string[] } => {
   const validation = validatePostContent(updates);
   
   if (!validation.isValid) {
@@ -445,7 +453,7 @@ export const editPostWithValidation = (postId: string, updates: any, userEmail: 
  * @param reason - Reason for deletion
  * @returns boolean - Success status
  */
-export const deletePostWithAudit = (postId: string, userEmail: string, reason?: string): { success: boolean; errors?: string[] } => {
+export const deletePost = (postId: string, userEmail: string, reason?: string): { success: boolean; errors?: string[] } => {
   try {
     const { getCommunityPosts, getUsers } = require('../../utils/userStorage');
     const posts = getCommunityPosts();
