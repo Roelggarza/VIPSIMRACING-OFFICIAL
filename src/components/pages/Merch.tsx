@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingBag, ArrowLeft, Star, AlertCircle, Bell, CheckCircle, Plus, ShoppingCart } from 'lucide-react';
-import { addAdminNotification, getSession } from '../../utils/userStorage';
-import { addToCart, getCartItemCount } from '../../utils/cartStorage';
+import { ShoppingBag, ArrowLeft, Star, AlertCircle, Bell } from 'lucide-react';
 import Button from '../ui/Button';
 import Card, { CardHeader, CardContent } from '../ui/Card';
-import Modal from '../ui/Modal';
-import CartIcon from '../ui/CartIcon';
 
 interface MerchItem {
   id: string;
@@ -20,113 +16,58 @@ interface MerchItem {
   category: 'hoodie' | 'hat' | 'tshirt' | 'longsleeve';
 }
 
-interface MerchProps {
-  showCartIcon?: boolean;
-  onCartClick?: () => void;
-}
-
-export default function Merch({ showCartIcon = false, onCartClick }: MerchProps) {
+export default function Merch() {
   const navigate = useNavigate();
   const [selectedItem, setSelectedItem] = useState<MerchItem | null>(null);
-  const [selectedSize, setSelectedSize] = useState('');
-  const [selectedColor, setSelectedColor] = useState('');
+  const [notifyEmails, setNotifyEmails] = useState<string[]>([]);
   const [email, setEmail] = useState('');
-  const [showThankYou, setShowThankYou] = useState(false);
-  const [showSizeModal, setShowSizeModal] = useState(false);
-  const [cartItemCount, setCartItemCount] = useState(0);
-  const [addedToCart, setAddedToCart] = useState(false);
-
-  const currentUser = getSession();
-
-  React.useEffect(() => {
-    if (currentUser) {
-      setCartItemCount(getCartItemCount(currentUser.email));
-    }
-  }, [currentUser]);
 
   const merchItems: MerchItem[] = [
-    {
-      id: 'vip-tshirt',
-      name: 'VIP SIM RACING T-Shirt',
-      price: 25,
-      image: 'https://images.pexels.com/photos/8532616/pexels-photo-8532616.jpeg',
-      description: 'Premium cotton blend t-shirt featuring the iconic VIP SIM RACING logo. Engineered for comfort during intense racing sessions and designed to showcase your passion for motorsport excellence.',
-      sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-      colors: ['Black', 'Red', 'White', 'Gray'],
-      inStock: false,
-      category: 'tshirt'
-    },
-    {
-      id: 'racing-hat',
-      name: 'VIP SIM RACING Cap',
-      price: 30,
-      image: 'https://scontent-hou1-1.xx.fbcdn.net/v/t1.15752-9/546324934_776648631730648_2379102014874501461_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=9f807c&_nc_ohc=8iKNRkMmz5oQ7kNvwHxQmqN&_nc_oc=Adn4ORoXXu5hNCV4cG_dVtxpCusgyc8BGy-W026st_F39qdw2kkdU1_kO6oR8SrhE6nSn2b6bhzuW_nksczMhyfj&_nc_zt=23&_nc_ht=scontent-hou1-1.xx&oh=03_Q7cD3QE056990pOMYGvC8zdmg3mJPmmPB49AvHO_Y4fF8vBpCQ&oe=68E89F6B',
-      description: 'Performance racing cap with premium embroidered VIP SIM RACING logo. Features moisture-wicking technology and adjustable fit, perfect for track days and representing the racing community.',
-      sizes: ['One Size'],
-      colors: ['Black', 'White'],
-      inStock: false,
-      category: 'hat'
-    },
     {
       id: 'vip-hoodie',
       name: 'VIP SIM RACING Hoodie',
       price: 50,
       image: 'https://images.pexels.com/photos/8532616/pexels-photo-8532616.jpeg',
-      description: 'Luxury fleece hoodie crafted for ultimate comfort and style. Features the exclusive VIP SIM RACING design with premium materials that deliver warmth and performance for the dedicated racing enthusiast.',
+      description: 'Premium quality hoodie with VIP SIM RACING logo. Perfect for the track or casual wear.',
       sizes: ['S', 'M', 'L', 'XL', 'XXL'],
       colors: ['Black', 'Red', 'Gray'],
       inStock: false,
       category: 'hoodie'
     },
     {
+      id: 'racing-hat',
+      name: 'VIP SIM RACING Cap',
+      price: 30,
+      image: 'https://images.pexels.com/photos/1124465/pexels-photo-1124465.jpeg',
+      description: 'Adjustable racing cap with embroidered VIP SIM RACING logo. One size fits all.',
+      sizes: ['One Size'],
+      colors: ['Black', 'Red', 'White'],
+      inStock: false,
+      category: 'hat'
+    },
+    {
+      id: 'racing-tshirt',
+      name: 'VIP SIM RACING T-Shirt',
+      price: 25,
+      image: 'https://images.pexels.com/photos/8532616/pexels-photo-8532616.jpeg',
+      description: 'Comfortable cotton t-shirt with VIP SIM RACING design. Perfect for everyday wear.',
+      sizes: ['S', 'M', 'L', 'XL', 'XXL'],
+      colors: ['Black', 'Red', 'White', 'Gray'],
+      inStock: false,
+      category: 'tshirt'
+    },
+    {
       id: 'longsleeve-shirt',
       name: 'VIP SIM RACING Long Sleeve',
       price: 30,
       image: 'https://images.pexels.com/photos/8532616/pexels-photo-8532616.jpeg',
-      description: 'High-performance long sleeve shirt with moisture-wicking fabric and VIP SIM RACING branding. Designed for extended racing sessions with superior comfort and professional racing aesthetics.',
+      description: 'Long sleeve shirt with VIP SIM RACING branding. Great for cooler weather.',
       sizes: ['S', 'M', 'L', 'XL', 'XXL'],
       colors: ['Black', 'Red', 'Navy'],
       inStock: false,
       category: 'longsleeve'
     }
   ];
-
-  const handleProductClick = (item: MerchItem) => {
-    if (!currentUser) {
-      alert('Please log in to add items to cart');
-      navigate('/login');
-      return;
-    }
-    
-    setSelectedItem(item);
-    setSelectedSize(item.sizes[0]);
-    setSelectedColor(item.colors[0]);
-    setShowSizeModal(true);
-  };
-
-  const handleAddToCart = () => {
-    if (!selectedItem || !currentUser) return;
-
-    const cartItem = {
-      productId: selectedItem.id,
-      name: selectedItem.name,
-      price: selectedItem.price,
-      image: selectedItem.image,
-      size: selectedSize,
-      color: selectedColor,
-      quantity: 1
-    };
-
-    addToCart(currentUser.email, cartItem);
-    setCartItemCount(getCartItemCount(currentUser.email));
-    setAddedToCart(true);
-    
-    setTimeout(() => {
-      setAddedToCart(false);
-      setShowSizeModal(false);
-      setSelectedItem(null);
-    }, 1500);
-  };
 
   const handleNotifyMe = (itemId: string) => {
     if (!email.trim()) {
@@ -139,6 +80,7 @@ export default function Merch({ showCartIcon = false, onCartClick }: MerchProps)
       return;
     }
 
+    // Store notification request (in a real app, this would go to a backend)
     const existingNotifications = JSON.parse(localStorage.getItem('merch_notifications') || '[]');
     const newNotification = {
       email: email.trim(),
@@ -149,22 +91,7 @@ export default function Merch({ showCartIcon = false, onCartClick }: MerchProps)
     existingNotifications.push(newNotification);
     localStorage.setItem('merch_notifications', JSON.stringify(existingNotifications));
 
-    addAdminNotification({
-      type: 'merch_notification',
-      title: 'New Merch Restock Notification',
-      message: `${email.trim()} signed up for merch restock notifications`,
-      data: {
-        email: email.trim(),
-        itemId: itemId === 'all-items' ? 'All Items' : itemId,
-        timestamp: new Date().toISOString()
-      }
-    });
-
-    setShowThankYou(true);
-    setTimeout(() => {
-      setShowThankYou(false);
-    }, 3000);
-    
+    alert('Thanks! We\'ll notify you when this item is back in stock.');
     setEmail('');
   };
 
@@ -187,13 +114,7 @@ export default function Merch({ showCartIcon = false, onCartClick }: MerchProps)
             <p className="text-xl text-slate-300">Show your racing spirit</p>
           </div>
           
-          {showCartIcon && currentUser && onCartClick && (
-            <CartIcon 
-              itemCount={cartItemCount} 
-              onClick={onCartClick}
-              className="bg-slate-800/50 rounded-lg"
-            />
-          )}
+          <div className="w-24"></div> {/* Spacer for centering */}
         </div>
 
         {/* Coming Soon Banner */}
@@ -213,34 +134,6 @@ export default function Merch({ showCartIcon = false, onCartClick }: MerchProps)
                 🚀 All items are currently sold out but will be restocked soon! 
                 Sign up for notifications to be the first to know when they're available.
               </p>
-              
-              <div className="mt-4 space-y-3">
-                <div className="flex space-x-2">
-                  <input
-                    type="email"
-                    placeholder="Enter email for restock alerts"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="flex-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full bg-purple-500/10 hover:bg-purple-500/20 border-purple-500/30 text-purple-300"
-                  onClick={() => handleNotifyMe('all-items')}
-                  icon={Bell}
-                >
-                  Notify When Available
-                </Button>
-                
-                {showThankYou && (
-                  <div className="flex items-center justify-center space-x-2 text-green-400 bg-green-500/10 p-3 rounded-lg border border-green-500/30">
-                    <CheckCircle className="w-5 h-5 flex-shrink-0" />
-                    <span className="text-sm font-medium">Thank you for signing up! We'll notify you when items are available.</span>
-                  </div>
-                )}
-              </div>
             </div>
           </CardContent>
         </Card>
@@ -248,7 +141,7 @@ export default function Merch({ showCartIcon = false, onCartClick }: MerchProps)
         {/* Merch Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {merchItems.map((item) => (
-            <Card key={item.id} className="group hover:scale-105 transition-all duration-300 cursor-pointer" onClick={() => handleProductClick(item)}>
+            <Card key={item.id} className="group hover:scale-105 transition-all duration-300">
               <CardContent className="p-0">
                 {/* Product Image */}
                 <div className="relative h-64 overflow-hidden rounded-t-xl">
@@ -274,32 +167,45 @@ export default function Merch({ showCartIcon = false, onCartClick }: MerchProps)
                 </div>
                 
                 {/* Product Info */}
-                <div className="p-4 space-y-3">
-                  <h3 className="text-lg font-bold text-white">{item.name}</h3>
-                  <p className="text-sm text-slate-400 leading-relaxed">{item.description}</p>
+                <div className="p-6 space-y-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-white mb-2">{item.name}</h3>
+                    <p className="text-slate-400 text-sm">{item.description}</p>
+                  </div>
                   
                   {/* Product Details */}
-                  <div className="space-y-2 pt-2 border-t border-slate-700">
-                    <div className="text-center">
-                      <div className="text-sm text-slate-400 mb-1">Available in:</div>
-                      <div className="text-white text-sm font-medium">{item.sizes.join(', ')}</div>
-                      <div className="text-slate-300 text-sm">{item.colors.join(', ')}</div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-400">Sizes:</span>
+                      <span className="text-white">{item.sizes.join(', ')}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-400">Colors:</span>
+                      <span className="text-white">{item.colors.join(', ')}</span>
                     </div>
                   </div>
                   
-                  {/* Add to Cart Button */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full mt-4"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleProductClick(item);
-                    }}
-                    icon={Plus}
-                  >
-                    Select Size & Add to Cart
-                  </Button>
+                  {/* Notify Me Section */}
+                  <div className="space-y-3 pt-4 border-t border-slate-700">
+                    <div className="flex space-x-2">
+                      <input
+                        type="email"
+                        placeholder="Enter email for restock alerts"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="flex-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      />
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full bg-purple-500/10 hover:bg-purple-500/20 border-purple-500/30 text-purple-300"
+                      onClick={() => handleNotifyMe(item.id)}
+                      icon={Bell}
+                    >
+                      Notify When Available
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -323,7 +229,7 @@ export default function Merch({ showCartIcon = false, onCartClick }: MerchProps)
               <ShoppingBag className="w-12 h-12 text-green-500 mx-auto mb-4" />
               <h3 className="text-xl font-bold text-white mb-3">Exclusive Designs</h3>
               <p className="text-slate-300">
-                Unique VIP SIM RACING designs that you won't find anywhere else. Show your racing pride!
+                Unique VIP Edge Racing designs that you won't find anywhere else. Show your racing pride!
               </p>
             </CardContent>
           </Card>
@@ -349,9 +255,9 @@ export default function Merch({ showCartIcon = false, onCartClick }: MerchProps)
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 variant="outline"
-                onClick={() => window.location.href = 'tel:8008975419'}
+                onClick={() => window.location.href = 'tel:8324904304'}
               >
-                Call (800) 897-5419
+                Call (832) 490-4304
               </Button>
               <Button 
                 variant="outline"
@@ -363,101 +269,6 @@ export default function Merch({ showCartIcon = false, onCartClick }: MerchProps)
           </CardContent>
         </Card>
       </div>
-
-      {/* Size Selection Modal */}
-      <Modal
-        isOpen={showSizeModal}
-        onClose={() => {
-          setShowSizeModal(false);
-          setSelectedItem(null);
-          setAddedToCart(false);
-        }}
-        title={selectedItem?.name || 'Select Options'}
-      >
-        {selectedItem && (
-          <div className="space-y-6">
-            {addedToCart ? (
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
-                  <CheckCircle className="w-8 h-8 text-green-500" />
-                </div>
-                <h3 className="text-xl font-bold text-white">Added to Cart!</h3>
-                <p className="text-slate-300">
-                  {selectedItem.name} ({selectedSize}, {selectedColor}) has been added to your cart.
-                </p>
-              </div>
-            ) : (
-              <>
-                {/* Product Preview */}
-                <div className="flex items-center space-x-4">
-                  <img 
-                    src={selectedItem.image} 
-                    alt={selectedItem.name}
-                    className="w-20 h-20 object-cover rounded-lg"
-                  />
-                  <div>
-                    <h3 className="text-lg font-bold text-white">{selectedItem.name}</h3>
-                    <p className="text-red-400 font-semibold">${selectedItem.price}</p>
-                    <p className="text-sm text-slate-400">{selectedItem.description}</p>
-                  </div>
-                </div>
-
-                {/* Size Selection */}
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-slate-300">Size</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {selectedItem.sizes.map((size) => (
-                      <Button
-                        key={size}
-                        variant={selectedSize === size ? 'primary' : 'outline'}
-                        size="sm"
-                        onClick={() => setSelectedSize(size)}
-                      >
-                        {size}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Color Selection */}
-                <div className="space-y-3">
-                  <label className="block text-sm font-medium text-slate-300">Color</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {selectedItem.colors.map((color) => (
-                      <Button
-                        key={color}
-                        variant={selectedColor === color ? 'primary' : 'outline'}
-                        size="sm"
-                        onClick={() => setSelectedColor(color)}
-                      >
-                        {color}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Coming Soon Notice */}
-                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-                  <p className="text-yellow-300 text-sm font-semibold">
-                    🚧 This item is currently sold out but will be restocked soon! 
-                    Your selection will be saved for when items become available.
-                  </p>
-                </div>
-
-                {/* Add to Cart Button */}
-                <Button 
-                  onClick={handleAddToCart}
-                  className="w-full"
-                  icon={ShoppingCart}
-                  disabled={!selectedSize || !selectedColor}
-                >
-                  Add to Cart (Coming Soon)
-                </Button>
-              </>
-            )}
-          </div>
-        )}
-      </Modal>
     </div>
   );
 }
