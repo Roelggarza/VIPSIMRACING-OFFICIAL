@@ -161,7 +161,7 @@ export const RACING_GAMES = [
     id: 'assetto-corsa-competizione',
     name: 'Assetto Corsa Competizione',
     description: 'Official GT World Challenge game with authentic GT3 and GT4 racing',
-    image: 'https://gaming-cdn.com/images/products/1263/orig/assetto-corsa-pc-game-steam-cover.jpg?v=1707830876',
+    image: 'https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg',
     launchUrl: null
   },
   {
