@@ -168,7 +168,7 @@ export const RACING_GAMES = [
     id: 'iracing',
     name: 'iRacing',
     description: 'The world\'s premier online racing simulation platform',
-    image: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/266410/capsule_616x353.jpg?t=1751293140',
+    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg',
     launchUrl: null
   },
   {
@@ -182,43 +182,71 @@ export const RACING_GAMES = [
     id: 'gran-turismo-7',
     name: 'Gran Turismo 7',
     description: 'The ultimate driving simulator with over 400 cars and legendary tracks',
-    image: 'https://image.api.playstation.com/vulcan/ap/rnd/202109/1321/eFGBuaRr21HUpGtsy3biwJip.png',
+    image: 'https://images.pexels.com/photos/1007410/pexels-photo-1007410.jpeg',
     launchUrl: null
   },
   {
     id: 'dirt-rally-2',
     name: 'DiRT Rally 2.0',
     description: 'Challenging rally racing through diverse terrains and weather conditions',
-    image: 'https://thisgengaming.com/wp-content/uploads/2019/03/ster-1.jpg',
+    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg',
     launchUrl: null
   },
   {
     id: 'forza-motorsport',
     name: 'Forza Motorsport',
     description: 'Turn 10\'s flagship racing simulation with dynamic time of day and weather',
-    image: 'https://cdn.forza.net/strapi-uploads/assets/Forza_Motorsport_Review_Press_Kit_08_16x9_WM_bb4606db25.jpg',
+    image: 'https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg',
     launchUrl: null
   },
   {
     id: 'rfactor-2',
     name: 'rFactor 2',
     description: 'Professional-grade racing simulation used by real racing teams',
-    image: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/365960/capsule_616x353.jpg?t=1727871590',
+    image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg',
     launchUrl: null
   },
   {
     id: 'automobilista-2',
     name: 'Automobilista 2',
     description: 'Brazilian racing simulation featuring diverse motorsport disciplines',
-    image: 'https://gaming-cdn.com/images/products/5440/616x353/automobilista-pc-game-steam-cover.jpg?v=1710761501',
+    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg',
     launchUrl: null
   },
   {
     id: 'project-cars-3',
     name: 'Project CARS 3',
     description: 'Dynamic racing with career progression and authentic motorsport experience',
-    image: 'https://xboxwire.thesourcemediaassets.com/sites/2/2020/08/ProjectCars3_HERO.jpg',
+    image: 'https://images.pexels.com/photos/1007410/pexels-photo-1007410.jpeg',
     launchUrl: null
+  },
+  {
+    id: 'acc-british-gt',
+    name: 'ACC - British GT Pack',
+    description: 'British GT Championship expansion with iconic UK circuits',
+    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg',
+    launchUrl: null
+  },
+  {
+    id: 'beamng-drive',
+    name: 'BeamNG.drive',
+    description: 'Advanced vehicle simulation with realistic physics and damage modeling',
+    image: 'https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg',
+    launchUrl: null
+  },
+  {
+    id: 'wreckfest',
+    name: 'Wreckfest',
+    description: 'Demolition derby and banger racing with realistic damage physics',
+    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg',
+    launchUrl: null
+  },
+  {
+    id: 'drift-game',
+    name: 'Drift',
+    description: 'Master the art of drifting with realistic physics and challenging courses',
+    image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg',
+    launchUrl: 'https://fups.itch.io/drift'
   }
 ];
 
