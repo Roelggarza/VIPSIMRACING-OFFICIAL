@@ -18,9 +18,9 @@ interface MerchItem {
 
 export default function Merch() {
   const navigate = useNavigate();
-  const [selectedItem, setSelectedItem] = useState<MerchItem | null>(null);
-  const [notifyEmails, setNotifyEmails] = useState<string[]>([]);
   const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState('');
 
   const merchItems: MerchItem[] = [
     {
@@ -69,30 +69,57 @@ export default function Merch() {
     }
   ];
 
-  const handleNotifyMe = (itemId: string) => {
+  const handleNotifyMe = () => {
     if (!email.trim()) {
-      alert('Please enter your email address');
+      setSubmitMessage('Please enter your email address');
       return;
     }
 
     if (!/\S+@\S+\.\S+/.test(email)) {
-      alert('Please enter a valid email address');
+      setSubmitMessage('Please enter a valid email address');
       return;
     }
 
-    // Store notification request (in a real app, this would go to a backend)
+    setIsSubmitting(true);
+    
+    // Store notification request and notify admins
     const existingNotifications = JSON.parse(localStorage.getItem('merch_notifications') || '[]');
+    
+    // Check if email already exists
+    if (existingNotifications.some((n: any) => n.email === email.trim())) {
+      setSubmitMessage('You\'re already signed up for notifications!');
+      setIsSubmitting(false);
+      setEmail('');
+      return;
+    }
+    
     const newNotification = {
       email: email.trim(),
-      itemId,
+      signupDate: new Date().toISOString(),
       timestamp: new Date().toISOString()
     };
 
     existingNotifications.push(newNotification);
     localStorage.setItem('merch_notifications', JSON.stringify(existingNotifications));
 
-    alert('Thanks! We\'ll notify you when this item is back in stock.');
+    // Add admin notification
+    const { addAdminNotification } = require('../../utils/userStorage');
+    addAdminNotification({
+      type: 'merch_notification',
+      title: 'New Merch Notification Signup',
+      message: `${email.trim()} signed up for merch restock notifications`,
+      data: {
+        email: email.trim(),
+        signupDate: new Date().toISOString()
+      }
+    });
+
+    setSubmitMessage('Thanks! We\'ll notify you when items are back in stock.');
+    setIsSubmitting(false);
     setEmail('');
+    
+    // Clear message after 3 seconds
+    setTimeout(() => setSubmitMessage(''), 3000);
   };
 
   return (
@@ -132,8 +159,43 @@ export default function Merch() {
             <div className="bg-purple-500/20 border border-purple-400/50 rounded-lg p-4">
               <p className="text-purple-300 text-sm font-semibold">
                 🚀 All items are currently sold out but will be restocked soon! 
-                Sign up for notifications to be the first to know when they're available.
+                Sign up for notifications below to be the first to know when they're available.
               </p>
+              
+              {/* Centralized Notification Signup */}
+              <div className="bg-slate-800/50 rounded-lg p-4 mt-4">
+                <h3 className="text-white font-bold mb-3">Get Notified When Items Restock</h3>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="email"
+                    placeholder="Enter your email for restock alerts"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleNotifyMe()}
+                    className="flex-1 px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    disabled={isSubmitting}
+                  />
+                  <Button
+                    onClick={handleNotifyMe}
+                    disabled={isSubmitting || !email.trim()}
+                    className="bg-purple-500 hover:bg-purple-600 px-6"
+                  >
+                    {isSubmitting ? 'Signing Up...' : 'Notify Me'}
+                  </Button>
+                </div>
+                {submitMessage && (
+                  <p className={`text-sm mt-3 font-semibold ${
+                    submitMessage.includes('Thanks') || submitMessage.includes('already signed up') 
+                      ? 'text-green-400' 
+                      : 'text-red-400'
+                  }`}>
+                    {submitMessage}
+                  </p>
+                )}
+                <p className="text-purple-300 text-xs mt-2">
+                  We'll email you as soon as new merchandise is available. No spam, just restocks!
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -186,25 +248,13 @@ export default function Merch() {
                   </div>
                   
                   {/* Notify Me Section */}
-                  <div className="space-y-3 pt-4 border-t border-slate-700">
-                    <div className="flex space-x-2">
-                      <input
-                        type="email"
-                        placeholder="Enter email for restock alerts"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="flex-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      />
+                  <div className="pt-4 border-t border-slate-700">
+                    <div className="bg-slate-800/50 rounded-lg p-3 text-center">
+                      <p className="text-slate-300 text-sm mb-2">Want to be notified when this restocks?</p>
+                      <p className="text-purple-400 text-xs font-semibold">
+                        Sign up for notifications at the top of the page! ↑
+                      </p>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full bg-purple-500/10 hover:bg-purple-500/20 border-purple-500/30 text-purple-300"
-                      onClick={() => handleNotifyMe(item.id)}
-                      icon={Bell}
-                    >
-                      Notify When Available
-                    </Button>
                   </div>
                 </div>
               </CardContent>

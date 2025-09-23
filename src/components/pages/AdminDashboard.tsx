@@ -33,6 +33,7 @@ export default function AdminDashboard() {
 
   const refreshData = () => {
     setUsers(getUsers());
+    setSimulators(getSimulators());
     setNotifications(getAdminNotifications());
     setUnreadCount(getUnreadNotificationCount());
     setReports(getPostReports());
@@ -554,11 +555,26 @@ export default function AdminDashboard() {
         <Card>
           <CardHeader>
             <h3 className="text-lg font-bold text-white">User Management</h3>
-            <p className="text-slate-400 text-sm">Manage user accounts, passwords, and admin privileges. All registrations from any device appear here.</p>
+            <div className="flex items-center justify-between">
+              <p className="text-slate-400 text-sm">Manage user accounts, passwords, and admin privileges. All registrations from any device appear here.</p>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-slate-400">{users.length} total users</span>
+                <Button variant="ghost" size="sm" onClick={refreshData}>
+                  Refresh
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {users.map((user) => (
+              {users.length === 0 ? (
+                <div className="text-center py-8 text-slate-400">
+                  <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No users found.</p>
+                  <p className="text-sm mt-2">User registrations will appear here.</p>
+                </div>
+              ) : (
+                users.map((user) => (
                 <div key={user.email} className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg">
                   <div className="flex items-center space-x-4">
                     <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-600/50">
@@ -657,7 +673,8 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 </div>
-              ))}
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
