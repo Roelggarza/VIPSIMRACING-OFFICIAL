@@ -80,12 +80,10 @@ export default function Landing() {
             
             <div className="flex justify-center">
               <div className="p-4 bg-white rounded-lg">
-                <QRCode 
-                  value={racingDashboardUrl} 
-                  size={160}
-                  fgColor="#ef4444"
-                  bgColor="#ffffff"
-                  level="M"
+                <img 
+                  src="https://photos.fife.usercontent.google.com/pw/AP1GczP8omkDcAYtUIDHfB_-tWHYsnaJhntmZSkqJqF-6saVkC8PStyCtvIj=w192-h192-s-no-gm?authuser=0"
+                  alt="QR Code - Quick Access to Racing Dashboard"
+                  className="w-40 h-40 object-contain"
                 />
               </div>
             </div>
