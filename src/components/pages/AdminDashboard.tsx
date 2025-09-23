@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, Monitor, Activity, Eye, Settings, AlertTriangle, Key, UserCheck, UserX, Bell, BellOff, Clock, MapPin, Smartphone, Globe, Flag, MessageCircle, Trash2, EyeOff, CheckCircle, XCircle } from 'lucide-react';
+import { Shield, Users, Monitor, Activity, Eye, Settings, AlertTriangle, Key, UserCheck, UserX, Bell, BellOff, Clock, MapPin, Smartphone, Globe, Flag, MessageCircle, Trash2, EyeOff, CheckCircle, XCircle, Mail } from 'lucide-react';
 import { getUsers, getSimulators, User as UserType, Simulator, formatCreditsDisplay, resetUserPassword, updateUser, getAdminNotifications, markNotificationAsRead, getUnreadNotificationCount, getPostReports, PostReport, updatePostReport, getCommunityPosts, hidePost, deleteCommunityPost, getChatMessages } from '../../utils/userStorage';
 import { generateSecurePassword } from '../../utils/passwordSecurity';
 import Card, { CardHeader, CardContent } from '../ui/Card';
@@ -145,6 +145,8 @@ export default function AdminDashboard() {
         return <Flag className="w-5 h-5 text-red-500" />;
       case 'chat_message':
         return <MessageCircle className="w-5 h-5 text-purple-500" />;
+      case 'merch_notification':
+        return <Mail className="w-5 h-5 text-orange-500" />;
       default:
         return <Bell className="w-5 h-5 text-slate-500" />;
     }
@@ -537,6 +539,9 @@ export default function AdminDashboard() {
                             )}
                             {notification.type === 'purchase' && notification.data.package && (
                               <span>💰 ${notification.data.package.price} - {notification.data.package.name}</span>
+                            )}
+                            {notification.type === 'merch_notification' && (
+                              <span>📧 {notification.data.email} - Merch notifications</span>
                             )}
                           </div>
                         )}
