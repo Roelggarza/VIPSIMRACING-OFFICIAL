@@ -1031,6 +1031,7 @@ export const addCommunityPost = (postData: Omit<CommunityPost, 'id' | 'likes' | 
       }
     });
     
+    return newPost;
   } catch (error) {
     console.error('Error adding community post:', error);
     throw error;
