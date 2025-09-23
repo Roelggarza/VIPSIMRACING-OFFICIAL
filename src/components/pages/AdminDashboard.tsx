@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, Monitor, Activity, Eye, Settings, AlertTriangle, Key, UserCheck, UserX, Bell, BellOff, Clock, MapPin, Smartphone, Globe, Flag, MessageCircle, Trash2, EyeOff, CheckCircle, XCircle, Mail } from 'lucide-react';
+import { Shield, Users, Monitor, Activity, Eye, Settings, AlertTriangle, Key, UserCheck, UserX, Bell, BellOff, Clock, MapPin, Smartphone, Globe, Flag, MessageCircle, Trash2, EyeOff, CheckCircle, XCircle } from 'lucide-react';
 import { getUsers, getSimulators, User as UserType, Simulator, formatCreditsDisplay, resetUserPassword, updateUser, getAdminNotifications, markNotificationAsRead, getUnreadNotificationCount, getPostReports, PostReport, updatePostReport, getCommunityPosts, hidePost, deleteCommunityPost, getChatMessages } from '../../utils/userStorage';
 import { generateSecurePassword } from '../../utils/passwordSecurity';
 import Card, { CardHeader, CardContent } from '../ui/Card';
@@ -33,7 +33,6 @@ export default function AdminDashboard() {
 
   const refreshData = () => {
     setUsers(getUsers());
-    setSimulators(getSimulators());
     setNotifications(getAdminNotifications());
     setUnreadCount(getUnreadNotificationCount());
     setReports(getPostReports());
@@ -145,8 +144,6 @@ export default function AdminDashboard() {
         return <Flag className="w-5 h-5 text-red-500" />;
       case 'chat_message':
         return <MessageCircle className="w-5 h-5 text-purple-500" />;
-      case 'merch_notification':
-        return <Mail className="w-5 h-5 text-orange-500" />;
       default:
         return <Bell className="w-5 h-5 text-slate-500" />;
     }
@@ -540,9 +537,6 @@ export default function AdminDashboard() {
                             {notification.type === 'purchase' && notification.data.package && (
                               <span>💰 ${notification.data.package.price} - {notification.data.package.name}</span>
                             )}
-                            {notification.type === 'merch_notification' && (
-                              <span>📧 {notification.data.email} - Merch notifications</span>
-                            )}
                           </div>
                         )}
                       </div>
@@ -560,26 +554,11 @@ export default function AdminDashboard() {
         <Card>
           <CardHeader>
             <h3 className="text-lg font-bold text-white">User Management</h3>
-            <div className="flex items-center justify-between">
-              <p className="text-slate-400 text-sm">Manage user accounts, passwords, and admin privileges. All registrations from any device appear here.</p>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm text-slate-400">{users.length} total users</span>
-                <Button variant="ghost" size="sm" onClick={refreshData}>
-                  Refresh
-                </Button>
-              </div>
-            </div>
+            <p className="text-slate-400 text-sm">Manage user accounts, passwords, and admin privileges. All registrations from any device appear here.</p>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {users.length === 0 ? (
-                <div className="text-center py-8 text-slate-400">
-                  <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>No users found.</p>
-                  <p className="text-sm mt-2">User registrations will appear here.</p>
-                </div>
-              ) : (
-                users.map((user) => (
+              {users.map((user) => (
                 <div key={user.email} className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg">
                   <div className="flex items-center space-x-4">
                     <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-600/50">
@@ -678,8 +657,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 </div>
-                ))
-              )}
+              ))}
             </div>
           </CardContent>
         </Card>

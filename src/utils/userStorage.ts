@@ -723,7 +723,7 @@ export const resetUserPassword = async (email: string, newPassword: string): Pro
     addAdminNotification({
       type: 'password_reset',
       title: 'Password Reset',
-      message: `Password reset for ${users[userIndex].fullName}`,
+      message: `${newUser.fullName} has registered for VIP SIM RACING`,
       data: {
         email: email,
         resetTime: new Date().toISOString()
