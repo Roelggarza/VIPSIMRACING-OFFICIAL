@@ -161,14 +161,14 @@ export const RACING_GAMES = [
     id: 'assetto-corsa-competizione',
     name: 'Assetto Corsa Competizione',
     description: 'Official GT World Challenge game with authentic GT3 and GT4 racing',
-    image: 'https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg',
+    image: 'https://gaming-cdn.com/images/products/1263/orig/assetto-corsa-pc-game-steam-cover.jpg?v=1707830876',
     launchUrl: null
   },
   {
     id: 'iracing',
     name: 'iRacing',
     description: 'The world\'s premier online racing simulation platform',
-    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg',
+    image: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/266410/capsule_616x353.jpg?t=1751293140',
     launchUrl: null
   },
   {
@@ -182,71 +182,43 @@ export const RACING_GAMES = [
     id: 'gran-turismo-7',
     name: 'Gran Turismo 7',
     description: 'The ultimate driving simulator with over 400 cars and legendary tracks',
-    image: 'https://images.pexels.com/photos/1007410/pexels-photo-1007410.jpeg',
+    image: 'https://image.api.playstation.com/vulcan/ap/rnd/202109/1321/eFGBuaRr21HUpGtsy3biwJip.png',
     launchUrl: null
   },
   {
     id: 'dirt-rally-2',
     name: 'DiRT Rally 2.0',
     description: 'Challenging rally racing through diverse terrains and weather conditions',
-    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg',
+    image: 'https://thisgengaming.com/wp-content/uploads/2019/03/ster-1.jpg',
     launchUrl: null
   },
   {
     id: 'forza-motorsport',
     name: 'Forza Motorsport',
     description: 'Turn 10\'s flagship racing simulation with dynamic time of day and weather',
-    image: 'https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg',
+    image: 'https://cdn.forza.net/strapi-uploads/assets/Forza_Motorsport_Review_Press_Kit_08_16x9_WM_bb4606db25.jpg',
     launchUrl: null
   },
   {
     id: 'rfactor-2',
     name: 'rFactor 2',
     description: 'Professional-grade racing simulation used by real racing teams',
-    image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg',
+    image: 'https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/365960/capsule_616x353.jpg?t=1727871590',
     launchUrl: null
   },
   {
     id: 'automobilista-2',
     name: 'Automobilista 2',
     description: 'Brazilian racing simulation featuring diverse motorsport disciplines',
-    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg',
+    image: 'https://gaming-cdn.com/images/products/5440/616x353/automobilista-pc-game-steam-cover.jpg?v=1710761501',
     launchUrl: null
   },
   {
     id: 'project-cars-3',
     name: 'Project CARS 3',
     description: 'Dynamic racing with career progression and authentic motorsport experience',
-    image: 'https://images.pexels.com/photos/1007410/pexels-photo-1007410.jpeg',
+    image: 'https://xboxwire.thesourcemediaassets.com/sites/2/2020/08/ProjectCars3_HERO.jpg',
     launchUrl: null
-  },
-  {
-    id: 'acc-british-gt',
-    name: 'ACC - British GT Pack',
-    description: 'British GT Championship expansion with iconic UK circuits',
-    image: 'https://images.pexels.com/photos/1592384/pexels-photo-1592384.jpeg',
-    launchUrl: null
-  },
-  {
-    id: 'beamng-drive',
-    name: 'BeamNG.drive',
-    description: 'Advanced vehicle simulation with realistic physics and damage modeling',
-    image: 'https://images.pexels.com/photos/358070/pexels-photo-358070.jpeg',
-    launchUrl: null
-  },
-  {
-    id: 'wreckfest',
-    name: 'Wreckfest',
-    description: 'Demolition derby and banger racing with realistic damage physics',
-    image: 'https://images.pexels.com/photos/544542/pexels-photo-544542.jpeg',
-    launchUrl: null
-  },
-  {
-    id: 'drift-game',
-    name: 'Drift',
-    description: 'Master the art of drifting with realistic physics and challenging courses',
-    image: 'https://images.pexels.com/photos/1007456/pexels-photo-1007456.jpeg',
-    launchUrl: 'https://fups.itch.io/drift'
   }
 ];
 
@@ -433,11 +405,11 @@ const initializeStorage = async () => {
       ipAddress: 'localhost'
     };
 
-    // Secondary admin account
-    const originalAdmin: User = {
+    // Roel's admin account
+    const roelAdmin: User = {
       fullName: 'Roel Garza',
       dob: '1985-01-01',
-      email: 'roelggarza@gmail.com',
+      email: 'roel@vipsimracing.com',
       passwordHash: adminPasswordHash,
       phone: '(800) 897-5419',
       address: '',
@@ -476,7 +448,50 @@ const initializeStorage = async () => {
       ipAddress: 'localhost'
     };
 
-    localStorage.setItem('vip_users', JSON.stringify([adminUser, originalAdmin]));
+    // Additional admin account for roelggarza@gmail.com
+    const roelGmailAdmin: User = {
+      fullName: 'Roel Garza',
+      dob: '1985-01-01',
+      email: 'roelggarza@gmail.com',
+      passwordHash: adminPasswordHash,
+      phone: '(800) 897-5419',
+      address: '',
+      state: 'Texas',
+      zipCode: '',
+      emergencyName: '',
+      emergencyPhone: '',
+      registrationDate: new Date().toISOString(),
+      profilePicture: '',
+      bannerImage: '',
+      bio: 'Owner and founder of VIP SIM RACING.',
+      racingCredits: 0,
+      accountBalance: 0,
+      isAdmin: true,
+      isOnline: false,
+      lastActive: new Date().toISOString(),
+      currentSimulator: null,
+      isStreaming: false,
+      currentGame: '',
+      status: 'offline',
+      statusMessage: '',
+      spotifyData: {
+        connected: false
+      },
+      socialAccounts: {},
+      vipMembership: undefined,
+      stats: {
+        totalRaces: 0,
+        bestLapTime: '--:--',
+        rank: 3,
+        wins: 0,
+        podiums: 0
+      },
+      registrationSource: 'System',
+      deviceInfo: 'Server',
+      ipAddress: 'localhost'
+    };
+
+    localStorage.setItem('vip_users', JSON.stringify([adminUser, roelAdmin, roelGmailAdmin]));
     
     // Initialize simulators
     const simulators: Simulator[] = Array.from({ length: 8 }, (_, i) => ({
@@ -502,6 +517,7 @@ const initializeStorage = async () => {
     // Check if the new admin user already exists, if not add them
     const users = getUsers();
     const existingAdmin = users.find(u => u.email === 'admin@vipsimracing.com');
+    const existingRoelGmail = users.find(u => u.email === 'roelggarza@gmail.com');
     
     if (!existingAdmin) {
       const adminPasswordHash = await hashPassword('VIPEdge2024!');
@@ -553,6 +569,60 @@ const initializeStorage = async () => {
     } else if (!existingAdmin.isAdmin) {
       // Make sure the existing user is an admin
       existingAdmin.isAdmin = true;
+      localStorage.setItem('vip_users', JSON.stringify(users));
+    }
+    
+    // Add roelggarza@gmail.com admin if not exists
+    if (!existingRoelGmail) {
+      const adminPasswordHash = await hashPassword('VIPEdge2024!');
+      
+      const roelGmailAdmin: User = {
+        fullName: 'Roel Garza',
+        dob: '1985-01-01',
+        email: 'roelggarza@gmail.com',
+        passwordHash: adminPasswordHash,
+        phone: '(800) 897-5419',
+        address: '',
+        state: 'Texas',
+        zipCode: '',
+        emergencyName: '',
+        emergencyPhone: '',
+        registrationDate: new Date().toISOString(),
+        profilePicture: '',
+        bannerImage: '',
+        bio: 'Owner and founder of VIP SIM RACING.',
+        racingCredits: 0,
+        accountBalance: 0,
+        isAdmin: true,
+        isOnline: false,
+        lastActive: new Date().toISOString(),
+        currentSimulator: null,
+        isStreaming: false,
+        currentGame: '',
+        status: 'offline',
+        statusMessage: '',
+        spotifyData: {
+          connected: false
+        },
+        socialAccounts: {},
+        vipMembership: undefined,
+        stats: {
+          totalRaces: 0,
+          bestLapTime: '--:--',
+          rank: users.length + 1,
+          wins: 0,
+          podiums: 0
+        },
+        registrationSource: 'System',
+        deviceInfo: 'Server',
+        ipAddress: 'localhost'
+      };
+      
+      users.push(roelGmailAdmin);
+      localStorage.setItem('vip_users', JSON.stringify(users));
+    } else if (!existingRoelGmail.isAdmin) {
+      // Make sure the existing user is an admin
+      existingRoelGmail.isAdmin = true;
       localStorage.setItem('vip_users', JSON.stringify(users));
     }
     
@@ -717,18 +787,23 @@ export const resetUserPassword = async (email: string, newPassword: string): Pro
     
     // Hash the new password
     users[userIndex].passwordHash = await hashPassword(newPassword);
+    users[userIndex].lastActive = new Date().toISOString();
     localStorage.setItem('vip_users', JSON.stringify(users));
     
     // Add admin notification
     addAdminNotification({
       type: 'password_reset',
       title: 'Password Reset',
-      message: `${newUser.fullName} has registered for VIP SIM RACING`,
+      message: `Password reset completed for ${email} via OTP verification`,
       data: {
         email: email,
-        resetTime: new Date().toISOString()
+        resetTime: new Date().toISOString(),
+        method: 'OTP'
       }
     });
+    
+    // Invalidate all existing sessions for security
+    localStorage.removeItem('vip_session');
     
     return true;
   }
@@ -876,32 +951,73 @@ export const disconnectSpotify = (email: string) => {
 // Community Posts
 export const getCommunityPosts = (): CommunityPost[] => {
   const posts = localStorage.getItem('vip_community_posts');
-  return posts ? JSON.parse(posts) : [];
+  try {
+    return posts ? JSON.parse(posts) : [];
+  } catch (error) {
+    console.error('Error parsing community posts:', error);
+    // Reset corrupted data
+    localStorage.setItem('vip_community_posts', JSON.stringify([]));
+    return [];
+  }
 };
 
 export const addCommunityPost = (postData: Omit<CommunityPost, 'id' | 'likes' | 'likedBy' | 'shares' | 'sharedBy' | 'comments' | 'createdAt'>) => {
-  const posts = getCommunityPosts();
-  const newPost: CommunityPost = {
-    ...postData,
-    id: Date.now().toString(),
-    likes: 0,
-    likedBy: [],
-    shares: 0,
-    sharedBy: [],
-    comments: [],
-    createdAt: new Date().toISOString()
-  };
-  
-  posts.push(newPost);
-  localStorage.setItem('vip_community_posts', JSON.stringify(posts));
-  return newPost;
+  try {
+    const posts = getCommunityPosts();
+    
+    // Validate required fields
+    if (!postData.title?.trim()) {
+      throw new Error('Post title is required');
+    }
+    
+    if (!postData.userId?.trim()) {
+      throw new Error('User ID is required');
+    }
+    
+    const newPost: CommunityPost = {
+      ...postData,
+      id: Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9),
+      likes: 0,
+      likedBy: [],
+      shares: 0,
+      sharedBy: [],
+      comments: [],
+      createdAt: new Date().toISOString(),
+      isPublic: postData.isPublic !== false,
+      isHidden: false,
+      reportedBy: []
+    };
+    
+    posts.unshift(newPost);
+    localStorage.setItem('vip_community_posts', JSON.stringify(posts));
+    
+    // Add admin notification
+    addAdminNotification({
+      type: 'new_post',
+      title: 'New Community Post',
+      message: `${postData.userId} shared: ${postData.title}`,
+      data: {
+        postId: newPost.id,
+        type: postData.type,
+        title: postData.title
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error adding community post:', error);
+    throw error;
+  }
 };
 
 export const likeCommunityPost = (postId: string, userId: string) => {
-  const posts = getCommunityPosts();
-  const postIndex = posts.findIndex(p => p.id === postId);
-  
-  if (postIndex !== -1) {
+  try {
+    const posts = getCommunityPosts();
+    const postIndex = posts.findIndex(p => p.id === postId);
+    
+    if (postIndex === -1) {
+      throw new Error('Post not found');
+    }
+    
     const post = posts[postIndex];
     const isLiked = post.likedBy.includes(userId);
     
@@ -911,45 +1027,178 @@ export const likeCommunityPost = (postId: string, userId: string) => {
     } else {
       post.likedBy.push(userId);
       post.likes += 1;
+      
+      // Notify post author if it's not their own like
+      if (post.userId !== userId) {
+        const users = getUsers();
+        const liker = users.find(u => u.email === userId);
+        
+        addAdminNotification({
+          type: 'post_like',
+          title: 'Someone Liked Your Post',
+          message: `${liker?.fullName || 'Someone'} liked "${post.title}"`,
+          data: {
+            postId: postId,
+            likerName: liker?.fullName || 'Unknown User'
+          }
+        });
+      }
     }
     
     localStorage.setItem('vip_community_posts', JSON.stringify(posts));
+    return post;
+  } catch (error) {
+    console.error('Error liking post:', error);
+    throw error;
   }
 };
 
 export const shareCommunityPost = (postId: string, userId: string) => {
-  const posts = getCommunityPosts();
-  const postIndex = posts.findIndex(p => p.id === postId);
-  
-  if (postIndex !== -1) {
+  try {
+    const posts = getCommunityPosts();
+    const postIndex = posts.findIndex(p => p.id === postId);
+    
+    if (postIndex === -1) {
+      throw new Error('Post not found');
+    }
+    
     const post = posts[postIndex];
     if (!post.sharedBy.includes(userId)) {
       post.sharedBy.push(userId);
       post.shares += 1;
       localStorage.setItem('vip_community_posts', JSON.stringify(posts));
+      
+      // Notify post author if it's not their own share
+      if (post.userId !== userId) {
+        const users = getUsers();
+        const sharer = users.find(u => u.email === userId);
+        
+        addAdminNotification({
+          type: 'post_share',
+          title: 'Someone Shared Your Post',
+          message: `${sharer?.fullName || 'Someone'} shared "${post.title}"`,
+          data: {
+            postId: postId,
+            sharerName: sharer?.fullName || 'Unknown User'
+          }
+        });
+      }
+      
+      return post;
     }
+    
+    return post;
+  } catch (error) {
+    console.error('Error sharing post:', error);
+    throw error;
   }
 };
 
 export const addCommentToCommunityPost = (postId: string, commentData: Omit<Comment, 'id' | 'likes' | 'likedBy' | 'replies' | 'createdAt'>) => {
-  const posts = getCommunityPosts();
-  const postIndex = posts.findIndex(p => p.id === postId);
-  
-  if (postIndex !== -1) {
+  try {
+    const posts = getCommunityPosts();
+    const postIndex = posts.findIndex(p => p.id === postId);
+    
+    if (postIndex === -1) {
+      throw new Error('Post not found');
+    }
+    
     const post = posts[postIndex];
     if (!post.comments) post.comments = [];
     
     const newComment: Comment = {
       ...commentData,
-      id: Date.now().toString(),
+      id: Date.now().toString() + '_' + Math.random().toString(36).substr(2, 9),
       likes: 0,
       likedBy: [],
       replies: [],
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      read: false
     };
     
     post.comments.push(newComment);
     localStorage.setItem('vip_community_posts', JSON.stringify(posts));
+    
+    // Notify post author if it's not their own comment
+    if (post.userId !== commentData.userId) {
+      addAdminNotification({
+        type: 'new_comment',
+        title: 'New Comment on Your Post',
+        message: `${commentData.userName} commented on "${post.title}"`,
+        data: {
+          postId: postId,
+          commentId: newComment.id,
+          commenterName: commentData.userName
+        }
+      });
+    }
+    
+    return newComment;
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    throw error;
+  }
+};
+
+export const reportPost = (postId: string, reporterId: string, reason: 'spam' | 'inappropriate' | 'harassment' | 'copyright' | 'other', description: string) => {
+  try {
+    const reports = getPostReports();
+    const posts = getCommunityPosts();
+    const users = getUsers();
+    
+    const post = posts.find(p => p.id === postId);
+    const reporter = users.find(u => u.email === reporterId);
+    
+    if (!post || !reporter) {
+      throw new Error('Post or reporter not found');
+    }
+    
+    // Check if user already reported this post
+    const existingReport = reports.find(r => r.postId === postId && r.reporterId === reporterId);
+    if (existingReport) {
+      throw new Error('You have already reported this post');
+    }
+    
+    const newReport: PostReport = {
+      id: Date.now().toString(),
+      postId,
+      reporterId,
+      reporterName: reporter.fullName,
+      reason,
+      description,
+      timestamp: new Date().toISOString(),
+      status: 'pending',
+      post
+    };
+    
+    reports.push(newReport);
+    localStorage.setItem('vip_post_reports', JSON.stringify(reports));
+    
+    // Add to post's reported list
+    const postIndex = posts.findIndex(p => p.id === postId);
+    if (postIndex !== -1) {
+      if (!posts[postIndex].reportedBy) posts[postIndex].reportedBy = [];
+      posts[postIndex].reportedBy!.push(reporterId);
+      localStorage.setItem('vip_community_posts', JSON.stringify(posts));
+    }
+    
+    // Add admin notification
+    addAdminNotification({
+      type: 'post_report',
+      title: 'New Content Report',
+      message: `${reporter.fullName} reported a post for ${reason}`,
+      data: {
+        postId,
+        reporterId,
+        reason,
+        description
+      }
+    });
+    
+    return newReport;
+  } catch (error) {
+    console.error('Error reporting post:', error);
+    throw error;
   }
 };
 
@@ -1031,61 +1280,6 @@ export const getUnreadNotificationCount = (): number => {
 };
 
 // Post Reports
-export const reportPost = (postId: string, reporterId: string, reason: 'spam' | 'inappropriate' | 'harassment' | 'copyright' | 'other', description: string) => {
-  const reports = getPostReports();
-  const posts = getCommunityPosts();
-  const users = getUsers();
-  
-  const post = posts.find(p => p.id === postId);
-  const reporter = users.find(u => u.email === reporterId);
-  
-  if (!post || !reporter) {
-    throw new Error('Post or reporter not found');
-  }
-  
-  // Check if user already reported this post
-  const existingReport = reports.find(r => r.postId === postId && r.reporterId === reporterId);
-  if (existingReport) {
-    throw new Error('You have already reported this post');
-  }
-  
-  const newReport: PostReport = {
-    id: Date.now().toString(),
-    postId,
-    reporterId,
-    reporterName: reporter.fullName,
-    reason,
-    description,
-    timestamp: new Date().toISOString(),
-    status: 'pending',
-    post
-  };
-  
-  reports.push(newReport);
-  localStorage.setItem('vip_post_reports', JSON.stringify(reports));
-  
-  // Add to post's reported list
-  const postIndex = posts.findIndex(p => p.id === postId);
-  if (postIndex !== -1) {
-    if (!posts[postIndex].reportedBy) posts[postIndex].reportedBy = [];
-    posts[postIndex].reportedBy!.push(reporterId);
-    localStorage.setItem('vip_community_posts', JSON.stringify(posts));
-  }
-  
-  // Add admin notification
-  addAdminNotification({
-    type: 'post_report',
-    title: 'New Content Report',
-    message: `${reporter.fullName} reported a post for ${reason}`,
-    data: {
-      postId,
-      reporterId,
-      reason,
-      description
-    }
-  });
-};
-
 export const getPostReports = (): PostReport[] => {
   const reports = localStorage.getItem('vip_post_reports');
   return reports ? JSON.parse(reports) : [];

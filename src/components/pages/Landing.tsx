@@ -81,11 +81,12 @@ export default function Landing() {
             <div className="flex justify-center">
               <div className="p-4 bg-white rounded-lg">
                 <QRCode 
-                  value={racingDashboardUrl} 
+                  value={racingDashboardUrl}
                   size={160}
-                  fgColor="#ef4444"
                   bgColor="#ffffff"
+                  fgColor="#000000"
                   level="M"
+                  includeMargin={true}
                 />
               </div>
             </div>
@@ -99,7 +100,7 @@ export default function Landing() {
               <Car className="w-8 h-8 text-red-500" />
             </div>
             <h3 className="text-xl font-semibold text-white text-shadow-medium">Professional Equipment</h3>
-            <p className="text-slate-400 text-shadow-light">State-of-the-art racing simulators with realistic physics</p>
+            <p className="text-slate-400 text-shadow-light">Ready to build your state of the art racing sim setup? Contact us today to start your custom build.</p>
           </div>
           
           <div className="text-center space-y-3">
@@ -114,8 +115,8 @@ export default function Landing() {
             <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto">
               <Flag className="w-8 h-8 text-red-500" />
             </div>
-            <h3 className="text-xl font-semibold text-white text-shadow-medium">Training Programs</h3>
-            <p className="text-slate-400 text-shadow-light">Improve your skills with professional coaching</p>
+            <h3 className="text-xl font-semibold text-white text-shadow-medium">Birthdays & Private Events</h3>
+            <p className="text-slate-400 text-shadow-light">Contact us today for Private Events & Birthday Packages.</p>
           </div>
         </div>
 
