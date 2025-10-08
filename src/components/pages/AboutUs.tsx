@@ -184,7 +184,7 @@ export default function AboutUs() {
                   onClick={() => window.location.href = 'tel:8008975419'}
                   icon={Phone}
                 >
-                  Call (800) 897-5419
+                  Call (832) 490-4304
                 </Button>
                 
                 <Button 
