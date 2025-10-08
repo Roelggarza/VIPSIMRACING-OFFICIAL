@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserPlus, AlertTriangle, CheckCircle, CreditCard, ChevronDown, ChevronUp, Crown, Zap, Gift, FileText } from 'lucide-react';
+import { UserPlus, AlertTriangle, CheckCircle, CreditCard, ChevronDown, ChevronUp, Crown, Zap, Gift, FileText, ArrowLeft } from 'lucide-react';
 import { saveUser, emailExists, addCreditsAndBalance } from '../../utils/userStorage';
 import { validatePasswordStrength } from '../../utils/passwordSecurity';
 import { RELEASE_WAIVER_TEXT } from '../../utils/constants';
@@ -258,6 +258,17 @@ export default function Registration() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-red-900/20 py-8 px-6">
+      <div className="absolute top-6 left-6">
+        <Button
+          variant="ghost"
+          onClick={() => navigate('/')}
+          icon={ArrowLeft}
+          className="text-slate-400 hover:text-white"
+        >
+          Back to Home
+        </Button>
+      </div>
+
       <div className="max-w-4xl mx-auto space-y-6">
         <Card>
           <CardHeader>
@@ -271,30 +282,6 @@ export default function Registration() {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {/* C7 Z06 Giveaway Banner - Enhanced with NO PURCHASE NECESSARY */}
-            <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/50 rounded-lg p-4">
-              <div className="flex items-center justify-center space-x-3 mb-3">
-                <Gift className="w-8 h-8 text-yellow-400" />
-                <h2 className="text-2xl font-bold text-yellow-300">WIN A C7 Z06 CORVETTE!</h2>
-                <Gift className="w-8 h-8 text-yellow-400" />
-              </div>
-              <div className="text-center space-y-2">
-                <p className="text-yellow-200 font-bold text-lg">
-                  🏆 FREE GIVEAWAY - NO PURCHASE NECESSARY 🏆
-                </p>
-                <p className="text-yellow-100 text-sm">
-                  Register today and opt-in below for your chance to win a Chevrolet Corvette C7 Z06! 
-                  <strong> NO PURCHASE NECESSARY TO ENTER OR WIN.</strong> Registration is completely free.
-                </p>
-                <div className="bg-yellow-500/20 border border-yellow-400/50 rounded-lg p-3 mt-3">
-                  <p className="text-yellow-200 text-xs font-bold">
-                    ⚖️ LEGAL: NO PURCHASE NECESSARY. A PURCHASE WILL NOT INCREASE YOUR CHANCES OF WINNING. 
-                    VOID WHERE PROHIBITED. Winner announced on our social media channels. ⚖️
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {/* Liability Waiver */}
             <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 space-y-3">
               <div className="flex items-center space-x-2 text-red-400">

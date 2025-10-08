@@ -66,32 +66,6 @@ export default function Landing() {
           </div>
         </div>
 
-        {/* QR Code Section */}
-        <Card className="max-w-md mx-auto mt-12">
-          <CardContent className="text-center space-y-4">
-            <div className="flex items-center justify-center space-x-2 text-slate-300 mb-4">
-              <QrCode className="w-5 h-5" />
-              <span className="font-semibold">Quick Access</span>
-            </div>
-            
-            <p className="text-sm text-slate-400 mb-4">
-              Scan to access your Racing Dashboard from mobile
-            </p>
-            
-            <div className="flex justify-center">
-              <div className="p-4 bg-white rounded-lg">
-                <QRCode 
-                  value={racingDashboardUrl} 
-                  size={160}
-                  fgColor="#ef4444"
-                  bgColor="#ffffff"
-                  level="M"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         {/* Features */}
         <div className="grid md:grid-cols-3 gap-6 mt-16">
           <div className="text-center space-y-3">
@@ -114,8 +88,8 @@ export default function Landing() {
             <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto">
               <Flag className="w-8 h-8 text-red-500" />
             </div>
-            <h3 className="text-xl font-semibold text-white text-shadow-medium">Training Programs</h3>
-            <p className="text-slate-400 text-shadow-light">Improve your skills with professional coaching</p>
+            <h3 className="text-xl font-semibold text-white text-shadow-medium">Private Events</h3>
+            <p className="text-slate-400 text-shadow-light">Ask about our private events, Corporate Events, and Birthday Celebrations!</p>
           </div>
         </div>
 

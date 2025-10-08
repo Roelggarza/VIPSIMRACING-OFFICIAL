@@ -205,6 +205,17 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-red-900/20 flex items-center justify-center p-6">
+      <div className="absolute top-6 left-6">
+        <Button
+          variant="ghost"
+          onClick={() => navigate('/')}
+          icon={ArrowLeft}
+          className="text-slate-400 hover:text-white"
+        >
+          Back to Home
+        </Button>
+      </div>
+
       <Card className="max-w-md w-full">
         <CardHeader>
           <div className="text-center space-y-2">

@@ -131,9 +131,30 @@ export default function Merch() {
             </p>
             <div className="bg-purple-500/20 border border-purple-400/50 rounded-lg p-4">
               <p className="text-purple-300 text-sm font-semibold">
-                🚀 All items are currently sold out but will be restocked soon! 
+                🚀 All items are currently sold out but will be restocked soon!
                 Sign up for notifications to be the first to know when they're available.
               </p>
+            </div>
+
+            {/* Single Email Notification Section */}
+            <div className="space-y-3 pt-4">
+              <div className="flex space-x-2">
+                <input
+                  type="email"
+                  placeholder="Enter email for restock alerts"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="flex-1 px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 text-base focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+                <Button
+                  variant="outline"
+                  className="bg-purple-500/10 hover:bg-purple-500/20 border-purple-500/30 text-purple-300"
+                  onClick={() => handleNotifyMe('all')}
+                  icon={Bell}
+                >
+                  Notify Me
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -170,41 +191,6 @@ export default function Merch() {
                 <div className="p-6 space-y-4">
                   <div>
                     <h3 className="text-xl font-bold text-white mb-2">{item.name}</h3>
-                    <p className="text-slate-400 text-sm">{item.description}</p>
-                  </div>
-                  
-                  {/* Product Details */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-400">Sizes:</span>
-                      <span className="text-white">{item.sizes.join(', ')}</span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-400">Colors:</span>
-                      <span className="text-white">{item.colors.join(', ')}</span>
-                    </div>
-                  </div>
-                  
-                  {/* Notify Me Section */}
-                  <div className="space-y-3 pt-4 border-t border-slate-700">
-                    <div className="flex space-x-2">
-                      <input
-                        type="email"
-                        placeholder="Enter email for restock alerts"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="flex-1 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      />
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full bg-purple-500/10 hover:bg-purple-500/20 border-purple-500/30 text-purple-300"
-                      onClick={() => handleNotifyMe(item.id)}
-                      icon={Bell}
-                    >
-                      Notify When Available
-                    </Button>
                   </div>
                 </div>
               </CardContent>
