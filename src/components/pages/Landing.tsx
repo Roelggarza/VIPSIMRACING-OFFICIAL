@@ -100,7 +100,7 @@ export default function Landing() {
               href="tel:8008975419" 
               className="text-red-400 hover:text-red-300 transition-colors font-medium"
             >
-              (800) 897-5419
+              (832) 490-4304
             </a>
             <span className="hidden sm:inline text-slate-600">|</span>
             <a 
