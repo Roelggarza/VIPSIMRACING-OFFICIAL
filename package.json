@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vercel/speed-insights": "^1.2.0",
     "bcryptjs": "^2.4.3",
     "lucide-react": "^0.344.0",
     "qrcode.react": "^3.1.0",
