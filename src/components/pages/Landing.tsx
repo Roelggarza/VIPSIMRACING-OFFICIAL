@@ -89,7 +89,7 @@ export default function Landing() {
               <Flag className="w-8 h-8 text-red-500" />
             </div>
             <h3 className="text-xl font-semibold text-white text-shadow-medium">Private Events</h3>
-            <p className="text-slate-400 text-shadow-light">Ask about our Private Events, Corporate Events, and Birthday Partys!</p>
+            <p className="text-slate-400 text-shadow-light">Ask about our Private Events, Corporate Events, and Birthday Parties!</p>
           </div>
         </div>
 
